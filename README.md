@@ -2,7 +2,7 @@
 
 Sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 0: project foundation only.
+This repository is currently in Phase 1: data foundation and deterministic compatibility validation.
 
 ## Stack
 
@@ -48,11 +48,41 @@ npm run build
 npm run verify
 ```
 
+## Phase 1 Domain Model
+
+Keyboard components are modeled with reusable Zod schemas and TypeScript types in `src/lib/types`. The current component categories are:
+
+- case
+- PCB
+- plate
+- switch
+- keycap
+- stabilizer
+
+The model includes compatibility fields for layout support, switch technology, mounting support, keycap profile, stabilizer type and sizes, connection type, sound profile, price, vendor URL, image URL, and sound URL.
+
+Representative offline seed data lives in `src/data/components.ts`. It is intentionally small so tests can cover valid builds, invalid layout combinations, invalid switch technology combinations, sound preference warnings, and beginner-friendly metadata without requiring live Supabase credentials.
+
+## Rule Engine
+
+The deterministic compatibility engine lives in `src/lib/rules`. It accepts a partial or complete component selection plus a component catalog, then returns:
+
+- `isValid`
+- blocking `errors`
+- non-blocking `warnings`
+- combined `issues`
+- human-readable `explanations`
+- resolved selected components
+
+Implemented Phase 1 rules check layout compatibility between case, PCB, and plate; switch technology support across PCB, plate, and keycaps; keycap layout support; stabilizer type and size requirements; mounting-style compatibility; missing required categories; and warning-only sound or beginner-friendliness preference mismatches.
+
+AI recommendations must call this validation before presenting a build as compatible. The LLM can translate preferences or explain trade-offs, but the rule engine remains the source of truth.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
 
-Phase 1 will add the Supabase schema, seed component data, and the deterministic TypeScript compatibility rule engine.
+Phase 1 adds the Supabase schema draft, seed component data, Zod domain schemas, and the deterministic TypeScript compatibility rule engine.
 
 Phase 2 will add structured OpenAI intent extraction that converts vague user preferences into technical criteria.
 

@@ -1,1 +1,4 @@
-export { requiredBuildSlots, validateBuildCompatibility } from "./compatibility";
+export {
+  requiredComponentCategories,
+  validateBuildCompatibility,
+} from "./compatibility";
