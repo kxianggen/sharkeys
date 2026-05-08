@@ -2,7 +2,7 @@
 
 Sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 2: API and Supabase-ready backend foundation.
+This repository is currently in Phase 3: structured OpenAI intent extraction.
 
 ## Stack
 
@@ -115,6 +115,28 @@ The validation endpoint calls the deterministic rule engine. Future AI features 
 
 Supabase integration is prepared but not live-wired yet. The migration draft lives in `supabase/migrations`, and seed-to-Supabase transforms live in `src/data/supabase`.
 
+## Phase 3 AI Intent Extraction
+
+Phase 3 adds server-side structured intent extraction in `src/lib/ai` and a thin API route:
+
+- `POST /api/ai/intent`
+
+Example request:
+
+```bash
+curl -X POST http://localhost:3000/api/ai/intent \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "I want a beginner friendly 65% keyboard under 200 USD that sounds creamy."
+  }'
+```
+
+The route extracts structured criteria such as budget, layout, sound profile, use case, beginner-friendliness, switch technology, priorities, constraints, and clarification needs. It also prepares matching search criteria and candidate component IDs grouped by category from the offline seed catalog.
+
+Phase 3 does not create final build recommendations. The AI extracts intent only. Any future build recommendation must be assembled from grounded component data and validated through the deterministic rule engine before it is shown as compatible.
+
+If `OPENAI_API_KEY` is not configured, the intent service returns a safe fallback with `clarificationNeeded: true`; tests do not require real OpenAI network calls.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
@@ -123,7 +145,7 @@ Phase 1 adds the Supabase schema draft, seed component data, Zod domain schemas,
 
 Phase 2 adds seed-backed data access helpers, API route handlers, API validation schemas, and Supabase-ready seed transforms.
 
-Phase 3 will add structured OpenAI intent extraction that converts vague user preferences into technical criteria.
+Phase 3 adds structured OpenAI intent extraction that converts vague user preferences into technical criteria.
 
 Phase 4 will build the 2D configurator, sound comparison workflow, and recommendation screens.
 
