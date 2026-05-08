@@ -32,6 +32,8 @@ export type Database = {
           supported_stabilizer_sizes: string[] | null;
           connection: string | null;
           hotswap: boolean | null;
+          pin_count: number | null;
+          actuation_force_g: number | null;
           sound_profile: string | null;
           price: number | null;
           vendor_url: string | null;
@@ -63,6 +65,8 @@ export type Database = {
           supported_stabilizer_sizes?: string[] | null;
           connection?: string | null;
           hotswap?: boolean | null;
+          pin_count?: number | null;
+          actuation_force_g?: number | null;
           sound_profile?: string | null;
           price?: number | null;
           vendor_url?: string | null;

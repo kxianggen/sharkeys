@@ -31,6 +31,10 @@ create table if not exists public.keyboard_components (
     or connection in ('wired', 'wireless', 'both')
   ),
   hotswap boolean,
+  pin_count integer check (pin_count is null or pin_count > 0),
+  actuation_force_g numeric(6, 2) check (
+    actuation_force_g is null or actuation_force_g > 0
+  ),
   sound_profile text check (
     sound_profile is null
     or sound_profile in ('thocky', 'creamy', 'clacky', 'silent', 'neutral')
@@ -67,3 +71,22 @@ create index if not exists keyboard_components_switch_support_idx
 
 create index if not exists component_sound_samples_component_id_idx
   on public.component_sound_samples (component_id);
+
+alter table public.keyboard_components enable row level security;
+alter table public.component_sound_samples enable row level security;
+
+grant usage on schema public to anon, authenticated;
+grant select on public.keyboard_components to anon, authenticated;
+grant select on public.component_sound_samples to anon, authenticated;
+
+create policy "Catalog components are publicly readable"
+  on public.keyboard_components
+  for select
+  to anon, authenticated
+  using (true);
+
+create policy "Catalog sound samples are publicly readable"
+  on public.component_sound_samples
+  for select
+  to anon, authenticated
+  using (true);
