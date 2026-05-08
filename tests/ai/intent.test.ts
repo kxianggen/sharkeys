@@ -51,8 +51,73 @@ describe("extractKeyboardIntent", () => {
       });
 
       expect(result.source).toBe("fallback_missing_api_key");
+      expect(result.intent.soundProfile).toBe("silent");
+      expect(result.intent.beginnerFriendly).toBe(true);
       expect(result.intent.clarificationNeeded).toBe(true);
       expect(result.error).toContain("OPENAI_API_KEY");
+    } finally {
+      if (previousApiKey !== undefined) {
+        process.env.OPENAI_API_KEY = previousApiKey;
+      }
+    }
+  });
+
+  it("extracts optical 60% clacky intent with local keyword fallback", async () => {
+    const previousApiKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const result = await extractKeyboardIntent({
+        message: "optical 60% build with clacky sound",
+      });
+
+      expect(result.source).toBe("fallback_missing_api_key");
+      expect(result.intent.layout).toBe("60");
+      expect(result.intent.switchTechnology).toBe("optical");
+      expect(result.intent.soundProfile).toBe("clacky");
+    } finally {
+      if (previousApiKey !== undefined) {
+        process.env.OPENAI_API_KEY = previousApiKey;
+      }
+    }
+  });
+
+  it("extracts quiet office budget intent with local keyword fallback", async () => {
+    const previousApiKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const result = await extractKeyboardIntent({
+        message: "quiet office keyboard under 250 USD",
+      });
+
+      expect(result.source).toBe("fallback_missing_api_key");
+      expect(result.intent.useCase).toBe("office");
+      expect(result.intent.soundProfile).toBe("silent");
+      expect(result.intent.budget).toMatchObject({
+        amount: 250,
+        currency: "USD",
+      });
+    } finally {
+      if (previousApiKey !== undefined) {
+        process.env.OPENAI_API_KEY = previousApiKey;
+      }
+    }
+  });
+
+  it("extracts beginner creamy 65% intent with local keyword fallback", async () => {
+    const previousApiKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const result = await extractKeyboardIntent({
+        message: "beginner friendly creamy 65%",
+      });
+
+      expect(result.source).toBe("fallback_missing_api_key");
+      expect(result.intent.beginnerFriendly).toBe(true);
+      expect(result.intent.soundProfile).toBe("creamy");
+      expect(result.intent.layout).toBe("65");
     } finally {
       if (previousApiKey !== undefined) {
         process.env.OPENAI_API_KEY = previousApiKey;

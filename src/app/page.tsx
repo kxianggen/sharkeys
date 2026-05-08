@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import { StatusCard } from "@/components/status-card";
+import { RecommendationDemo } from "@/components/recommendation-demo";
 
 const architectureItems = [
   {
@@ -36,10 +37,10 @@ const architectureItems = [
 ] as const;
 
 const phaseItems = [
-  "Next.js App Router scaffold",
-  "Environment variable contract",
-  "Supabase and OpenAI placeholders",
-  "Vitest rule-engine smoke test",
+  "Structured intent extraction",
+  "Seed-backed candidate search",
+  "Rule-engine validation gate",
+  "First usable recommendation demo",
 ] as const;
 
 const keyRows = [
@@ -57,7 +58,7 @@ export default function Home() {
           <div className="space-y-7">
             <div className="inline-flex items-center gap-2 border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-sm font-medium text-zinc-700">
               <Keyboard className="h-4 w-4 text-emerald-700" aria-hidden />
-              Phase 0 foundation
+              Phase 4 demo flow
             </div>
             <div className="space-y-4">
               <h1 className="max-w-3xl text-5xl font-semibold tracking-normal text-zinc-950 sm:text-6xl">
@@ -115,6 +116,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <RecommendationDemo />
 
       <section className="mx-auto grid w-full max-w-6xl gap-4 px-6 py-8 sm:px-8 md:grid-cols-2 xl:grid-cols-4">
         {architectureItems.map((item) => (

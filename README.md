@@ -2,7 +2,7 @@
 
 Sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 3: structured OpenAI intent extraction.
+This repository is currently in Phase 4: validated recommendation flow and first usable demo UI.
 
 ## Stack
 
@@ -137,6 +137,28 @@ Phase 3 does not create final build recommendations. The AI extracts intent only
 
 If `OPENAI_API_KEY` is not configured, the intent service returns a safe fallback with `clarificationNeeded: true`; tests do not require real OpenAI network calls.
 
+## Phase 4 Validated Recommendations
+
+Phase 4 adds a recommendation service in `src/lib/recommendations`, a route handler, and a small demo section on the home page.
+
+Available endpoint:
+
+- `POST /api/recommendations`
+
+Example request:
+
+```bash
+curl -X POST http://localhost:3000/api/recommendations \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "I want a beginner friendly 65% keyboard under 250 USD that sounds creamy."
+  }'
+```
+
+The endpoint calls the existing intent extraction flow, maps the extracted intent into seed-backed candidate searches, assembles possible builds from known component IDs, and validates every assembled build with `validateBuildSelectionFromIds`. Only builds that pass deterministic validation are returned in `recommendations`; invalid candidate combinations are filtered out before the response.
+
+If no valid build can be assembled, the route returns explanations and a clarification prompt instead of an unvalidated recommendation. The demo UI follows the same rule: it displays extracted intent and validated build cards only.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
@@ -147,9 +169,11 @@ Phase 2 adds seed-backed data access helpers, API route handlers, API validation
 
 Phase 3 adds structured OpenAI intent extraction that converts vague user preferences into technical criteria.
 
-Phase 4 will build the 2D configurator, sound comparison workflow, and recommendation screens.
+Phase 4 adds validated recommendation assembly, `POST /api/recommendations`, and the first usable demo UI for natural-language build requests.
 
-Phase 5 will add community gallery save, share, and clone flows.
+Phase 5 will expand the configurator UI, sound comparison workflow, and recommendation review experience.
+
+Phase 6 will add community gallery save, share, and clone flows.
 
 ## Architecture Rule
 

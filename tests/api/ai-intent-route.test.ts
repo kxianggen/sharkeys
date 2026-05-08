@@ -37,8 +37,12 @@ describe("AI intent API route", () => {
 
       expect(response.status).toBe(200);
       expect(parsed.data.source).toBe("fallback_missing_api_key");
+      expect(parsed.data.intent.beginnerFriendly).toBe(true);
+      expect(parsed.data.intent.soundProfile).toBe("creamy");
       expect(parsed.data.intent.clarificationNeeded).toBe(true);
-      expect(parsed.data.candidateComponentIds.case).toHaveLength(3);
+      expect(parsed.data.candidateComponentIds.case).toContain(
+        "case_neo65_gasket",
+      );
       expect(parsed.data.error).toContain("OPENAI_API_KEY");
     } finally {
       if (previousApiKey !== undefined) {

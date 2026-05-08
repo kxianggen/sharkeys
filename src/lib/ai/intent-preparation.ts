@@ -60,16 +60,25 @@ function searchCandidateIds(
   };
 
   const strictMatches = searchComponents(categoryCriteria);
-  const relaxedMatches =
-    strictMatches.length > 0
-      ? strictMatches
-      : searchComponents({
-          category,
-          layout: criteria.layout,
-          switchTechnology: criteria.switchTechnology,
-        });
+  const relaxedMatches = searchComponents({
+    category,
+    layout: criteria.layout,
+    switchTechnology: criteria.switchTechnology,
+    soundProfile: criteria.soundProfile,
+    beginnerFriendly: criteria.beginnerFriendly,
+    maxPrice: criteria.maxPrice,
+  });
+  const coreMatches = searchComponents({
+    category,
+    layout: criteria.layout,
+    switchTechnology: criteria.switchTechnology,
+  });
 
-  return relaxedMatches
+  return (strictMatches.length > 0
+    ? strictMatches
+    : relaxedMatches.length > 0
+      ? relaxedMatches
+      : coreMatches)
     .slice(0, maxCandidatesPerCategory)
     .map((component) => component.id);
 }
