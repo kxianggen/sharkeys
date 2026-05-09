@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   buildValidatedRecommendations,
   createRecommendationResult,
+  generateRecommendationsFromMessage,
 } from "@/lib/recommendations";
 import { extractedKeyboardIntentSchema, prepareIntentMatches } from "@/lib/ai";
+import { PROTOTYPE_USD_TO_MYR_RATE } from "@/lib/pricing";
 import type {
   ComponentCandidateIdsByCategory,
   ExtractedKeyboardIntent,
@@ -30,12 +32,12 @@ function makeIntent(
 }
 
 const validCandidateIds: ComponentCandidateIdsByCategory = {
-  case: ["case_neo65_gasket"],
-  pcb: ["pcb_neo65_mx_hotswap"],
-  plate: ["plate_neo65_fr4"],
-  switch: ["switch_mx_linear_creamy"],
-  keycap: ["keycap_cherry_ansi_mx"],
-  stabilizer: ["stab_durock_v2_screw_in"],
+  case: ["case_zuoya_gmk67_v2_kit_case"],
+  pcb: ["pcb_zuoya_gmk67_v2_hotswap"],
+  plate: ["plate_zuoya_gmk67_v2_pc"],
+  switch: ["switch_gateron_milky_yellow_pro"],
+  keycap: ["keycap_mecha_bow_cherry_pbt"],
+  stabilizer: ["stab_zuoya_gmk67_plate_mount"],
 };
 
 describe("recommendation service", () => {
@@ -66,7 +68,10 @@ describe("recommendation service", () => {
       intent: makeIntent(),
       candidateComponentIds: {
         ...validCandidateIds,
-        case: ["case_budget60_tray", "case_neo65_gasket"],
+        case: [
+          "case_razer_huntsman_mini_60_case",
+          "case_zuoya_gmk67_v2_kit_case",
+        ],
       },
       maxRecommendations: 2,
     });
@@ -74,7 +79,7 @@ describe("recommendation service", () => {
     expect(assembly.rejectedBuildCount).toBeGreaterThan(0);
     expect(assembly.recommendations).toHaveLength(1);
     expect(assembly.recommendations[0].componentIds.case).toBe(
-      "case_neo65_gasket",
+      "case_zuoya_gmk67_v2_kit_case",
     );
     expect(assembly.recommendations[0].validation.isValid).toBe(true);
   });
@@ -90,12 +95,12 @@ describe("recommendation service", () => {
         switchTechnology: "mechanical",
       },
       candidateComponentIds: {
-        case: ["case_budget60_tray"],
-        pcb: ["pcb_neo65_mx_hotswap"],
-        plate: ["plate_tkl_pom"],
-        switch: ["switch_mx_linear_creamy"],
-        keycap: ["keycap_cherry_ansi_mx"],
-        stabilizer: ["stab_durock_v2_screw_in"],
+        case: ["case_razer_huntsman_mini_60_case"],
+        pcb: ["pcb_zuoya_gmk67_v2_hotswap"],
+        plate: ["plate_mkb_siren_vk87_pc"],
+        switch: ["switch_gateron_milky_yellow_pro"],
+        keycap: ["keycap_mecha_bow_cherry_pbt"],
+        stabilizer: ["stab_zuoya_gmk67_plate_mount"],
       },
     };
     const result = createRecommendationResult(
@@ -119,7 +124,7 @@ describe("recommendation service", () => {
     const intent = makeIntent({
       budget: {
         amount: 300,
-        currency: "USD",
+        currency: "MYR",
         label: "mid_range",
       },
     });
@@ -133,6 +138,7 @@ describe("recommendation service", () => {
           criteria: {
             layout: "65",
             maxPrice: 300,
+            currency: "MYR",
           },
           candidateComponentIds: validCandidateIds,
         },
@@ -143,5 +149,127 @@ describe("recommendation service", () => {
     expect(result.explanations).toContain(
       "Estimated build price exceeds the extracted budget.",
     );
+  });
+
+  it("returns MYR price estimates for Malaysia seed recommendations", () => {
+    const result = createRecommendationResult(
+      {
+        intent: makeIntent({
+          budget: {
+            amount: 500,
+            currency: "MYR",
+            label: "mid_range",
+          },
+        }),
+        source: "openai",
+      },
+      {
+        preparation: {
+          criteria: {
+            layout: "65",
+            maxPrice: 500,
+            currency: "MYR",
+          },
+          candidateComponentIds: validCandidateIds,
+        },
+      },
+    );
+
+    expect(result.recommendations).toHaveLength(1);
+    expect(result.recommendations[0].estimatedPriceCurrency).toBe("MYR");
+    expect(result.recommendations[0].estimatedPrice).toBeGreaterThan(0);
+    expect(result.recommendations[0].estimatedPrice).toBeLessThanOrEqual(500);
+  });
+
+  it("keeps RM500 prompt results within the MYR catalog budget", async () => {
+    const previousApiKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const result = await generateRecommendationsFromMessage({
+        message: "beginner friendly creamy 65% keyboard under RM500",
+      });
+
+      expect(result.intent.budget).toMatchObject({
+        amount: 500,
+        currency: "MYR",
+      });
+      expect(result.criteria).toMatchObject({
+        maxPrice: 500,
+        currency: "MYR",
+      });
+      expect(result.recommendations.length).toBeGreaterThan(0);
+      expect(
+        result.recommendations.every(
+          (recommendation) =>
+            recommendation.validation.isValid &&
+            recommendation.estimatedPriceCurrency === "MYR" &&
+            recommendation.estimatedPrice !== null &&
+            recommendation.estimatedPrice <= 500,
+        ),
+      ).toBe(true);
+    } finally {
+      if (previousApiKey !== undefined) {
+        process.env.OPENAI_API_KEY = previousApiKey;
+      }
+    }
+  });
+
+  it("filters USD budgets through deterministic MYR conversion", async () => {
+    const previousApiKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const result = await generateRecommendationsFromMessage({
+        message: "beginner friendly creamy 65% keyboard under $50",
+      });
+
+      expect(result.intent.budget).toMatchObject({
+        amount: 50,
+        currency: "USD",
+      });
+      expect(result.criteria.currency).toBe("MYR");
+      expect(result.criteria.maxPrice).toBeCloseTo(
+        50 * PROTOTYPE_USD_TO_MYR_RATE,
+      );
+      expect(result.recommendations).toEqual([]);
+      expect(result.explanations).toContain(
+        "Estimated build price exceeds the extracted budget.",
+      );
+    } finally {
+      if (previousApiKey !== undefined) {
+        process.env.OPENAI_API_KEY = previousApiKey;
+      }
+    }
+  });
+
+  it("does not silently return unfiltered MYR builds for low USD office budgets", async () => {
+    const previousApiKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const result = await generateRecommendationsFromMessage({
+        message: "quiet office keyboard under $50",
+      });
+
+      expect(result.intent.useCase).toBe("office");
+      expect(result.intent.soundProfile).toBe("silent");
+      expect(result.intent.budget).toMatchObject({
+        amount: 50,
+        currency: "USD",
+      });
+      expect(result.criteria.currency).toBe("MYR");
+      expect(result.criteria.maxPrice).toBeCloseTo(
+        50 * PROTOTYPE_USD_TO_MYR_RATE,
+      );
+      expect(result.recommendations).toEqual([]);
+      expect(result.explanations).toContain(
+        "Estimated build price exceeds the extracted budget.",
+      );
+    } finally {
+      if (previousApiKey !== undefined) {
+        process.env.OPENAI_API_KEY = previousApiKey;
+      }
+    }
   });
 });

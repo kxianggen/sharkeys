@@ -4,6 +4,7 @@ import { compatibilityResultSchema } from "@/lib/api/schemas";
 import {
   caseComponentSchema,
   compatibilityIssueSchema,
+  currencyCodeSchema,
   keycapComponentSchema,
   pcbComponentSchema,
   plateComponentSchema,
@@ -47,6 +48,7 @@ export const validatedRecommendationBuildSchema = z
     componentIds: recommendationComponentIdsSchema,
     components: recommendationComponentsSchema,
     estimatedPrice: z.number().nonnegative().nullable(),
+    estimatedPriceCurrency: currencyCodeSchema.nullable(),
     validation: compatibilityResultSchema.refine((result) => result.isValid, {
       message: "Recommendation builds must pass deterministic validation.",
     }),

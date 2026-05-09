@@ -54,6 +54,7 @@ export function toSupabaseKeyboardComponentInsert(
         : null,
     sound_profile: component.soundProfile ?? null,
     price: component.price ?? null,
+    price_currency: component.priceCurrency ?? null,
     vendor_url: component.vendorUrl ?? null,
     image_url: component.imageUrl ?? null,
     sound_url: component.soundUrl ?? null,

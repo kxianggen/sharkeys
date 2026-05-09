@@ -2,7 +2,7 @@
 
 Sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 4: validated recommendation flow and first usable demo UI.
+This repository is currently in Phase 4.5: Malaysia-local vendor seed data and MYR pricing.
 
 ## Stack
 
@@ -59,9 +59,9 @@ Keyboard components are modeled with reusable Zod schemas and TypeScript types i
 - keycap
 - stabilizer
 
-The model includes compatibility fields for layout support, switch technology, mounting support, keycap profile, stabilizer type and sizes, connection type, sound profile, price, vendor URL, image URL, and sound URL.
+The model includes compatibility fields for layout support, switch technology, mounting support, keycap profile, stabilizer type and sizes, connection type, sound profile, price, price currency, vendor URL, image URL, and sound URL.
 
-Representative offline seed data lives in `src/data/components.ts`. It is intentionally small so tests can cover valid builds, invalid layout combinations, invalid switch technology combinations, sound preference warnings, and beginner-friendly metadata without requiring live Supabase credentials.
+Representative offline seed data lives in `src/data/components.ts`. It is intentionally small so tests can cover valid builds, invalid layout combinations, invalid switch technology combinations, sound preference warnings, beginner-friendly metadata, and MYR price handling without requiring live Supabase credentials.
 
 ## Rule Engine
 
@@ -97,12 +97,12 @@ curl -X POST http://localhost:3000/api/builds/validate \
   -H "Content-Type: application/json" \
   -d '{
     "componentIds": {
-      "case": "case_neo65_gasket",
-      "pcb": "pcb_neo65_mx_hotswap",
-      "plate": "plate_neo65_fr4",
-      "switch": "switch_mx_linear_creamy",
-      "keycap": "keycap_cherry_ansi_mx",
-      "stabilizer": "stab_durock_v2_screw_in"
+      "case": "case_zuoya_gmk67_v2_kit_case",
+      "pcb": "pcb_zuoya_gmk67_v2_hotswap",
+      "plate": "plate_zuoya_gmk67_v2_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_mecha_bow_cherry_pbt",
+      "stabilizer": "stab_zuoya_gmk67_plate_mount"
     },
     "preferences": {
       "layout": "65",
@@ -127,7 +127,7 @@ Example request:
 curl -X POST http://localhost:3000/api/ai/intent \
   -H "Content-Type: application/json" \
   -d '{
-    "message": "I want a beginner friendly 65% keyboard under 200 USD that sounds creamy."
+    "message": "I want a beginner friendly 65% keyboard under RM500 that sounds creamy."
   }'
 ```
 
@@ -135,7 +135,7 @@ The route extracts structured criteria such as budget, layout, sound profile, us
 
 Phase 3 does not create final build recommendations. The AI extracts intent only. Any future build recommendation must be assembled from grounded component data and validated through the deterministic rule engine before it is shown as compatible.
 
-If `OPENAI_API_KEY` is not configured, the intent service returns a safe fallback with `clarificationNeeded: true`; tests do not require real OpenAI network calls.
+If `OPENAI_API_KEY` is not configured, the intent service returns a deterministic local keyword fallback with `clarificationNeeded: true`; tests do not require real OpenAI network calls. The fallback recognizes common Malaysia-local budget formats such as `RM500` and `500 MYR`, plus USD formats.
 
 ## Phase 4 Validated Recommendations
 
@@ -151,13 +151,28 @@ Example request:
 curl -X POST http://localhost:3000/api/recommendations \
   -H "Content-Type: application/json" \
   -d '{
-    "message": "I want a beginner friendly 65% keyboard under 250 USD that sounds creamy."
+    "message": "I want a beginner friendly 65% keyboard under RM500 that sounds creamy."
   }'
 ```
 
 The endpoint calls the existing intent extraction flow, maps the extracted intent into seed-backed candidate searches, assembles possible builds from known component IDs, and validates every assembled build with `validateBuildSelectionFromIds`. Only builds that pass deterministic validation are returned in `recommendations`; invalid candidate combinations are filtered out before the response.
 
 If no valid build can be assembled, the route returns explanations and a clarification prompt instead of an unvalidated recommendation. The demo UI follows the same rule: it displays extracted intent and validated build cards only.
+
+## Phase 4.5 Malaysia-Local Seed Data
+
+Phase 4.5 replaces the fictional prototype catalog with a small curated Malaysia-focused dataset using MYR pricing and vendor/source metadata. Current source vendors include Mecha Malaysia, MKB.MY, KeebsProject Shopee, and a Razer Malaysia optical 60% reference for the optical-switch test path.
+
+The catalog is still a prototype dataset, not a scraper or live inventory feed. Prices and availability are not guaranteed. Vendor URLs and metadata are included for traceability, and kit-derived compatibility records are explicitly marked with `metadata.sourceType = "kit_derived"` and a source note.
+
+The recommendation flow now formats estimated build prices in the recommendation currency, and the local fallback parser can understand prompts such as:
+
+- `beginner friendly creamy 65% keyboard under RM500`
+- `quiet office keyboard under RM250`
+- `optical 60% build with clacky sound`
+- `thocky TKL typing keyboard`
+
+Because the prototype catalog is MYR-priced, recommendation search and budget filtering normalize USD budgets into MYR with the fixed `PROTOTYPE_USD_TO_MYR_RATE` constant in `src/lib/pricing`. This is deterministic demo logic for local testing only, not live foreign-exchange data. The extracted intent still preserves the user's original currency, while candidate search and final budget checks use the normalized MYR amount so currency mismatches cannot bypass budget filtering.
 
 ## Development Phases
 
@@ -170,6 +185,8 @@ Phase 2 adds seed-backed data access helpers, API route handlers, API validation
 Phase 3 adds structured OpenAI intent extraction that converts vague user preferences into technical criteria.
 
 Phase 4 adds validated recommendation assembly, `POST /api/recommendations`, and the first usable demo UI for natural-language build requests.
+
+Phase 4.5 localizes the prototype catalog around Malaysia vendors, adds MYR currency handling, and keeps all recommendations validated by the deterministic rule engine.
 
 Phase 5 will expand the configurator UI, sound comparison workflow, and recommendation review experience.
 

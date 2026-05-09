@@ -45,6 +45,14 @@ const subscribeToHydration = () => () => undefined;
 const getHydratedSnapshot = () => true;
 const getServerHydrationSnapshot = () => false;
 
+function formatMoney(amount: number, currency: string) {
+  return new Intl.NumberFormat("en-MY", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
+  }).format(amount);
+}
+
 export function RecommendationDemo() {
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<RecommendationResult | null>(null);
@@ -73,7 +81,7 @@ export function RecommendationDemo() {
       [
         "Budget",
         intent.budget?.amount
-          ? `${intent.budget.amount} ${intent.budget.currency ?? ""}`.trim()
+          ? formatMoney(intent.budget.amount, intent.budget.currency ?? "MYR")
           : intent.budget?.label ?? "Unspecified",
       ],
       [
@@ -163,7 +171,7 @@ export function RecommendationDemo() {
             id="keyboard-request"
             maxLength={2000}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="Creamy 65% beginner build under 250 USD"
+            placeholder="Creamy 65% beginner build under RM500"
             value={message}
           />
 
@@ -275,7 +283,10 @@ function RecommendationCard({
           <p className="mt-1 text-sm text-zinc-500">
             {recommendation.estimatedPrice === null
               ? "Price estimate unavailable"
-              : `Estimated ${recommendation.estimatedPrice} USD`}
+              : `Estimated ${formatMoney(
+                  recommendation.estimatedPrice,
+                  recommendation.estimatedPriceCurrency ?? "MYR",
+                )}`}
           </p>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">

@@ -13,12 +13,12 @@ import type { ComponentCategory, KeyboardBuildSelection } from "@/lib/types";
 
 const validBuildSelection: KeyboardBuildSelection = {
   componentIds: {
-    case: "case_neo65_gasket",
-    pcb: "pcb_neo65_mx_hotswap",
-    plate: "plate_neo65_fr4",
-    switch: "switch_mx_linear_creamy",
-    keycap: "keycap_cherry_ansi_mx",
-    stabilizer: "stab_durock_v2_screw_in",
+    case: "case_zuoya_gmk67_v2_kit_case",
+    pcb: "pcb_zuoya_gmk67_v2_hotswap",
+    plate: "plate_zuoya_gmk67_v2_pc",
+    switch: "switch_gateron_milky_yellow_pro",
+    keycap: "keycap_mecha_bow_cherry_pbt",
+    stabilizer: "stab_zuoya_gmk67_plate_mount",
   },
   preferences: {
     layout: "65",
@@ -35,10 +35,10 @@ describe("component repository helpers", () => {
   });
 
   it("looks up a component by ID", () => {
-    const component = getComponentById("pcb_neo65_mx_hotswap");
+    const component = getComponentById("pcb_zuoya_gmk67_v2_hotswap");
 
     expect(component?.category).toBe("pcb");
-    expect(component?.name).toBe("Neo 65 MX Hotswap PCB");
+    expect(component?.name).toBe("Zuoya GMK67 V2 Hotswap PCB");
   });
 
   it("filters components by category", () => {
@@ -61,7 +61,7 @@ describe("component repository helpers", () => {
 
     expect(grouped.case).toHaveLength(3);
     expect(grouped.pcb).toHaveLength(3);
-    expect(grouped.switch).toHaveLength(4);
+    expect(grouped.switch).toHaveLength(5);
   });
 
   it("searches components by simple criteria", () => {
@@ -69,15 +69,25 @@ describe("component repository helpers", () => {
       category: "switch",
       switchTechnology: "mechanical",
       beginnerFriendly: true,
-      maxPrice: 0.7,
+      maxPrice: 1,
+      currency: "MYR",
     });
 
     expect(results.map((component) => component.id)).toEqual(
       expect.arrayContaining([
-        "switch_mx_linear_creamy",
-        "switch_mx_tactile_thocky",
+        "switch_gateron_milky_yellow_pro",
+        "switch_akko_v3_cream_yellow_pro",
       ]),
     );
+  });
+
+  it("keeps Malaysia seed prices in MYR", () => {
+    expect(
+      keyboardComponents.every(
+        (component) =>
+          component.price === undefined || component.priceCurrency === "MYR",
+      ),
+    ).toBe(true);
   });
 
   it("validates a build selection from component IDs", () => {

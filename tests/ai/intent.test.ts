@@ -7,6 +7,7 @@ import {
   prepareIntentMatches,
   userIntentRequestSchema,
 } from "@/lib/ai";
+import { PROTOTYPE_USD_TO_MYR_RATE } from "@/lib/pricing";
 
 describe("AI intent schemas", () => {
   it("parses valid user text input", () => {
@@ -82,13 +83,13 @@ describe("extractKeyboardIntent", () => {
     }
   });
 
-  it("extracts quiet office budget intent with local keyword fallback", async () => {
+  it("extracts quiet office MYR budget intent with local keyword fallback", async () => {
     const previousApiKey = process.env.OPENAI_API_KEY;
     delete process.env.OPENAI_API_KEY;
 
     try {
       const result = await extractKeyboardIntent({
-        message: "quiet office keyboard under 250 USD",
+        message: "quiet office keyboard under RM250",
       });
 
       expect(result.source).toBe("fallback_missing_api_key");
@@ -96,7 +97,7 @@ describe("extractKeyboardIntent", () => {
       expect(result.intent.soundProfile).toBe("silent");
       expect(result.intent.budget).toMatchObject({
         amount: 250,
-        currency: "USD",
+        currency: "MYR",
       });
     } finally {
       if (previousApiKey !== undefined) {
@@ -118,6 +119,28 @@ describe("extractKeyboardIntent", () => {
       expect(result.intent.beginnerFriendly).toBe(true);
       expect(result.intent.soundProfile).toBe("creamy");
       expect(result.intent.layout).toBe("65");
+    } finally {
+      if (previousApiKey !== undefined) {
+        process.env.OPENAI_API_KEY = previousApiKey;
+      }
+    }
+  });
+
+  it("extracts MYR suffix budgets with local keyword fallback", async () => {
+    const previousApiKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const result = await extractKeyboardIntent({
+        message: "beginner friendly creamy 65% keyboard under 500 MYR",
+      });
+
+      expect(result.source).toBe("fallback_missing_api_key");
+      expect(result.intent.budget).toMatchObject({
+        amount: 500,
+        currency: "MYR",
+        label: "mid_range",
+      });
     } finally {
       if (previousApiKey !== undefined) {
         process.env.OPENAI_API_KEY = previousApiKey;
@@ -186,7 +209,33 @@ describe("intent preparation", () => {
       soundProfile: "creamy",
       switchTechnology: "mechanical",
       beginnerFriendly: true,
-      maxPrice: 150,
+      currency: "MYR",
+    });
+    expect(criteria.maxPrice).toBeCloseTo(150 * PROTOTYPE_USD_TO_MYR_RATE);
+  });
+
+  it("keeps MYR budgets as MYR search criteria", () => {
+    const criteria = mapIntentToSearchCriteria({
+      budget: {
+        amount: 500,
+        currency: "MYR",
+        label: "mid_range",
+      },
+      layout: "65",
+      soundProfile: "creamy",
+      useCase: "programming",
+      beginnerFriendly: true,
+      switchTechnology: "mechanical",
+      priorities: ["sound"],
+      constraints: [],
+      clarificationNeeded: false,
+      clarificationQuestion: null,
+    });
+
+    expect(criteria).toMatchObject({
+      layout: "65",
+      maxPrice: 500,
+      currency: "MYR",
     });
   });
 
@@ -205,13 +254,13 @@ describe("intent preparation", () => {
     });
 
     expect(preparation.candidateComponentIds.case).toContain(
-      "case_neo65_gasket",
+      "case_zuoya_gmk67_v2_kit_case",
     );
     expect(preparation.candidateComponentIds.pcb).toContain(
-      "pcb_neo65_mx_hotswap",
+      "pcb_zuoya_gmk67_v2_hotswap",
     );
     expect(preparation.candidateComponentIds.switch).toContain(
-      "switch_mx_linear_creamy",
+      "switch_gateron_milky_yellow_pro",
     );
   });
 
@@ -224,13 +273,15 @@ describe("intent preparation", () => {
       beginnerFriendly: false,
       switchTechnology: "mechanical",
       priorities: ["sound"],
-      constraints: ["POM"],
+      constraints: ["polycarbonate"],
       clarificationNeeded: false,
       clarificationQuestion: null,
     });
 
-    expect(preparation.criteria.query).toBe("typing POM");
-    expect(preparation.candidateComponentIds.plate).toEqual(["plate_tkl_pom"]);
+    expect(preparation.criteria.query).toBe("typing polycarbonate");
+    expect(preparation.candidateComponentIds.plate).toEqual([
+      "plate_mkb_siren_vk87_pc",
+    ]);
   });
 
   it("drops query terms in relaxed fallback when strict candidate matching is too narrow", () => {
@@ -242,16 +293,16 @@ describe("intent preparation", () => {
       beginnerFriendly: true,
       switchTechnology: "mechanical",
       priorities: ["sound"],
-      constraints: ["nonexistent unicorn foam"],
+      constraints: ["nonexistent foam blend"],
       clarificationNeeded: false,
       clarificationQuestion: null,
     });
 
     expect(preparation.criteria.query).toBe(
-      "programming nonexistent unicorn foam",
+      "programming nonexistent foam blend",
     );
     expect(preparation.candidateComponentIds.pcb).toContain(
-      "pcb_neo65_mx_hotswap",
+      "pcb_zuoya_gmk67_v2_hotswap",
     );
   });
 });

@@ -10,9 +10,11 @@ import { getComponentById, validateBuildSelectionFromIds } from "@/lib/component
 import {
   requiredComponentCategories,
   type ComponentCategory,
+  type CurrencyCode,
   type KeyboardBuildSelection,
   type CompatibilityIssue,
 } from "@/lib/types";
+import { normalizeBudgetForCatalogPricing } from "@/lib/pricing";
 
 import {
   recommendationResultSchema,
@@ -38,6 +40,11 @@ const maxCandidatesPerCategoryForAssembly = 4;
 const maxAssemblyAttempts = 300;
 const defaultMaxRecommendations = 3;
 const estimatedSwitchCount = 70;
+
+type PriceEstimate = {
+  amount: number;
+  currency: CurrencyCode;
+};
 
 export async function generateRecommendationsFromMessage(
   request: RecommendationsRequest,
@@ -228,13 +235,15 @@ function createBuildSelection(
   componentIds: RecommendationComponentIds,
   intent: ExtractedKeyboardIntent,
 ): KeyboardBuildSelection {
+  const catalogBudget = normalizeBudgetForCatalogPricing(intent.budget);
+
   return {
     componentIds,
     preferences: {
       layout: intent.layout ?? undefined,
       soundProfile: intent.soundProfile ?? undefined,
       beginnerFriendly: intent.beginnerFriendly ?? undefined,
-      maxPrice: intent.budget?.amount ?? undefined,
+      maxPrice: catalogBudget?.amount,
     },
   };
 }
@@ -250,12 +259,15 @@ function createRecommendationBuild({
   index: number;
   validation: ReturnType<typeof validateBuildSelectionFromIds>;
 }): ValidatedRecommendationBuild {
+  const priceEstimate = estimateBuildPrice(components);
+
   return {
     id: `validated_build_${index}`,
     title: `${components.case.name} with ${components.switch.name}`,
     componentIds,
     components,
-    estimatedPrice: estimateBuildPrice(components),
+    estimatedPrice: priceEstimate?.amount ?? null,
+    estimatedPriceCurrency: priceEstimate?.currency ?? null,
     validation,
     warnings: validation.warnings,
     explanations: [
@@ -265,40 +277,59 @@ function createRecommendationBuild({
   };
 }
 
-function estimateBuildPrice(components: RecommendationComponents) {
+function estimateBuildPrice(components: RecommendationComponents): PriceEstimate | null {
   const prices = requiredComponentCategories
     .map((category) => {
       const price = components[category].price;
+      const currency = components[category].priceCurrency;
 
-      if (price === undefined) {
+      if (price === undefined || currency === undefined) {
         return undefined;
       }
 
-      return category === "switch" ? price * estimatedSwitchCount : price;
+      return {
+        amount: category === "switch" ? price * estimatedSwitchCount : price,
+        currency,
+      };
     })
-    .filter((price): price is number => price !== undefined);
+    .filter((price): price is PriceEstimate => price !== undefined);
 
   if (prices.length === 0) {
     return null;
   }
 
-  return Number(
-    prices.reduce((total, price) => total + price, 0).toFixed(2),
-  );
+  const [currency] = prices;
+
+  if (!currency || prices.some((price) => price.currency !== currency.currency)) {
+    return null;
+  }
+
+  return {
+    amount: Number(
+      prices.reduce((total, price) => total + price.amount, 0).toFixed(2),
+    ),
+    currency: currency.currency,
+  };
 }
 
 function exceedsExtractedBudget(
   recommendation: ValidatedRecommendationBuild,
   intent: ExtractedKeyboardIntent,
 ) {
-  const budgetAmount = intent.budget?.amount;
+  const catalogBudget = normalizeBudgetForCatalogPricing(intent.budget);
 
-  return (
-    budgetAmount !== null &&
-    budgetAmount !== undefined &&
-    recommendation.estimatedPrice !== null &&
-    recommendation.estimatedPrice > budgetAmount
-  );
+  if (!catalogBudget) {
+    return false;
+  }
+
+  if (
+    recommendation.estimatedPrice === null ||
+    recommendation.estimatedPriceCurrency !== catalogBudget.currency
+  ) {
+    return true;
+  }
+
+  return recommendation.estimatedPrice > catalogBudget.amount;
 }
 
 function compareRecommendations(

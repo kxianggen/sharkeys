@@ -15,12 +15,12 @@ import {
 
 const validBuildPayload = {
   componentIds: {
-    case: "case_neo65_gasket",
-    pcb: "pcb_neo65_mx_hotswap",
-    plate: "plate_neo65_fr4",
-    switch: "switch_mx_linear_creamy",
-    keycap: "keycap_cherry_ansi_mx",
-    stabilizer: "stab_durock_v2_screw_in",
+    case: "case_zuoya_gmk67_v2_kit_case",
+    pcb: "pcb_zuoya_gmk67_v2_hotswap",
+    plate: "plate_zuoya_gmk67_v2_pc",
+    switch: "switch_gateron_milky_yellow_pro",
+    keycap: "keycap_mecha_bow_cherry_pbt",
+    stabilizer: "stab_zuoya_gmk67_plate_mount",
   },
   preferences: {
     layout: "65",
@@ -37,7 +37,7 @@ describe("component API routes", () => {
     const parsed = componentsListResponseSchema.parse(body);
 
     expect(response.status).toBe(200);
-    expect(parsed.data.count).toBe(4);
+    expect(parsed.data.count).toBe(5);
     expect(
       parsed.data.components.every((component) => component.category === "switch"),
     ).toBe(true);
@@ -45,13 +45,13 @@ describe("component API routes", () => {
 
   it("returns a component by ID", async () => {
     const response = await componentGET(new Request("http://localhost"), {
-      params: Promise.resolve({ id: "case_neo65_gasket" }),
+      params: Promise.resolve({ id: "case_zuoya_gmk67_v2_kit_case" }),
     });
     const body = await response.json();
     const parsed = componentResponseSchema.parse(body);
 
     expect(response.status).toBe(200);
-    expect(parsed.data.component.name).toBe("Neo 65 Gasket Case");
+    expect(parsed.data.component.name).toBe("Zuoya GMK67 V2 65% Kit Case");
   });
 
   it("returns a useful error when a component ID is unknown", async () => {

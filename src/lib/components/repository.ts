@@ -3,6 +3,7 @@ import { validateBuildCompatibility } from "@/lib/rules";
 import {
   componentCategorySchema,
   type ComponentCategory,
+  type CurrencyCode,
   type KeyboardBuildSelection,
   type KeyboardComponent,
   type KeyboardLayout,
@@ -18,6 +19,7 @@ export type ComponentSearchCriteria = {
   soundProfile?: SoundProfile;
   beginnerFriendly?: boolean;
   maxPrice?: number;
+  currency?: CurrencyCode;
 };
 
 export type ComponentsByCategory = Record<
@@ -94,6 +96,7 @@ export function searchComponents(criteria: ComponentSearchCriteria = {}) {
     if (
       criteria.maxPrice !== undefined &&
       component.price !== undefined &&
+      (!criteria.currency || component.priceCurrency === criteria.currency) &&
       component.price > criteria.maxPrice
     ) {
       return false;

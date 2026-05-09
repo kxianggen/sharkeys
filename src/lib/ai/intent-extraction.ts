@@ -2,6 +2,7 @@ import { zodTextFormat } from "openai/helpers/zod";
 import type OpenAI from "openai";
 
 import { createOpenAIClient } from "@/lib/openai";
+import type { CurrencyCode } from "@/lib/types";
 
 import {
   extractedKeyboardIntentSchema,
@@ -48,6 +49,7 @@ export async function extractKeyboardIntent(
             "You extract keyboard build intent into structured criteria.",
             "Do not recommend final products or complete builds.",
             "Do not invent component IDs, products, prices, vendors, or availability.",
+            "Use MYR or USD when a budget currency is present; default Malaysia-local RM budgets to MYR.",
             "If the user is vague, set clarificationNeeded and ask one concise question.",
             "Use only the schema fields. Compatibility is decided later by deterministic validation.",
           ].join(" "),
@@ -134,27 +136,86 @@ function normalizeText(message: string) {
 }
 
 function parseBudget(text: string) {
-  const budgetMatch =
-    text.match(/\$\s*(\d+(?:\.\d{1,2})?)/) ??
-    text.match(/\b(?:under|below|less than|max|maximum|budget)\s*\$?\s*(\d+(?:\.\d{1,2})?)\b/) ??
-    text.match(/\b(\d+(?:\.\d{1,2})?)\s*(usd|dollars?)\b/);
+  const constrainedBudgetMatch = text.match(
+    /\b(?:under|below|less than|max|maximum|budget)\s*(rm|myr|usd|\$)?\s*(\d+(?:\.\d{1,2})?)(?:\s*(usd|dollars?|myr|rm))?\b/,
+  );
 
-  if (!budgetMatch) {
-    return null;
+  if (constrainedBudgetMatch) {
+    return createBudgetIntent(
+      Number(constrainedBudgetMatch[2]),
+      parseCurrency(constrainedBudgetMatch[1] ?? constrainedBudgetMatch[3]) ??
+        "MYR",
+    );
   }
 
-  const amount = Number(budgetMatch[1]);
+  const prefixedCurrencyMatch = text.match(
+    /\b(rm|myr|usd)\s*(\d+(?:\.\d{1,2})?)\b/,
+  );
 
+  if (prefixedCurrencyMatch) {
+    return createBudgetIntent(
+      Number(prefixedCurrencyMatch[2]),
+      parseCurrency(prefixedCurrencyMatch[1]) ?? "MYR",
+    );
+  }
+
+  const dollarMatch = text.match(/\$\s*(\d+(?:\.\d{1,2})?)/);
+
+  if (dollarMatch) {
+    return createBudgetIntent(Number(dollarMatch[1]), "USD");
+  }
+
+  const suffixedCurrencyMatch = text.match(
+    /\b(\d+(?:\.\d{1,2})?)\s*(usd|dollars?|myr|rm)\b/,
+  );
+
+  if (suffixedCurrencyMatch) {
+    return createBudgetIntent(
+      Number(suffixedCurrencyMatch[1]),
+      parseCurrency(suffixedCurrencyMatch[2]) ?? "MYR",
+    );
+  }
+
+  return null;
+}
+
+function parseCurrency(value: string | undefined): CurrencyCode | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  if (value === "$" || value === "usd" || value.startsWith("dollar")) {
+    return "USD";
+  }
+
+  if (value === "rm" || value === "myr") {
+    return "MYR";
+  }
+
+  return undefined;
+}
+
+function createBudgetIntent(amount: number, currency: CurrencyCode) {
   if (!Number.isFinite(amount)) {
     return null;
   }
 
   return {
     amount,
-    currency: "USD",
-    label:
-      amount <= 150 ? "budget" : amount <= 300 ? "mid_range" : "premium",
+    currency,
+    label: classifyBudget(amount, currency),
   };
+}
+
+function classifyBudget(amount: number, currency: CurrencyCode) {
+  const budgetThreshold = currency === "MYR" ? 300 : 150;
+  const midRangeThreshold = currency === "MYR" ? 700 : 300;
+
+  if (amount <= budgetThreshold) {
+    return "budget";
+  }
+
+  return amount <= midRangeThreshold ? "mid_range" : "premium";
 }
 
 function parseLayout(text: string) {

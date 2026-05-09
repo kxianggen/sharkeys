@@ -22,6 +22,7 @@ export function GET(request: NextRequest) {
       soundProfile: criteria.soundProfile,
       beginnerFriendly: criteria.beginnerFriendly,
       maxPrice: criteria.maxPrice,
+      currency: criteria.currency,
     });
 
     return jsonOk(componentsListResponseSchema, {

@@ -44,6 +44,8 @@ export const stabilizerSizeSchema = z.enum(["2u", "6.25u", "7u"]);
 
 export const connectionSchema = z.enum(["wired", "wireless", "both"]);
 
+export const currencyCodeSchema = z.enum(["MYR", "USD"]);
+
 export const soundProfileSchema = z.enum([
   "thocky",
   "creamy",
@@ -62,6 +64,7 @@ const baseComponentSchema = z.object({
   description: z.string().min(1).optional(),
   beginnerFriendly: z.boolean(),
   price: z.number().nonnegative().optional(),
+  priceCurrency: currencyCodeSchema.optional(),
   vendorUrl: optionalUrlSchema,
   imageUrl: optionalUrlSchema,
   soundUrl: optionalUrlSchema,
@@ -170,6 +173,7 @@ export type KeycapProfile = z.infer<typeof keycapProfileSchema>;
 export type StabilizerType = z.infer<typeof stabilizerTypeSchema>;
 export type StabilizerSize = z.infer<typeof stabilizerSizeSchema>;
 export type Connection = z.infer<typeof connectionSchema>;
+export type CurrencyCode = z.infer<typeof currencyCodeSchema>;
 export type SoundProfile = z.infer<typeof soundProfileSchema>;
 
 export type CaseComponent = z.infer<typeof caseComponentSchema>;

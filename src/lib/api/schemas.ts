@@ -12,6 +12,7 @@ import {
   keycapComponentSchema,
   pcbComponentSchema,
   plateComponentSchema,
+  currencyCodeSchema,
   soundProfileSchema,
   stabilizerComponentSchema,
   switchComponentSchema,
@@ -62,6 +63,7 @@ export const componentsQuerySchema = z
     soundProfile: soundProfileSchema.optional(),
     beginnerFriendly: booleanQuerySchema.optional(),
     maxPrice: optionalNumberQuerySchema.optional(),
+    currency: currencyCodeSchema.optional(),
   })
   .strict();
 

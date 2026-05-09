@@ -36,6 +36,7 @@ export type Database = {
           actuation_force_g: number | null;
           sound_profile: string | null;
           price: number | null;
+          price_currency: string | null;
           vendor_url: string | null;
           image_url: string | null;
           sound_url: string | null;
@@ -69,6 +70,7 @@ export type Database = {
           actuation_force_g?: number | null;
           sound_profile?: string | null;
           price?: number | null;
+          price_currency?: string | null;
           vendor_url?: string | null;
           image_url?: string | null;
           sound_url?: string | null;

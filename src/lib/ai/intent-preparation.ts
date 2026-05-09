@@ -6,6 +6,7 @@ import {
   searchComponents,
   type ComponentSearchCriteria,
 } from "@/lib/components";
+import { normalizeBudgetForCatalogPricing } from "@/lib/pricing";
 
 import {
   intentMatchingCriteriaSchema,
@@ -20,12 +21,15 @@ const maxCandidatesPerCategory = 6;
 export function mapIntentToSearchCriteria(
   intent: ExtractedKeyboardIntent,
 ): IntentMatchingCriteria {
+  const catalogBudget = normalizeBudgetForCatalogPricing(intent.budget);
+
   return intentMatchingCriteriaSchema.parse({
     layout: intent.layout ?? undefined,
     soundProfile: intent.soundProfile ?? undefined,
     switchTechnology: intent.switchTechnology ?? undefined,
     beginnerFriendly: intent.beginnerFriendly ?? undefined,
-    maxPrice: intent.budget?.amount ?? undefined,
+    maxPrice: catalogBudget?.amount,
+    currency: catalogBudget?.currency,
     query: buildQueryFromIntent(intent),
   });
 }
@@ -57,6 +61,7 @@ function searchCandidateIds(
     soundProfile: criteria.soundProfile,
     beginnerFriendly: criteria.beginnerFriendly,
     maxPrice: criteria.maxPrice,
+    currency: criteria.currency,
   };
 
   const strictMatches = searchComponents(categoryCriteria);
@@ -67,6 +72,7 @@ function searchCandidateIds(
     soundProfile: criteria.soundProfile,
     beginnerFriendly: criteria.beginnerFriendly,
     maxPrice: criteria.maxPrice,
+    currency: criteria.currency,
   });
   const coreMatches = searchComponents({
     category,

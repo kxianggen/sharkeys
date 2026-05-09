@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  currencyCodeSchema,
   keyboardLayoutSchema,
   soundProfileSchema,
   switchTechnologySchema,
@@ -30,7 +31,7 @@ export const intentPrioritySchema = z.enum([
 export const budgetIntentSchema = z
   .object({
     amount: z.number().nonnegative().nullable(),
-    currency: z.string().trim().min(3).max(3).nullable(),
+    currency: currencyCodeSchema.nullable(),
     label: z.enum(["budget", "mid_range", "premium", "unknown"]).nullable(),
   })
   .strict();
@@ -80,6 +81,7 @@ export const intentMatchingCriteriaSchema = z
     switchTechnology: switchTechnologySchema.optional(),
     beginnerFriendly: z.boolean().optional(),
     maxPrice: z.number().nonnegative().optional(),
+    currency: currencyCodeSchema.optional(),
     query: z.string().min(1).optional(),
   })
   .strict();

@@ -40,6 +40,10 @@ create table if not exists public.keyboard_components (
     or sound_profile in ('thocky', 'creamy', 'clacky', 'silent', 'neutral')
   ),
   price numeric(10, 2),
+  price_currency text check (
+    price_currency is null
+    or price_currency in ('MYR', 'USD')
+  ),
   vendor_url text,
   image_url text,
   sound_url text,
