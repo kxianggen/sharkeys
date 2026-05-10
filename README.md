@@ -2,7 +2,7 @@
 
 Sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 4.5: Malaysia-local vendor seed data and MYR pricing.
+This repository is currently in Phase 5: configurator UI and recommendation review.
 
 ## Stack
 
@@ -157,7 +157,7 @@ curl -X POST http://localhost:3000/api/recommendations \
 
 The endpoint calls the existing intent extraction flow, maps the extracted intent into seed-backed candidate searches, assembles possible builds from known component IDs, and validates every assembled build with `validateBuildSelectionFromIds`. Only builds that pass deterministic validation are returned in `recommendations`; invalid candidate combinations are filtered out before the response.
 
-If no valid build can be assembled, the route returns explanations and a clarification prompt instead of an unvalidated recommendation. The demo UI follows the same rule: it displays extracted intent and validated build cards only.
+If no valid build can be assembled, the route returns explanations and a clarification prompt instead of an unvalidated recommendation. The UI follows the same rule: it displays extracted intent and validated build cards only.
 
 ## Phase 4.5 Malaysia-Local Seed Data
 
@@ -174,6 +174,20 @@ The recommendation flow now formats estimated build prices in the recommendation
 
 Because the prototype catalog is MYR-priced, recommendation search and budget filtering normalize USD budgets into MYR with the fixed `PROTOTYPE_USD_TO_MYR_RATE` constant in `src/lib/pricing`. This is deterministic demo logic for local testing only, not live foreign-exchange data. The extracted intent still preserves the user's original currency, while candidate search and final budget checks use the normalized MYR amount so currency mismatches cannot bypass budget filtering.
 
+## Phase 5 Configurator UI
+
+Phase 5 turns the homepage into a fuller configuration workspace. The UI now provides:
+
+- natural-language build requests through `POST /api/recommendations`
+- multiple validated recommendations for comparison
+- category-by-category inspection for case, PCB, plate, switch, keycap, and stabilizer
+- MYR estimated totals and component-level price details
+- vendor/source metadata and outbound vendor links where available
+- compatibility status, warnings, and explanations from the deterministic rule engine
+- a manual component-selection panel that loads `GET /api/components` and validates selections with `POST /api/builds/validate`
+
+This phase does not add auth, payments, live Supabase reads, community gallery, or production deployment. The configurator still relies on offline seed data and existing API/service paths.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
@@ -188,7 +202,7 @@ Phase 4 adds validated recommendation assembly, `POST /api/recommendations`, and
 
 Phase 4.5 localizes the prototype catalog around Malaysia vendors, adds MYR currency handling, and keeps all recommendations validated by the deterministic rule engine.
 
-Phase 5 will expand the configurator UI, sound comparison workflow, and recommendation review experience.
+Phase 5 expands the configurator UI and recommendation review experience with validated build comparison, component inspection, vendor provenance, and manual validation.
 
 Phase 6 will add community gallery save, share, and clone flows.
 
