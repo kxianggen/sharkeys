@@ -2,7 +2,7 @@
 
 Sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 5: configurator UI and recommendation review.
+This repository is currently in Phase 6: saved builds and local gallery foundation.
 
 ## Stack
 
@@ -188,6 +188,21 @@ Phase 5 turns the homepage into a fuller configuration workspace. The UI now pro
 
 This phase does not add auth, payments, live Supabase reads, community gallery, or production deployment. The configurator still relies on offline seed data and existing API/service paths.
 
+## Phase 6 Saved Builds Gallery
+
+Phase 6 adds a local saved-builds foundation to the configurator workspace. Users can now:
+
+- save the selected validated recommendation
+- save a manually validated compatible build
+- inspect saved builds in a local gallery panel
+- review estimated MYR totals, component lists, validation status, and vendor links
+- load or clone a saved build back into the manual component panel
+- delete individual saved builds or clear the local gallery
+
+Saved builds are persisted with browser `localStorage` under `sharkeys.savedBuilds.v1`. This is intentionally local/offline prototype storage. It is not authentication-backed, synced across devices, or connected to live Supabase tables yet.
+
+The save buttons are only exposed after deterministic validation has succeeded. Recommendation saves use recommendations already validated by `src/lib/recommendations`, while manual saves require a successful `POST /api/builds/validate` result first. Loading a saved build places its component IDs into the manual panel so it can be revalidated before further use.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
@@ -204,7 +219,7 @@ Phase 4.5 localizes the prototype catalog around Malaysia vendors, adds MYR curr
 
 Phase 5 expands the configurator UI and recommendation review experience with validated build comparison, component inspection, vendor provenance, and manual validation.
 
-Phase 6 will add community gallery save, share, and clone flows.
+Phase 6 adds local saved-build persistence, a gallery panel, and clone/load flows without auth or live Supabase integration.
 
 ## Architecture Rule
 

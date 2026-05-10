@@ -2,7 +2,7 @@ import { act } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { keyboardComponents } from "@/data";
 import { RecommendationDemo } from "@/components/recommendation-demo";
@@ -97,6 +97,15 @@ function mockFetch(recommendationResponses: ApiResponseQueue = [recommendationRe
         );
       }
 
+      if (url === "/api/builds/validate") {
+        return jsonResponse({
+          success: true,
+          data: {
+            result: recommendationResult.recommendations[0].validation,
+          },
+        });
+      }
+
       return jsonResponse({
         success: false,
         error: {
@@ -111,8 +120,37 @@ function getSelect(label: string) {
   return screen.getByLabelText(label) as HTMLSelectElement;
 }
 
+function getSavedGallery() {
+  return screen.getByRole("region", { name: /Saved builds gallery/i });
+}
+
+function createLocalStorageMock() {
+  const store = new Map<string, string>();
+
+  return {
+    clear: vi.fn(() => store.clear()),
+    getItem: vi.fn((key: string) => store.get(key) ?? null),
+    key: vi.fn((index: number) => [...store.keys()][index] ?? null),
+    get length() {
+      return store.size;
+    },
+    removeItem: vi.fn((key: string) => store.delete(key)),
+    setItem: vi.fn((key: string, value: string) => {
+      store.set(key, value);
+    }),
+  } as Storage;
+}
+
 describe("RecommendationDemo", () => {
+  beforeEach(() => {
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      value: createLocalStorageMock(),
+    });
+  });
+
   afterEach(() => {
+    window.localStorage.clear();
     vi.unstubAllGlobals();
   });
 
@@ -257,5 +295,133 @@ describe("RecommendationDemo", () => {
     expect(screen.getByText(/Estimated total/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Zuoya GMK67/i).length).toBeGreaterThan(0);
     expect(screen.getByText("Open vendor page")).toBeInTheDocument();
+  });
+
+  it("saves the selected validated recommendation to the local gallery", async () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /beginner friendly creamy 65% keyboard under RM500/i,
+      }),
+    );
+
+    expect(
+      await screen.findByText("Rule-engine validated"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^Save build$/i }));
+
+    const gallery = getSavedGallery();
+
+    expect(
+      await within(gallery).findByText(/Saved recommendation/i),
+    ).toBeInTheDocument();
+    expect(within(gallery).getByText(/RM 390.10/i)).toBeInTheDocument();
+    expect(within(gallery).getAllByText("Vendor").length).toBeGreaterThan(0);
+
+    await waitFor(() => {
+      expect(
+        window.localStorage.getItem("sharkeys.savedBuilds.v1"),
+      ).toContain("Zuoya GMK67");
+    });
+  });
+
+  it("loads a saved build into the manual panel and validates it", async () => {
+    mockFetch([recommendationResult, emptyRecommendationResult]);
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /beginner friendly creamy 65% keyboard under RM500/i,
+      }),
+    );
+    expect(
+      await screen.findByText("Rule-engine validated"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^Save build$/i }));
+    expect(
+      await within(getSavedGallery()).findByText(/Saved recommendation/i),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Keyboard request"), {
+      target: { value: "beginner friendly creamy 65% keyboard under $50" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Find validated builds/i }));
+    expect(
+      await screen.findByText("No validated build found"),
+    ).toBeInTheDocument();
+    expect(getSelect("Case").value).toBe("");
+
+    fireEvent.click(within(getSavedGallery()).getByRole("button", {
+      name: /Load build/i,
+    }));
+
+    expect(getSelect("Case").value).toBe("case_zuoya_gmk67_v2_kit_case");
+    expect(getSelect("PCB").value).toBe("pcb_zuoya_gmk67_v2_hotswap");
+    expect(getSelect("Plate").value).toBe("plate_zuoya_gmk67_v2_pc");
+    expect(getSelect("Switch").value).toBe("switch_gateron_milky_yellow_pro");
+    expect(getSelect("Keycap").value).toBe("keycap_mecha_bow_cherry_pbt");
+    expect(getSelect("Stabilizer").value).toBe("stab_zuoya_gmk67_plate_mount");
+
+    fireEvent.click(screen.getByRole("button", { name: /Validate manual build/i }));
+    expect(await screen.findByText("Compatible build")).toBeInTheDocument();
+  });
+
+  it("saves a manually validated compatible build", async () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /beginner friendly creamy 65% keyboard under RM500/i,
+      }),
+    );
+    expect(
+      await screen.findByText("Rule-engine validated"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Validate manual build/i }));
+    expect(await screen.findByText("Compatible build")).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: /Save compatible build/i }),
+    );
+
+    const gallery = getSavedGallery();
+
+    expect(
+      await within(gallery).findByText(/Saved manual/i),
+    ).toBeInTheDocument();
+    expect(
+      within(gallery).getAllByText(/Manual build: Zuoya GMK67/i).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("deletes saved builds from the local gallery", async () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /beginner friendly creamy 65% keyboard under RM500/i,
+      }),
+    );
+    expect(
+      await screen.findByText("Rule-engine validated"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^Save build$/i }));
+
+    const gallery = getSavedGallery();
+
+    expect(
+      await within(gallery).findByText(/Saved recommendation/i),
+    ).toBeInTheDocument();
+    fireEvent.click(within(gallery).getByRole("button", { name: /Delete/i }));
+
+    await waitFor(() => {
+      expect(within(gallery).queryByText(/Saved recommendation/i)).toBeNull();
+    });
+    expect(within(gallery).getByText(/No saved builds yet/i)).toBeInTheDocument();
+    expect(window.localStorage.getItem("sharkeys.savedBuilds.v1")).toBe("[]");
   });
 });

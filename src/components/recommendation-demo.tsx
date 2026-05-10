@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   ArrowRight,
+  BookmarkPlus,
   CheckCircle2,
+  CopyPlus,
   ExternalLink,
   Info,
   Keyboard,
@@ -14,6 +16,7 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 
 import type { CompatibilityResult, KeyboardComponent } from "@/lib/types";
@@ -23,6 +26,13 @@ type RecommendationResult = RecommendationsApiResponse["data"];
 type RecommendationBuild = RecommendationResult["recommendations"][number];
 type ComponentCategory = keyof RecommendationResult["candidateComponentIds"];
 type ManualSelection = Partial<Record<ComponentCategory, string>>;
+type CompleteComponentIdSelection = Record<ComponentCategory, string>;
+type CompleteComponentSelection = RecommendationBuild["components"];
+type SavedBuildSource = "recommendation" | "manual";
+type PriceEstimate = {
+  amount: number;
+  currency: NonNullable<KeyboardComponent["priceCurrency"]>;
+};
 
 type ApiErrorResponse = {
   success: false;
@@ -44,6 +54,17 @@ type ValidateBuildApiResponse = {
   data: {
     result: CompatibilityResult;
   };
+};
+
+type SavedBuild = {
+  id: string;
+  title: string;
+  createdAt: string;
+  source: SavedBuildSource;
+  componentIds: CompleteComponentIdSelection;
+  estimatedPrice: number | null;
+  estimatedPriceCurrency: KeyboardComponent["priceCurrency"] | null;
+  validation: CompatibilityResult;
 };
 
 const componentCategories: ComponentCategory[] = [
@@ -79,6 +100,10 @@ const quickPrompts = [
   "optical 60% build with clacky sound",
   "thocky TKL typing keyboard",
 ] as const;
+
+const savedBuildsStorageKey = "sharkeys.savedBuilds.v1";
+const maxSavedBuilds = 12;
+const estimatedSwitchCount = 70;
 
 function formatMoney(amount: number, currency: string) {
   return new Intl.NumberFormat("en-MY", {
@@ -186,6 +211,169 @@ function getLayoutPreviewRows(layout: string | null | undefined) {
   ];
 }
 
+function createSavedBuildId(source: SavedBuildSource) {
+  const suffix =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}`;
+
+  return `saved_${source}_${suffix}`;
+}
+
+function readSavedBuildsFromStorage() {
+  try {
+    const raw = window.localStorage.getItem(savedBuildsStorageKey);
+
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw) as unknown;
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter(isSavedBuild).slice(0, maxSavedBuilds);
+  } catch {
+    return [];
+  }
+}
+
+function persistSavedBuilds(savedBuilds: SavedBuild[]) {
+  window.localStorage.setItem(
+    savedBuildsStorageKey,
+    JSON.stringify(savedBuilds.slice(0, maxSavedBuilds)),
+  );
+}
+
+function isSavedBuild(value: unknown): value is SavedBuild {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Partial<SavedBuild>;
+
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.title === "string" &&
+    typeof candidate.createdAt === "string" &&
+    (candidate.source === "recommendation" || candidate.source === "manual") &&
+    isCompleteComponentIdSelection(candidate.componentIds) &&
+    (typeof candidate.estimatedPrice === "number" ||
+      candidate.estimatedPrice === null) &&
+    (typeof candidate.estimatedPriceCurrency === "string" ||
+      candidate.estimatedPriceCurrency === null) &&
+    Boolean(candidate.validation?.isValid)
+  );
+}
+
+function isCompleteComponentIdSelection(
+  value: unknown,
+): value is CompleteComponentIdSelection {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const selection = value as Partial<Record<ComponentCategory, unknown>>;
+
+  return componentCategories.every(
+    (category) => typeof selection[category] === "string",
+  );
+}
+
+function toCompleteComponentIds(
+  selection: ManualSelection,
+): CompleteComponentIdSelection | null {
+  const entries = componentCategories.map((category) => {
+    const componentId = selection[category];
+
+    return componentId ? [category, componentId] : null;
+  });
+
+  if (entries.some((entry) => entry === null)) {
+    return null;
+  }
+
+  return Object.fromEntries(
+    entries as Array<[ComponentCategory, string]>,
+  ) as CompleteComponentIdSelection;
+}
+
+function resolveCompleteComponents(
+  componentIds: CompleteComponentIdSelection,
+  catalogById: Map<string, KeyboardComponent>,
+): CompleteComponentSelection | null {
+  const caseComponent = catalogById.get(componentIds.case);
+  const pcbComponent = catalogById.get(componentIds.pcb);
+  const plateComponent = catalogById.get(componentIds.plate);
+  const switchComponent = catalogById.get(componentIds.switch);
+  const keycapComponent = catalogById.get(componentIds.keycap);
+  const stabilizerComponent = catalogById.get(componentIds.stabilizer);
+
+  if (
+    caseComponent?.category !== "case" ||
+    pcbComponent?.category !== "pcb" ||
+    plateComponent?.category !== "plate" ||
+    switchComponent?.category !== "switch" ||
+    keycapComponent?.category !== "keycap" ||
+    stabilizerComponent?.category !== "stabilizer"
+  ) {
+    return null;
+  }
+
+  return {
+    case: caseComponent,
+    pcb: pcbComponent,
+    plate: plateComponent,
+    switch: switchComponent,
+    keycap: keycapComponent,
+    stabilizer: stabilizerComponent,
+  };
+}
+
+function estimateSavedBuildPrice(
+  components: CompleteComponentSelection,
+): PriceEstimate | null {
+  const prices = componentCategories
+    .map((category) => {
+      const component = components[category];
+
+      if (
+        component.price === undefined ||
+        component.priceCurrency === undefined
+      ) {
+        return undefined;
+      }
+
+      return {
+        amount:
+          category === "switch"
+            ? component.price * estimatedSwitchCount
+            : component.price,
+        currency: component.priceCurrency,
+      };
+    })
+    .filter((price): price is PriceEstimate => price !== undefined);
+
+  const [firstPrice] = prices;
+
+  if (!firstPrice || prices.some((price) => price.currency !== firstPrice.currency)) {
+    return null;
+  }
+
+  return {
+    amount: Number(
+      prices.reduce((total, price) => total + price.amount, 0).toFixed(2),
+    ),
+    currency: firstPrice.currency,
+  };
+}
+
+function buildSavedBuildTitle(components: CompleteComponentSelection) {
+  return `${components.case.name} with ${components.switch.name}`;
+}
+
 export function RecommendationDemo() {
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<RecommendationResult | null>(null);
@@ -201,6 +389,11 @@ export function RecommendationDemo() {
   const [error, setError] = useState<string | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [manualError, setManualError] = useState<string | null>(null);
+  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([]);
+  const [savedBuildsLoaded, setSavedBuildsLoaded] = useState(false);
+  const [savedBuildMessage, setSavedBuildMessage] = useState<string | null>(
+    null,
+  );
   const [hasMounted, setHasMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCatalogLoading, setIsCatalogLoading] = useState(true);
@@ -231,6 +424,10 @@ export function RecommendationDemo() {
     ) as Record<ComponentCategory, KeyboardComponent[]>;
   }, [catalog]);
 
+  const catalogById = useMemo(() => {
+    return new Map(catalog.map((component) => [component.id, component]));
+  }, [catalog]);
+
   const manualSelectionComplete = componentCategories.every(
     (category) => manualSelection[category],
   );
@@ -240,10 +437,26 @@ export function RecommendationDemo() {
   const isSubmitDisabled = hasMounted && shouldDisableSubmit;
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => setHasMounted(true), 0);
+    const timeoutId = window.setTimeout(() => {
+      setHasMounted(true);
+      setSavedBuilds(readSavedBuildsFromStorage());
+      setSavedBuildsLoaded(true);
+    }, 0);
 
     return () => window.clearTimeout(timeoutId);
   }, []);
+
+  useEffect(() => {
+    if (!hasMounted || !savedBuildsLoaded) {
+      return;
+    }
+
+    try {
+      persistSavedBuilds(savedBuilds);
+    } catch {
+      // Local persistence is a prototype convenience; saving should not break validation.
+    }
+  }, [hasMounted, savedBuilds, savedBuildsLoaded]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -313,6 +526,7 @@ export function RecommendationDemo() {
       setSelectedRecommendationId(firstRecommendation?.id ?? null);
       setActiveCategory("case");
       setManualValidation(null);
+      setSavedBuildMessage(null);
 
       if (firstRecommendation) {
         setManualSelection(firstRecommendation.componentIds);
@@ -418,6 +632,89 @@ export function RecommendationDemo() {
     setManualError(null);
   }
 
+  function prependSavedBuild(savedBuild: SavedBuild) {
+    setSavedBuilds((current) => [
+      savedBuild,
+      ...current.filter((build) => build.id !== savedBuild.id),
+    ].slice(0, maxSavedBuilds));
+    setSavedBuildMessage(`${savedBuild.title} saved locally.`);
+  }
+
+  function saveRecommendationBuild(recommendation: RecommendationBuild) {
+    if (!recommendation.validation.isValid) {
+      setSavedBuildMessage(
+        "Only builds that pass deterministic validation can be saved.",
+      );
+      return;
+    }
+
+    prependSavedBuild({
+      id: createSavedBuildId("recommendation"),
+      title: recommendation.title,
+      createdAt: new Date().toISOString(),
+      source: "recommendation",
+      componentIds: recommendation.componentIds,
+      estimatedPrice: recommendation.estimatedPrice,
+      estimatedPriceCurrency: recommendation.estimatedPriceCurrency,
+      validation: recommendation.validation,
+    });
+  }
+
+  function saveValidatedManualBuild() {
+    const componentIds = toCompleteComponentIds(manualSelection);
+
+    if (!componentIds || !manualValidation?.isValid) {
+      setManualError(
+        "Validate a complete compatible build before saving it locally.",
+      );
+      return;
+    }
+
+    const components = resolveCompleteComponents(componentIds, catalogById);
+
+    if (!components) {
+      setManualError("Saved build components could not be resolved from the catalog.");
+      return;
+    }
+
+    const priceEstimate = estimateSavedBuildPrice(components);
+
+    prependSavedBuild({
+      id: createSavedBuildId("manual"),
+      title: `Manual build: ${buildSavedBuildTitle(components)}`,
+      createdAt: new Date().toISOString(),
+      source: "manual",
+      componentIds,
+      estimatedPrice: priceEstimate?.amount ?? null,
+      estimatedPriceCurrency: priceEstimate?.currency ?? null,
+      validation: manualValidation,
+    });
+  }
+
+  function loadSavedBuild(savedBuild: SavedBuild) {
+    setManualSelection(savedBuild.componentIds);
+    setManualValidation(null);
+    setManualError(null);
+    setActiveCategory("case");
+    setSavedBuildMessage(`${savedBuild.title} loaded into the manual panel.`);
+  }
+
+  function deleteSavedBuild(savedBuildId: string) {
+    const deletedBuild = savedBuilds.find((build) => build.id === savedBuildId);
+
+    setSavedBuilds((current) =>
+      current.filter((build) => build.id !== savedBuildId),
+    );
+    setSavedBuildMessage(
+      deletedBuild ? `${deletedBuild.title} removed from saved builds.` : null,
+    );
+  }
+
+  function clearSavedBuilds() {
+    setSavedBuilds([]);
+    setSavedBuildMessage("Saved builds cleared.");
+  }
+
   return (
     <section className="border-b border-zinc-200 bg-zinc-50">
       <div className="mx-auto grid w-full max-w-7xl gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:px-8">
@@ -511,7 +808,9 @@ export function RecommendationDemo() {
                 [category]: componentId || undefined,
               }));
               setManualValidation(null);
+              setSavedBuildMessage(null);
             }}
+            onSaveValidatedManualBuild={saveValidatedManualBuild}
             onValidate={() => void validateManualSelection()}
           />
         </div>
@@ -546,6 +845,7 @@ export function RecommendationDemo() {
                 <RecommendationInspector
                   activeCategory={activeCategory}
                   onActiveCategoryChange={setActiveCategory}
+                  onSaveRecommendation={saveRecommendationBuild}
                   recommendation={selectedRecommendation}
                   selectedComponent={selectedComponent}
                 />
@@ -554,6 +854,16 @@ export function RecommendationDemo() {
           ) : null}
 
           {!result ? <EmptyWorkspace /> : null}
+
+          <SavedBuildsGallery
+            catalogById={catalogById}
+            message={savedBuildMessage}
+            onClear={clearSavedBuilds}
+            onDelete={deleteSavedBuild}
+            onLoad={loadSavedBuild}
+            savedBuilds={savedBuilds}
+            savedBuildsLoaded={savedBuildsLoaded}
+          />
         </div>
       </div>
     </section>
@@ -729,11 +1039,13 @@ function RecommendationList({
 function RecommendationInspector({
   activeCategory,
   onActiveCategoryChange,
+  onSaveRecommendation,
   recommendation,
   selectedComponent,
 }: {
   activeCategory: ComponentCategory;
   onActiveCategoryChange: (category: ComponentCategory) => void;
+  onSaveRecommendation: (recommendation: RecommendationBuild) => void;
   recommendation: RecommendationBuild;
   selectedComponent: KeyboardComponent | undefined;
 }) {
@@ -770,6 +1082,14 @@ function RecommendationInspector({
                     recommendation.estimatedPriceCurrency ?? "MYR",
                   )}
             </p>
+            <button
+              className="mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-md bg-zinc-950 px-3 text-sm font-medium text-white transition hover:bg-zinc-800"
+              onClick={() => onSaveRecommendation(recommendation)}
+              type="button"
+            >
+              <BookmarkPlus className="h-4 w-4" aria-hidden />
+              Save build
+            </button>
           </div>
         </div>
       </div>
@@ -994,6 +1314,7 @@ function ManualSelectionPanel({
   manualSelectionComplete,
   manualValidation,
   onSelect,
+  onSaveValidatedManualBuild,
   onValidate,
 }: {
   catalogByCategory: Record<ComponentCategory, KeyboardComponent[]>;
@@ -1006,6 +1327,7 @@ function ManualSelectionPanel({
   manualSelectionComplete: boolean;
   manualValidation: CompatibilityResult | null;
   onSelect: (category: ComponentCategory, componentId: string) => void;
+  onSaveValidatedManualBuild: () => void;
   onValidate: () => void;
 }) {
   const shouldDisableCatalogControls =
@@ -1099,9 +1421,199 @@ function ManualSelectionPanel({
               <li key={issue.code}>{issue.message}</li>
             ))}
           </ul>
+          {manualValidation.isValid ? (
+            <button
+              className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-emerald-700 px-3 text-sm font-medium text-white transition hover:bg-emerald-800"
+              onClick={onSaveValidatedManualBuild}
+              type="button"
+            >
+              <BookmarkPlus className="h-4 w-4" aria-hidden />
+              Save compatible build
+            </button>
+          ) : null}
         </div>
       ) : null}
     </div>
+  );
+}
+
+function SavedBuildsGallery({
+  catalogById,
+  message,
+  onClear,
+  onDelete,
+  onLoad,
+  savedBuilds,
+  savedBuildsLoaded,
+}: {
+  catalogById: Map<string, KeyboardComponent>;
+  message: string | null;
+  onClear: () => void;
+  onDelete: (savedBuildId: string) => void;
+  onLoad: (savedBuild: SavedBuild) => void;
+  savedBuilds: SavedBuild[];
+  savedBuildsLoaded: boolean;
+}) {
+  return (
+    <section
+      aria-label="Saved builds gallery"
+      className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-normal text-zinc-500">
+            Local gallery
+          </p>
+          <h2 className="mt-1 text-base font-semibold text-zinc-950">
+            Saved builds
+          </h2>
+          <p className="mt-1 text-sm text-zinc-600">
+            Saved in this browser for local prototype review.
+          </p>
+        </div>
+        <button
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={savedBuilds.length === 0}
+          onClick={onClear}
+          type="button"
+        >
+          <Trash2 className="h-4 w-4" aria-hidden />
+          Clear all
+        </button>
+      </div>
+
+      {message ? (
+        <Notice
+          className="mt-4"
+          icon={Info}
+          message={message}
+          tone="sky"
+        />
+      ) : null}
+
+      {!savedBuildsLoaded ? (
+        <p className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
+          Loading saved builds...
+        </p>
+      ) : null}
+
+      {savedBuildsLoaded && savedBuilds.length === 0 ? (
+        <p className="mt-4 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-3 py-4 text-sm text-zinc-600">
+          No saved builds yet. Save a validated recommendation or a compatible
+          manual build to keep it here.
+        </p>
+      ) : null}
+
+      {savedBuilds.length > 0 ? (
+        <div className="mt-4 grid gap-3">
+          {savedBuilds.map((savedBuild) => (
+            <SavedBuildCard
+              catalogById={catalogById}
+              key={savedBuild.id}
+              onDelete={onDelete}
+              onLoad={onLoad}
+              savedBuild={savedBuild}
+            />
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function SavedBuildCard({
+  catalogById,
+  onDelete,
+  onLoad,
+  savedBuild,
+}: {
+  catalogById: Map<string, KeyboardComponent>;
+  onDelete: (savedBuildId: string) => void;
+  onLoad: (savedBuild: SavedBuild) => void;
+  savedBuild: SavedBuild;
+}) {
+  const price =
+    savedBuild.estimatedPrice !== null && savedBuild.estimatedPriceCurrency
+      ? formatMoney(savedBuild.estimatedPrice, savedBuild.estimatedPriceCurrency)
+      : "No estimate";
+
+  return (
+    <article className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-emerald-200 bg-white px-2 py-1 text-xs font-medium text-emerald-700">
+              {savedBuild.validation.isValid ? "Compatible" : "Needs review"}
+            </span>
+            <span className="rounded-full border border-zinc-200 bg-white px-2 py-1 text-xs font-medium text-zinc-600">
+              Saved {savedBuild.source}
+            </span>
+          </div>
+          <h3 className="mt-2 text-sm font-semibold leading-5 text-zinc-950">
+            {savedBuild.title}
+          </h3>
+          <p className="mt-1 text-xs text-zinc-500">
+            {new Date(savedBuild.createdAt).toLocaleString("en-MY", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+          </p>
+        </div>
+        <div className="text-left sm:text-right">
+          <p className="text-xs font-medium uppercase tracking-normal text-zinc-500">
+            Estimated total
+          </p>
+          <p className="mt-1 text-base font-semibold text-zinc-950">{price}</p>
+        </div>
+      </div>
+
+      <dl className="mt-3 grid gap-2 border-y border-zinc-200 py-3 sm:grid-cols-2">
+        {componentCategories.map((category) => {
+          const component = catalogById.get(savedBuild.componentIds[category]);
+
+          return (
+            <div key={category}>
+              <dt className="text-[11px] font-medium uppercase tracking-normal text-zinc-500">
+                {categoryLabels[category]}
+              </dt>
+              <dd className="mt-1 text-sm text-zinc-900">
+                {component?.name ?? savedBuild.componentIds[category]}
+              </dd>
+              {component?.vendorUrl ? (
+                <a
+                  className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800"
+                  href={component.vendorUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Vendor
+                  <ExternalLink className="h-3 w-3" aria-hidden />
+                </a>
+              ) : null}
+            </div>
+          );
+        })}
+      </dl>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-zinc-950 px-3 text-sm font-medium text-white transition hover:bg-zinc-800"
+          onClick={() => onLoad(savedBuild)}
+          type="button"
+        >
+          <CopyPlus className="h-4 w-4" aria-hidden />
+          Load build
+        </button>
+        <button
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+          onClick={() => onDelete(savedBuild.id)}
+          type="button"
+        >
+          <Trash2 className="h-4 w-4" aria-hidden />
+          Delete
+        </button>
+      </div>
+    </article>
   );
 }
 
