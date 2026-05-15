@@ -2,7 +2,7 @@
 
 Sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 7: Supabase-backed catalog foundation.
+This repository is currently in Phase 7.5: live Supabase catalog setup readiness.
 
 ## Stack
 
@@ -130,6 +130,62 @@ Catalog behavior:
 The Supabase migration keeps RLS enabled on `public.keyboard_components` and `public.component_sound_samples`, grants read access to `anon` and `authenticated`, and defines read-only `SELECT` policies for the public catalog. No public insert, update, or delete policies are added.
 
 Phase 7 is catalog persistence/readiness only. It does not add authentication, saved-build cloud sync, payments, community gallery storage, or live inventory guarantees. Recommendations still assemble builds from grounded catalog components and must pass the deterministic rule engine before they are returned.
+
+## Phase 7.5 Live Supabase Catalog Setup
+
+Phase 7.5 prepares the live Supabase setup path for the catalog tables. It does not add auth, payments, cloud saved builds, or community gallery storage.
+
+Prerequisites:
+
+- a Supabase project created in the Supabase dashboard
+- the Supabase CLI installed locally, or `npx supabase` available
+- `.env.local` with real project values, never committed
+
+Recommended setup flow:
+
+```bash
+# Optional if the CLI is not already installed globally.
+npm install supabase --save-dev
+
+npx supabase login
+npx supabase link --project-ref <your-project-ref>
+npx supabase db push
+```
+
+The migration in `supabase/migrations/20260507000000_create_keyboard_components.sql` creates `public.keyboard_components` and `public.component_sound_samples`, enables RLS, grants read access to `anon` and `authenticated`, and adds read-only `SELECT` policies for the public catalog. Do not add public insert, update, or delete policies for these tables.
+
+After linking and applying the migration, configure `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-or-publishable-key>
+SUPABASE_SERVICE_ROLE_KEY=<server-only-service-role-key>
+OPENAI_API_KEY=
+```
+
+`SUPABASE_SERVICE_ROLE_KEY` is used only by the local seed script below. It must never be committed and must never be exposed to browser code.
+
+Seed and verify the catalog:
+
+```bash
+npm run supabase:seed-catalog
+npm run supabase:verify-catalog
+```
+
+`npm run supabase:seed-catalog` loads `.env.local`, uses the server-only service role key locally, and upserts the existing TypeScript seed catalog into Supabase. `npm run supabase:verify-catalog` uses only the public anon key and prints catalog counts.
+
+App-level verification:
+
+```bash
+npm run dev
+curl http://localhost:3000/api/components
+curl http://localhost:3000/api/components/category/switch
+curl -X POST http://localhost:3000/api/recommendations \
+  -H "Content-Type: application/json" \
+  -d '{"message":"beginner friendly creamy 65% keyboard under RM500"}'
+```
+
+If Supabase env vars are missing, blank, or still set to `.env.example` placeholders, the app intentionally falls back to the checked-in seed catalog.
 
 ## Phase 3 AI Intent Extraction
 
