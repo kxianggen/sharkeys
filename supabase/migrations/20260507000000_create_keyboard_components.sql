@@ -80,6 +80,10 @@ alter table public.keyboard_components enable row level security;
 alter table public.component_sound_samples enable row level security;
 
 grant usage on schema public to anon, authenticated;
+revoke insert, update, delete, truncate, references, trigger
+  on public.keyboard_components from anon, authenticated;
+revoke insert, update, delete, truncate, references, trigger
+  on public.component_sound_samples from anon, authenticated;
 grant select on public.keyboard_components to anon, authenticated;
 grant select on public.component_sound_samples to anon, authenticated;
 
