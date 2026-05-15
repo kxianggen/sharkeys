@@ -2,7 +2,7 @@
 
 Sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 6: saved builds and local gallery foundation.
+This repository is currently in Phase 7: Supabase-backed catalog foundation.
 
 ## Stack
 
@@ -36,7 +36,9 @@ SUPABASE_SERVICE_ROLE_KEY=
 OPENAI_API_KEY=
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` is reserved for server-side administrative tasks only. It must never be exposed to browser code.
+`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are optional for local demo work. When they are missing, the catalog APIs use the checked-in seed data. When they are present, server-side API routes try to read the public catalog tables from Supabase and fall back to seed data if the read fails.
+
+`SUPABASE_SERVICE_ROLE_KEY` is reserved for server-side administrative tasks only. It is not needed for Phase 7 catalog reads and must never be exposed to browser code.
 
 ## Quality Commands
 
@@ -114,6 +116,20 @@ curl -X POST http://localhost:3000/api/builds/validate \
 The validation endpoint calls the deterministic rule engine. Future AI features must use this same validation path before showing any generated build recommendation.
 
 Supabase integration is prepared but not live-wired yet. The migration draft lives in `supabase/migrations`, and seed-to-Supabase transforms live in `src/data/supabase`.
+
+## Phase 7 Supabase Catalog Foundation
+
+Phase 7 wires the catalog read path so API routes can use Supabase-backed keyboard component rows when Supabase public env vars are configured. The implementation keeps the existing seed-backed repository as the deterministic offline fallback, so tests, local builds, and demos still work without live Supabase credentials.
+
+Catalog behavior:
+
+- missing Supabase URL or anon key: use `src/data/components.ts`
+- successful Supabase read: use rows from `public.keyboard_components`
+- Supabase read error or empty catalog: fall back to seed data so the demo stays usable
+
+The Supabase migration keeps RLS enabled on `public.keyboard_components` and `public.component_sound_samples`, grants read access to `anon` and `authenticated`, and defines read-only `SELECT` policies for the public catalog. No public insert, update, or delete policies are added.
+
+Phase 7 is catalog persistence/readiness only. It does not add authentication, saved-build cloud sync, payments, community gallery storage, or live inventory guarantees. Recommendations still assemble builds from grounded catalog components and must pass the deterministic rule engine before they are returned.
 
 ## Phase 3 AI Intent Extraction
 
@@ -221,6 +237,8 @@ Phase 5 expands the configurator UI and recommendation review experience with va
 
 Phase 6 adds local saved-build persistence, a gallery panel, and clone/load flows without auth or live Supabase integration.
 
+Phase 7 adds Supabase-backed catalog reads with a seed fallback, keeping the app usable offline while preparing the catalog for hosted persistence.
+
 ## Architecture Rule
 
-AI recommendations must never bypass deterministic validation. OpenAI output can suggest or explain, but final compatibility decisions must come from the TypeScript rule engine backed by Supabase component data.
+AI recommendations must never bypass deterministic validation. OpenAI output can suggest or explain, but final compatibility decisions must come from the TypeScript rule engine backed by grounded catalog data.

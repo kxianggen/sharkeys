@@ -7,6 +7,7 @@ import {
   type ComponentSearchCriteria,
 } from "@/lib/components";
 import { normalizeBudgetForCatalogPricing } from "@/lib/pricing";
+import type { KeyboardComponent } from "@/lib/types";
 
 import {
   intentMatchingCriteriaSchema,
@@ -34,12 +35,15 @@ export function mapIntentToSearchCriteria(
   });
 }
 
-export function prepareIntentMatches(intent: ExtractedKeyboardIntent) {
+export function prepareIntentMatches(
+  intent: ExtractedKeyboardIntent,
+  components?: readonly KeyboardComponent[],
+) {
   const criteria = mapIntentToSearchCriteria(intent);
   const candidateComponentIds = Object.fromEntries(
     componentCategorySchema.options.map((category) => [
       category,
-      searchCandidateIds(category, criteria),
+      searchCandidateIds(category, criteria, components),
     ]),
   ) as ComponentCandidateIdsByCategory;
 
@@ -52,6 +56,7 @@ export function prepareIntentMatches(intent: ExtractedKeyboardIntent) {
 function searchCandidateIds(
   category: ComponentCategory,
   criteria: IntentMatchingCriteria,
+  components?: readonly KeyboardComponent[],
 ) {
   const categoryCriteria: ComponentSearchCriteria = {
     category,
@@ -64,7 +69,7 @@ function searchCandidateIds(
     currency: criteria.currency,
   };
 
-  const strictMatches = searchComponents(categoryCriteria);
+  const strictMatches = searchComponents(categoryCriteria, components);
   const relaxedMatches = searchComponents({
     category,
     layout: criteria.layout,
@@ -73,12 +78,12 @@ function searchCandidateIds(
     beginnerFriendly: criteria.beginnerFriendly,
     maxPrice: criteria.maxPrice,
     currency: criteria.currency,
-  });
+  }, components);
   const coreMatches = searchComponents({
     category,
     layout: criteria.layout,
     switchTechnology: criteria.switchTechnology,
-  });
+  }, components);
 
   return (strictMatches.length > 0
     ? strictMatches

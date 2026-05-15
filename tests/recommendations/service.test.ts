@@ -7,6 +7,7 @@ import {
 } from "@/lib/recommendations";
 import { extractedKeyboardIntentSchema, prepareIntentMatches } from "@/lib/ai";
 import { PROTOTYPE_USD_TO_MYR_RATE } from "@/lib/pricing";
+import { keyboardComponents } from "@/data";
 import type {
   ComponentCandidateIdsByCategory,
   ExtractedKeyboardIntent,
@@ -179,6 +180,36 @@ describe("recommendation service", () => {
     expect(result.recommendations[0].estimatedPriceCurrency).toBe("MYR");
     expect(result.recommendations[0].estimatedPrice).toBeGreaterThan(0);
     expect(result.recommendations[0].estimatedPrice).toBeLessThanOrEqual(500);
+  });
+
+  it("can generate recommendations against an injected catalog component set", async () => {
+    const previousApiKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const catalogComponents = keyboardComponents.filter((component) =>
+        Object.values(validCandidateIds).flat().includes(component.id),
+      );
+      const result = await generateRecommendationsFromMessage(
+        {
+          message: "beginner friendly creamy 65% keyboard under RM500",
+        },
+        {
+          catalogComponents,
+          maxRecommendations: 1,
+        },
+      );
+
+      expect(result.recommendations).toHaveLength(1);
+      expect(result.recommendations[0].validation.isValid).toBe(true);
+      expect(Object.values(result.recommendations[0].componentIds)).toEqual(
+        expect.arrayContaining(Object.values(validCandidateIds).flat()),
+      );
+    } finally {
+      if (previousApiKey !== undefined) {
+        process.env.OPENAI_API_KEY = previousApiKey;
+      }
+    }
   });
 
   it("keeps RM500 prompt results within the MYR catalog budget", async () => {

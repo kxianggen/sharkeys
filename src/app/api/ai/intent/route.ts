@@ -10,6 +10,7 @@ import {
   prepareIntentMatches,
   userIntentRequestSchema,
 } from "@/lib/ai";
+import { getCatalogComponents } from "@/lib/components";
 
 export async function POST(request: Request) {
   let payload: unknown;
@@ -27,7 +28,11 @@ export async function POST(request: Request) {
   try {
     const parsedRequest = userIntentRequestSchema.parse(payload);
     const extraction = await extractKeyboardIntent(parsedRequest);
-    const preparation = prepareIntentMatches(extraction.intent);
+    const catalogComponents = await getCatalogComponents();
+    const preparation = prepareIntentMatches(
+      extraction.intent,
+      catalogComponents,
+    );
 
     return jsonOk(aiIntentApiResponseSchema, {
       success: true,

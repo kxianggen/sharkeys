@@ -7,14 +7,14 @@ import {
   jsonOk,
   jsonZodError,
 } from "@/lib/api";
-import { searchComponents } from "@/lib/components";
+import { searchCatalogComponents } from "@/lib/components";
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const criteria = componentsQuerySchema.parse(
       Object.fromEntries(request.nextUrl.searchParams),
     );
-    const components = searchComponents({
+    const components = await searchCatalogComponents({
       category: criteria.category,
       query: criteria.q,
       layout: criteria.layout,

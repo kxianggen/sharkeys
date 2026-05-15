@@ -6,11 +6,16 @@ import {
   type IntentExtractionResult,
   type IntentPreparation,
 } from "@/lib/ai";
-import { getComponentById, validateBuildSelectionFromIds } from "@/lib/components";
+import {
+  getCatalogComponents,
+  getComponentById,
+  validateBuildSelectionFromIds,
+} from "@/lib/components";
 import {
   requiredComponentCategories,
   type ComponentCategory,
   type CurrencyCode,
+  type KeyboardComponent,
   type KeyboardBuildSelection,
   type CompatibilityIssue,
 } from "@/lib/types";
@@ -27,6 +32,7 @@ import {
 
 type GenerateRecommendationsOptions = {
   extraction?: IntentExtractionResult;
+  catalogComponents?: readonly KeyboardComponent[];
   maxRecommendations?: number;
 };
 
@@ -52,8 +58,11 @@ export async function generateRecommendationsFromMessage(
 ): Promise<RecommendationResult> {
   const extraction =
     options.extraction ?? (await extractKeyboardIntent({ message: request.message }));
+  const catalogComponents =
+    options.catalogComponents ?? (await getCatalogComponents());
 
   return createRecommendationResult(extraction, {
+    catalogComponents,
     maxRecommendations: options.maxRecommendations,
   });
 }
@@ -61,14 +70,19 @@ export async function generateRecommendationsFromMessage(
 export function createRecommendationResult(
   extraction: IntentExtractionResult,
   options: {
+    catalogComponents?: readonly KeyboardComponent[];
     preparation?: IntentPreparation;
     maxRecommendations?: number;
   } = {},
 ): RecommendationResult {
-  const preparation = options.preparation ?? prepareIntentMatches(extraction.intent);
+  const catalogComponents = options.catalogComponents;
+  const preparation =
+    options.preparation ??
+    prepareIntentMatches(extraction.intent, catalogComponents);
   const assembly = buildValidatedRecommendations({
     intent: extraction.intent,
     candidateComponentIds: preparation.candidateComponentIds,
+    catalogComponents,
     maxRecommendations: options.maxRecommendations,
   });
   const clarificationPrompt = buildClarificationPrompt(extraction.intent, assembly);
@@ -89,10 +103,12 @@ export function createRecommendationResult(
 export function buildValidatedRecommendations({
   intent,
   candidateComponentIds,
+  catalogComponents,
   maxRecommendations = defaultMaxRecommendations,
 }: {
   intent: ExtractedKeyboardIntent;
   candidateComponentIds: ComponentCandidateIdsByCategory;
+  catalogComponents?: readonly KeyboardComponent[];
   maxRecommendations?: number;
 }): AssemblyResult {
   const candidateSets = getCandidateSets(candidateComponentIds);
@@ -123,7 +139,10 @@ export function buildValidatedRecommendations({
     }
 
     attempts += 1;
-    const components = resolveRecommendationComponents(componentIds);
+    const components = resolveRecommendationComponents(
+      componentIds,
+      catalogComponents,
+    );
 
     if (!components) {
       rejectedBuildCount += 1;
@@ -132,7 +151,10 @@ export function buildValidatedRecommendations({
     }
 
     const selection = createBuildSelection(componentIds, intent);
-    const validation = validateBuildSelectionFromIds(selection);
+    const validation = validateBuildSelectionFromIds(
+      selection,
+      catalogComponents,
+    );
 
     if (!validation.isValid) {
       rejectedBuildCount += 1;
@@ -202,13 +224,23 @@ function* enumerateBuildSelections(
 
 function resolveRecommendationComponents(
   componentIds: RecommendationComponentIds,
+  catalogComponents?: readonly KeyboardComponent[],
 ): RecommendationComponents | undefined {
-  const caseComponent = getComponentById(componentIds.case);
-  const pcbComponent = getComponentById(componentIds.pcb);
-  const plateComponent = getComponentById(componentIds.plate);
-  const switchComponent = getComponentById(componentIds.switch);
-  const keycapComponent = getComponentById(componentIds.keycap);
-  const stabilizerComponent = getComponentById(componentIds.stabilizer);
+  const caseComponent = getComponentById(componentIds.case, catalogComponents);
+  const pcbComponent = getComponentById(componentIds.pcb, catalogComponents);
+  const plateComponent = getComponentById(componentIds.plate, catalogComponents);
+  const switchComponent = getComponentById(
+    componentIds.switch,
+    catalogComponents,
+  );
+  const keycapComponent = getComponentById(
+    componentIds.keycap,
+    catalogComponents,
+  );
+  const stabilizerComponent = getComponentById(
+    componentIds.stabilizer,
+    catalogComponents,
+  );
 
   if (
     caseComponent?.category !== "case" ||

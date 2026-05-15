@@ -31,14 +31,20 @@ export function listComponents() {
   return [...keyboardComponents];
 }
 
-export function listComponentsByCategory(category: ComponentCategory) {
+export function listComponentsByCategory(
+  category: ComponentCategory,
+  components: readonly KeyboardComponent[] = keyboardComponents,
+) {
   componentCategorySchema.parse(category);
 
-  return keyboardComponents.filter((component) => component.category === category);
+  return components.filter((component) => component.category === category);
 }
 
-export function getComponentById(id: string) {
-  return keyboardComponents.find((component) => component.id === id);
+export function getComponentById(
+  id: string,
+  components: readonly KeyboardComponent[] = keyboardComponents,
+) {
+  return components.find((component) => component.id === id);
 }
 
 export function groupComponentsByCategory(
@@ -55,10 +61,13 @@ export function groupComponentsByCategory(
   return grouped;
 }
 
-export function searchComponents(criteria: ComponentSearchCriteria = {}) {
+export function searchComponents(
+  criteria: ComponentSearchCriteria = {},
+  components: readonly KeyboardComponent[] = keyboardComponents,
+) {
   const normalizedQuery = criteria.query?.trim().toLowerCase();
 
-  return keyboardComponents.filter((component) => {
+  return components.filter((component) => {
     if (criteria.category && component.category !== criteria.category) {
       return false;
     }
@@ -108,8 +117,9 @@ export function searchComponents(criteria: ComponentSearchCriteria = {}) {
 
 export function validateBuildSelectionFromIds(
   selection: KeyboardBuildSelection,
+  components: readonly KeyboardComponent[] = keyboardComponents,
 ) {
-  return validateBuildCompatibility(selection, keyboardComponents);
+  return validateBuildCompatibility(selection, components);
 }
 
 function matchesTextQuery(component: KeyboardComponent, query: string) {

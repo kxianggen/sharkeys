@@ -4,7 +4,7 @@ import {
   jsonOk,
   jsonZodError,
 } from "@/lib/api";
-import { listComponentsByCategory } from "@/lib/components";
+import { listCatalogComponentsByCategory } from "@/lib/components";
 import { componentCategorySchema } from "@/lib/types";
 
 type ComponentCategoryRouteContext = {
@@ -20,7 +20,7 @@ export async function GET(
   try {
     const { category: rawCategory } = await context.params;
     const category = componentCategorySchema.parse(rawCategory);
-    const components = listComponentsByCategory(category);
+    const components = await listCatalogComponentsByCategory(category);
 
     return jsonOk(categoryComponentsResponseSchema, {
       success: true,

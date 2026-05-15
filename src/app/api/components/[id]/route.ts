@@ -3,7 +3,7 @@ import {
   jsonError,
   jsonOk,
 } from "@/lib/api";
-import { getComponentById } from "@/lib/components";
+import { getCatalogComponentById } from "@/lib/components";
 
 type ComponentRouteContext = {
   params: Promise<{
@@ -13,7 +13,7 @@ type ComponentRouteContext = {
 
 export async function GET(_request: Request, context: ComponentRouteContext) {
   const { id } = await context.params;
-  const component = getComponentById(id);
+  const component = await getCatalogComponentById(id);
 
   if (!component) {
     return jsonError({

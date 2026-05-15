@@ -6,7 +6,7 @@ import {
   validateBuildRequestSchema,
   validateBuildResponseSchema,
 } from "@/lib/api";
-import { validateBuildSelectionFromIds } from "@/lib/components";
+import { validateCatalogBuildSelectionFromIds } from "@/lib/components";
 
 export async function POST(request: Request) {
   let payload: unknown;
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
   try {
     const selection = validateBuildRequestSchema.parse(payload);
-    const result = validateBuildSelectionFromIds(selection);
+    const result = await validateCatalogBuildSelectionFromIds(selection);
 
     return jsonOk(validateBuildResponseSchema, {
       success: true,
