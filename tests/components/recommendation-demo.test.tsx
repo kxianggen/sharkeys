@@ -192,7 +192,13 @@ describe("RecommendationDemo", () => {
     mockFetch();
     render(<RecommendationDemo />);
 
-    expect(screen.getByText("Build request")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: /Build your dream keyboard in a few words/i,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Keybot").length).toBeGreaterThan(0);
+    expect(screen.getByText(/The intelligent way to build/i)).toBeInTheDocument();
     expect(screen.getByText("Manual build check")).toBeInTheDocument();
     const submitButton = screen.getByRole("button", {
       name: /Find validated builds/i,
@@ -204,12 +210,12 @@ describe("RecommendationDemo", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /beginner friendly creamy 65% keyboard under RM500/i,
+        name: /Creamy sound for studying/i,
       }),
     ).toBeEnabled();
 
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
-      target: { value: "beginner friendly creamy 65% keyboard under RM500" },
+      target: { value: "Creamy sound for studying" },
     });
 
     await waitFor(() => {
@@ -221,13 +227,43 @@ describe("RecommendationDemo", () => {
     });
   });
 
+  it("opens and closes the floating Keybot assistant", async () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    const openButton = screen.getByRole("button", {
+      name: /Open Keybot assistant/i,
+    });
+
+    expect(openButton).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Close Keybot assistant/i }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(openButton);
+
+    const closeButton = screen.getByRole("button", {
+      name: /Close Keybot assistant/i,
+    });
+
+    expect(closeButton).toBeInTheDocument();
+    fireEvent.click(closeButton);
+
+    expect(
+      screen.getByRole("button", { name: /Open Keybot assistant/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Close Keybot assistant/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("loads recommendation component IDs into the manual panel", async () => {
     mockFetch();
     render(<RecommendationDemo />);
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /beginner friendly creamy 65% keyboard under RM500/i,
+        name: /Creamy sound for studying/i,
       }),
     );
 
@@ -251,7 +287,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /beginner friendly creamy 65% keyboard under RM500/i,
+        name: /Creamy sound for studying/i,
       }),
     );
 
@@ -285,7 +321,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /beginner friendly creamy 65% keyboard under RM500/i,
+        name: /Creamy sound for studying/i,
       }),
     );
 
@@ -303,7 +339,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /beginner friendly creamy 65% keyboard under RM500/i,
+        name: /Creamy sound for studying/i,
       }),
     );
 
@@ -333,7 +369,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /beginner friendly creamy 65% keyboard under RM500/i,
+        name: /Creamy sound for studying/i,
       }),
     );
     expect(
@@ -374,7 +410,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /beginner friendly creamy 65% keyboard under RM500/i,
+        name: /Creamy sound for studying/i,
       }),
     );
     expect(
@@ -403,7 +439,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /beginner friendly creamy 65% keyboard under RM500/i,
+        name: /Creamy sound for studying/i,
       }),
     );
     expect(

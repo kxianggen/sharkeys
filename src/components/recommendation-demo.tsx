@@ -1,22 +1,33 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   ArrowRight,
   BookmarkPlus,
+  Bot,
   CheckCircle2,
+  CheckCircle,
   CopyPlus,
+  Cpu,
   ExternalLink,
+  Eye,
   Info,
+  Image as ImageIcon,
   Keyboard,
   Layers3,
   Loader2,
+  MessageCircle,
+  Mic,
   PackageSearch,
+  Send,
   ShieldCheck,
   SlidersHorizontal,
+  Volume2,
+  WandSparkles,
   Sparkles,
   Trash2,
+  X,
 } from "lucide-react";
 
 import type { CompatibilityResult, KeyboardComponent } from "@/lib/types";
@@ -95,10 +106,15 @@ const categorySummaries: Record<ComponentCategory, string> = {
 };
 
 const quickPrompts = [
-  "beginner friendly creamy 65% keyboard under RM500",
-  "quiet office keyboard under RM800",
-  "optical 60% build with clacky sound",
-  "thocky TKL typing keyboard",
+  "Quiet keyboard for office",
+  "Creamy sound for studying",
+  "Beginner-friendly gaming build",
+  "Thocky keyboard under RM300",
+] as const;
+
+const smokePromptExamples = [
+  "creamy 65% beginner keyboard under RM500",
+  "optical 60% clacky gaming build",
 ] as const;
 
 const savedBuildsStorageKey = "sharkeys.savedBuilds.v1";
@@ -375,6 +391,8 @@ function buildSavedBuildTitle(components: CompleteComponentSelection) {
 }
 
 export function RecommendationDemo() {
+  const promptRef = useRef<HTMLTextAreaElement | null>(null);
+  const resultsRef = useRef<HTMLElement | null>(null);
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<RecommendationResult | null>(null);
   const [selectedRecommendationId, setSelectedRecommendationId] = useState<
@@ -535,6 +553,15 @@ export function RecommendationDemo() {
         setManualValidation(null);
         setManualError(null);
       }
+
+      window.setTimeout(() => {
+        if (typeof resultsRef.current?.scrollIntoView === "function") {
+          resultsRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 0);
     } catch (caughtError) {
       setResult(null);
       setSelectedRecommendationId(null);
@@ -565,6 +592,14 @@ export function RecommendationDemo() {
 
     setMessage(prompt);
     await runRecommendationRequest(prompt);
+  }
+
+  function focusPrompt() {
+    promptRef.current?.focus();
+    promptRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
   }
 
   async function validateManualSelection() {
@@ -716,157 +751,623 @@ export function RecommendationDemo() {
   }
 
   return (
-    <section className="border-b border-zinc-200 bg-zinc-50">
-      <div className="mx-auto grid w-full max-w-7xl gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:px-8">
-        <div className="space-y-4">
-          <form
-            className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
-            onSubmit={handleSubmit}
-          >
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md border border-emerald-100 bg-emerald-50 text-emerald-700">
-                <Sparkles className="h-5 w-5" aria-hidden />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-zinc-950">
-                  Build request
-                </h2>
-                <p className="text-sm text-zinc-500">
-                  Grounded catalog search with rule validation
-                </p>
-              </div>
+    <div className="min-h-screen bg-[#f5faff] text-[#071e29]">
+      <LandingNav onStartBuilding={focusPrompt} />
+
+      <section
+        className="mx-auto flex w-full max-w-screen-xl flex-col items-center px-4 pb-20 pt-16 text-center sm:px-8 lg:px-16 lg:pb-28 lg:pt-20"
+        id="configurator"
+      >
+        <h1 className="max-w-4xl text-[44px] font-bold leading-[1.08] tracking-[-0.02em] text-[#071e29] sm:text-5xl lg:text-[64px] lg:leading-[1.04]">
+          Build your dream keyboard in a few words
+        </h1>
+        <p className="mt-6 max-w-3xl text-base leading-7 text-[#42474e] sm:text-lg">
+          Describe your preferred sound, feel, layout, or budget, and let the AI
+          guide you toward a compatible custom keyboard build.
+        </p>
+
+        <form
+          className="sharkeys-soft-shadow mt-12 w-full max-w-3xl rounded-[24px] border border-[#c2c7cf] bg-white p-5 text-left transition focus-within:border-[#00639d] focus-within:ring-4 focus-within:ring-[#43acff]/20"
+          onSubmit={handleSubmit}
+        >
+          <label className="sr-only" htmlFor="keyboard-request">
+            Keyboard request
+          </label>
+          <textarea
+            className="min-h-[118px] w-full resize-none border-none bg-transparent p-0 text-base leading-7 text-[#071e29] outline-none placeholder:text-[#42474e]/60 focus:ring-0 sm:text-lg"
+            id="keyboard-request"
+            maxLength={2000}
+            onChange={(event) => setMessage(event.target.value)}
+            placeholder="Build me a keyboard under RM300 that is quiet and suitable for office..."
+            ref={promptRef}
+            value={message}
+          />
+
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <div className="flex gap-2">
+              <button
+                aria-label="Voice input is not available yet"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-[#42474e] transition hover:bg-[#e9f5ff] disabled:cursor-not-allowed disabled:opacity-45"
+                disabled
+                type="button"
+              >
+                <Mic className="h-5 w-5" aria-hidden />
+              </button>
+              <button
+                aria-label="Image input is not available yet"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-[#42474e] transition hover:bg-[#e9f5ff] disabled:cursor-not-allowed disabled:opacity-45"
+                disabled
+                type="button"
+              >
+                <ImageIcon className="h-5 w-5" aria-hidden />
+              </button>
             </div>
-
-            <label
-              className="mb-2 block text-sm font-medium text-zinc-700"
-              htmlFor="keyboard-request"
-            >
-              Keyboard request
-            </label>
-            <textarea
-              className="min-h-32 w-full resize-y rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm leading-6 text-zinc-950 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-              id="keyboard-request"
-              maxLength={2000}
-              onChange={(event) => setMessage(event.target.value)}
-              placeholder="Creamy 65% beginner build under RM500"
-              value={message}
-            />
-
             <button
-              className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+              aria-label="Find validated builds"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-[#094067] text-white shadow-sm transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30 disabled:cursor-not-allowed disabled:bg-[#72777f]"
               disabled={isSubmitDisabled}
               type="submit"
             >
               {isSubmitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
               ) : (
-                <ShieldCheck className="h-4 w-4" aria-hidden />
+                <Send className="h-5 w-5" aria-hidden />
               )}
-              Find validated builds
             </button>
+          </div>
+        </form>
 
-            <div className="mt-4 grid gap-2">
-              {quickPrompts.map((prompt) => (
-                <button
-                  className="flex min-h-10 items-center justify-between gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-left text-xs font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={hasMounted && isSubmitting}
-                  key={prompt}
-                  onClick={() => void handleQuickPrompt(prompt)}
-                  type="button"
-                >
-                  <span>{prompt}</span>
-                  <ArrowRight className="h-3.5 w-3.5 flex-none" aria-hidden />
-                </button>
-              ))}
-            </div>
-
-            {error ? (
-              <Notice
-                className="mt-4"
-                icon={AlertCircle}
-                message={error}
-                tone="red"
-              />
-            ) : null}
-          </form>
-
-          <IntentPanel result={result} />
-
-          <ManualSelectionPanel
-            catalogByCategory={catalogByCategory}
-            catalogError={catalogError}
-            hasMounted={hasMounted}
-            isCatalogLoading={isCatalogLoading}
-            isManualValidating={isManualValidating}
-            manualError={manualError}
-            manualSelection={manualSelection}
-            manualSelectionComplete={manualSelectionComplete}
-            manualValidation={manualValidation}
-            onSelect={(category, componentId) => {
-              setManualSelection((current) => ({
-                ...current,
-                [category]: componentId || undefined,
-              }));
-              setManualValidation(null);
-              setSavedBuildMessage(null);
-            }}
-            onSaveValidatedManualBuild={saveValidatedManualBuild}
-            onValidate={() => void validateManualSelection()}
-          />
+        <div className="mt-6 flex max-w-4xl flex-wrap justify-center gap-3">
+          {quickPrompts.map((prompt) => (
+            <button
+              className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#c2c7cf] bg-white px-5 py-2 text-sm font-semibold text-[#42474e] transition hover:border-[#094067] hover:text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#43acff]/20 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={hasMounted && isSubmitting}
+              key={prompt}
+              onClick={() => void handleQuickPrompt(prompt)}
+              type="button"
+            >
+              <Sparkles className="h-4 w-4 text-[#00639d]" aria-hidden />
+              {prompt}
+            </button>
+          ))}
         </div>
 
-        <div className="space-y-4">
+        <div className="mt-4 flex flex-wrap justify-center gap-2 text-xs text-[#42474e]">
+          {smokePromptExamples.map((prompt) => (
+            <button
+              className="rounded-full px-3 py-1.5 transition hover:bg-[#e9f5ff] hover:text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#43acff]/20"
+              disabled={hasMounted && isSubmitting}
+              key={prompt}
+              onClick={() => void handleQuickPrompt(prompt)}
+              type="button"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+
+        {error ? (
+          <Notice
+            className="mt-6 max-w-3xl"
+            icon={AlertCircle}
+            message={error}
+            tone="red"
+          />
+        ) : null}
+      </section>
+
+      <section
+        className="border-y border-[#c2c7cf]/60 bg-[#e9f5ff] px-4 py-16 sm:px-8 lg:px-16"
+        id="results"
+        ref={resultsRef}
+      >
+        <div className="mx-auto w-full max-w-screen-xl">
           <WorkspaceHeader result={result} selected={selectedRecommendation} />
 
           {result?.source === "fallback_missing_api_key" ? (
             <Notice
+              className="mt-5"
               icon={Info}
               message="OpenAI key is not configured, so this demo is using local keyword extraction."
               tone="sky"
             />
           ) : null}
 
-          {result && result.recommendations.length === 0 ? (
-            <EmptyRecommendationState result={result} />
-          ) : null}
+          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="space-y-6">
+              {result && result.recommendations.length === 0 ? (
+                <EmptyRecommendationState result={result} />
+              ) : null}
 
-          {result && result.recommendations.length > 0 ? (
-            <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
-              <RecommendationList
-                onSelect={(recommendation) => {
-                  setSelectedRecommendationId(recommendation.id);
-                  loadRecommendationIntoManualPanel(recommendation);
+              {result && result.recommendations.length > 0 ? (
+                <div className="grid gap-6 2xl:grid-cols-[320px_minmax(0,1fr)]">
+                  <RecommendationList
+                    onSelect={(recommendation) => {
+                      setSelectedRecommendationId(recommendation.id);
+                      loadRecommendationIntoManualPanel(recommendation);
+                    }}
+                    recommendations={result.recommendations}
+                    selectedId={selectedRecommendation?.id ?? null}
+                  />
+
+                  {selectedRecommendation ? (
+                    <RecommendationInspector
+                      activeCategory={activeCategory}
+                      onActiveCategoryChange={setActiveCategory}
+                      onSaveRecommendation={saveRecommendationBuild}
+                      recommendation={selectedRecommendation}
+                      selectedComponent={selectedComponent}
+                    />
+                  ) : null}
+                </div>
+              ) : null}
+
+              {!result ? <EmptyWorkspace /> : null}
+
+              <SavedBuildsGallery
+                catalogById={catalogById}
+                message={savedBuildMessage}
+                onClear={clearSavedBuilds}
+                onDelete={deleteSavedBuild}
+                onLoad={loadSavedBuild}
+                savedBuilds={savedBuilds}
+                savedBuildsLoaded={savedBuildsLoaded}
+              />
+            </div>
+
+            <aside className="space-y-6">
+              <IntentPanel result={result} />
+
+              <ManualSelectionPanel
+                catalogByCategory={catalogByCategory}
+                catalogError={catalogError}
+                hasMounted={hasMounted}
+                isCatalogLoading={isCatalogLoading}
+                isManualValidating={isManualValidating}
+                manualError={manualError}
+                manualSelection={manualSelection}
+                manualSelectionComplete={manualSelectionComplete}
+                manualValidation={manualValidation}
+                onSelect={(category, componentId) => {
+                  setManualSelection((current) => ({
+                    ...current,
+                    [category]: componentId || undefined,
+                  }));
+                  setManualValidation(null);
+                  setSavedBuildMessage(null);
                 }}
-                recommendations={result.recommendations}
-                selectedId={selectedRecommendation?.id ?? null}
+                onSaveValidatedManualBuild={saveValidatedManualBuild}
+                onValidate={() => void validateManualSelection()}
               />
 
-              {selectedRecommendation ? (
-                <RecommendationInspector
-                  activeCategory={activeCategory}
-                  onActiveCategoryChange={setActiveCategory}
-                  onSaveRecommendation={saveRecommendationBuild}
-                  recommendation={selectedRecommendation}
-                  selectedComponent={selectedComponent}
-                />
-              ) : null}
-            </div>
+              <div className="lg:hidden">
+                <KeybotPanel />
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <HowItWorksSection />
+      <FeatureBento />
+      <FinalCta onStartBuilding={focusPrompt} />
+      <SharkeysFooter />
+
+      <div className="hidden lg:block">
+        <FloatingKeybot />
+      </div>
+    </div>
+  );
+}
+
+function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
+  const navLinks = [
+    ["Configurator", "#configurator"],
+    ["Browse", "#features"],
+    ["Community Gallery", "#saved-builds-gallery"],
+    ["My Builds", "#saved-builds-gallery"],
+  ] as const;
+
+  return (
+    <nav className="sticky top-0 z-50 border-b border-[#c2c7cf] bg-[#f5faff]/95 backdrop-blur">
+      <div className="mx-auto flex h-20 w-full max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-8 lg:px-16">
+        <a
+          className="flex items-center gap-3 text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
+          href="#configurator"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ddf1ff] text-[#094067]">
+            <Keyboard className="h-6 w-6" aria-hidden />
+          </span>
+          <span className="text-2xl font-bold tracking-[-0.01em]">
+            Sharkeys
+          </span>
+        </a>
+
+        <div className="hidden h-full items-center gap-10 md:flex">
+          {navLinks.map(([label, href], index) => (
+            <a
+              className={`flex h-full items-center border-b-2 text-sm font-semibold transition ${
+                index === 0
+                  ? "border-[#094067] text-[#094067]"
+                  : "border-transparent text-[#42474e] hover:text-[#094067]"
+              }`}
+              href={href}
+              key={label}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+
+        <button
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#094067] px-5 text-sm font-bold text-white transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
+          onClick={onStartBuilding}
+          type="button"
+        >
+          Start Building
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+function FloatingKeybot() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (!isOpen) {
+    return (
+      <button
+        aria-label="Open Keybot assistant"
+        className="sharkeys-soft-shadow fixed bottom-6 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border border-[#c2c7cf] bg-[#094067] text-white transition hover:-translate-y-0.5 hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
+        onClick={() => setIsOpen(true)}
+        type="button"
+      >
+        <Bot className="h-7 w-7" aria-hidden />
+      </button>
+    );
+  }
+
+  return <KeybotPanel floating onClose={() => setIsOpen(false)} />;
+}
+
+function KeybotPanel({
+  floating = false,
+  onClose,
+}: {
+  floating?: boolean;
+  onClose?: () => void;
+}) {
+  const faqs = [
+    {
+      question: "What is a thocky keyboard?",
+      answer:
+        "A deeper, rounded sound profile often influenced by switch choice, plate material, case design, and foam.",
+    },
+    {
+      question: "Linear vs tactile switches",
+      answer:
+        "Linear switches press smoothly. Tactile switches add a small bump so you can feel actuation.",
+    },
+    {
+      question: "What is a hot-swappable PCB?",
+      answer:
+        "A PCB that lets you install or replace switches without soldering, useful for beginners and testing.",
+    },
+  ] as const;
+
+  return (
+    <section
+      aria-label="Keybot keyboard helper"
+      className={
+        floating
+          ? "fixed bottom-6 right-6 z-40 w-96 max-w-[calc(100vw-3rem)]"
+          : "w-full"
+      }
+    >
+      <div className="sharkeys-soft-shadow overflow-hidden rounded-3xl border border-[#c2c7cf] bg-white">
+        <div className="flex items-center gap-3 bg-[#002a47] p-5 text-white">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#094067]">
+            <Bot className="h-5 w-5" aria-hidden />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-bold">Keybot</h2>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/70">
+              Keyboard terms, build help, and FAQs
+            </p>
+          </div>
+          {onClose ? (
+            <button
+              aria-label="Close Keybot assistant"
+              className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/60"
+              onClick={onClose}
+              type="button"
+            >
+              <X className="h-4 w-4" aria-hidden />
+            </button>
           ) : null}
+        </div>
 
-          {!result ? <EmptyWorkspace /> : null}
+        <div className="space-y-4 p-5">
+          <div className="rounded-2xl rounded-tl-md border border-[#c2c7cf]/60 bg-[#e9f5ff] p-3 text-sm leading-6 text-[#071e29]">
+            Hi, I’m your keyboard guide. I can explain common keyboard terms
+            while the main prompt generates real validated builds.
+          </div>
 
-          <SavedBuildsGallery
-            catalogById={catalogById}
-            message={savedBuildMessage}
-            onClear={clearSavedBuilds}
-            onDelete={deleteSavedBuild}
-            onLoad={loadSavedBuild}
-            savedBuilds={savedBuilds}
-            savedBuildsLoaded={savedBuildsLoaded}
+          <div className="space-y-2">
+            {faqs.map((faq) => (
+              <details
+                className="rounded-2xl border border-[#c2c7cf]/70 bg-[#ddf1ff] p-3 text-left"
+                key={faq.question}
+              >
+                <summary className="cursor-pointer text-sm font-bold text-[#094067]">
+                  {faq.question}
+                </summary>
+                <p className="mt-2 text-sm leading-6 text-[#42474e]">
+                  {faq.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 border-t border-[#c2c7cf] p-3">
+          <input
+            aria-label="Keybot question"
+            className="min-w-0 flex-1 rounded-full border border-transparent bg-transparent px-3 py-2 text-sm text-[#071e29] placeholder:text-[#42474e]/60 focus:border-[#00639d] focus:outline-none focus:ring-4 focus:ring-[#43acff]/20"
+            placeholder="Ask about switches, sound, layouts..."
+            readOnly
           />
+          <button
+            aria-label="Keybot chat is static for now"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#43acff] text-[#003e66] opacity-80"
+            disabled
+            type="button"
+          >
+            <Send className="h-4 w-4" aria-hidden />
+          </button>
         </div>
       </div>
     </section>
+  );
+}
+
+function HowItWorksSection() {
+  const steps = [
+    {
+      title: "Describe",
+      body: "Tell us what you want in plain English.",
+      icon: MessageCircle,
+    },
+    {
+      title: "Generate",
+      body: "Get curated, compatible component lists.",
+      icon: WandSparkles,
+    },
+    {
+      title: "Validate",
+      body: "Automatic checks ensure everything fits.",
+      icon: CheckCircle,
+    },
+    {
+      title: "Preview",
+      body: "See the look and review the recommended build before choosing parts.",
+      icon: Eye,
+    },
+  ] as const;
+
+  return (
+    <section className="bg-[#e9f5ff] px-4 py-20 sm:px-8 lg:px-16">
+      <div className="mx-auto max-w-screen-xl">
+        <div className="mb-14 text-center">
+          <h2 className="text-3xl font-bold tracking-[-0.01em] text-[#071e29] sm:text-4xl">
+            The intelligent way to build
+          </h2>
+          <p className="mt-3 text-lg text-[#42474e]">
+            From concept to compatibility check, handled by AI.
+          </p>
+        </div>
+
+        <div className="relative grid gap-6 md:grid-cols-4">
+          <div className="absolute left-[10%] right-[10%] top-10 hidden h-px bg-[#c2c7cf] md:block" />
+          {steps.map((step, index) => (
+            <article
+              className="relative z-10 flex flex-col items-center text-center"
+              key={step.title}
+            >
+              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-[#c2c7cf] bg-white shadow-sm">
+                <step.icon className="h-8 w-8 text-[#094067]" aria-hidden />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#071e29]">
+                {index + 1}. {step.title}
+              </h3>
+              <p className="mt-2 text-base leading-6 text-[#42474e]">
+                {step.body}
+              </p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeatureBento() {
+  return (
+    <section
+      className="mx-auto max-w-screen-xl px-4 py-24 sm:px-8 lg:px-16"
+      id="features"
+    >
+      <div className="mb-12 text-center">
+        <h2 className="text-3xl font-bold tracking-[-0.01em] text-[#071e29] sm:text-4xl">
+          Precision tools, simplified
+        </h2>
+      </div>
+
+      <div className="grid auto-rows-[minmax(260px,auto)] gap-6 md:grid-cols-3">
+        <article className="sharkeys-soft-shadow overflow-hidden rounded-3xl border border-[#c2c7cf] bg-white md:col-span-2 md:row-span-2">
+          <div className="p-8">
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-[#ddf1ff] text-[#094067]">
+              <Eye className="h-5 w-5" aria-hidden />
+            </div>
+            <h3 className="text-2xl font-semibold text-[#071e29]">
+              Visual Build Preview
+            </h3>
+            <p className="mt-3 max-w-xl text-lg leading-7 text-[#42474e]">
+              Review the recommended build structure with a clean keyboard
+              preview before inspecting individual parts.
+            </p>
+          </div>
+          <BentoKeyboardPreview />
+        </article>
+
+        <article className="sharkeys-soft-shadow flex flex-col justify-between rounded-3xl border border-[#c2c7cf] bg-white p-8">
+          <div>
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-[#d0e6f5] text-[#00639d]">
+              <Cpu className="h-5 w-5" aria-hidden />
+            </div>
+            <h3 className="text-2xl font-semibold text-[#071e29]">
+              Smart Compatibility
+            </h3>
+            <p className="mt-3 text-base leading-6 text-[#42474e]">
+              Deterministic checks compare layouts, mounts, switch technology,
+              keycaps, and stabilizers before a build is shown.
+            </p>
+          </div>
+          <div className="mt-8 flex items-center gap-3 rounded-2xl border border-[#c2c7cf]/70 bg-[#ddf1ff] p-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#094067]">
+              <CheckCircle2 className="h-5 w-5" aria-hidden />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[#071e29]">
+                PCB &amp; Switches matched
+              </p>
+              <p className="text-xs text-[#42474e]">
+                Technology and layout verified
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <article className="sharkeys-soft-shadow flex flex-col justify-between overflow-hidden rounded-3xl border border-[#c2c7cf] bg-white p-8">
+          <div>
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-[#ddf1ff] text-[#094067]">
+              <Volume2 className="h-5 w-5" aria-hidden />
+            </div>
+            <h3 className="text-2xl font-semibold text-[#071e29]">
+              Sound Profile Guidance
+            </h3>
+            <p className="mt-3 text-base leading-6 text-[#42474e]">
+              Match preferences like thocky, creamy, clacky, or silent using
+              catalog metadata. No simulated audio is claimed yet.
+            </p>
+          </div>
+          <SoundWave />
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function BentoKeyboardPreview() {
+  return (
+    <div className="sharkeys-keyboard-preview border-t border-[#c2c7cf] p-8">
+      <div className="mx-auto max-w-2xl rounded-[28px] border border-[#c2c7cf] bg-[#d5ebfb] p-5 shadow-sm">
+        <div className="grid gap-2">
+          {getLayoutPreviewRows("65").map((row, rowIndex) => (
+            <div
+              className="grid auto-cols-fr grid-flow-col gap-2"
+              key={row.join("-")}
+              style={{ paddingLeft: `${rowIndex * 0.5}rem` }}
+            >
+              {row.map((keycap, keyIndex) => (
+                <span
+                  className="sharkeys-keycap flex h-10 min-w-0 items-center justify-center rounded-lg border border-[#c2c7cf] bg-white px-2 text-[11px] font-semibold text-[#42474e]"
+                  key={`${rowIndex}-${keyIndex}-${keycap}`}
+                >
+                  {keycap}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SoundWave() {
+  const heights = [24, 42, 78, 100, 62, 34, 90, 52, 70, 44, 24];
+
+  return (
+    <div className="mt-8 flex h-20 items-end gap-1.5">
+      {heights.map((height, index) => (
+        <span
+          className="w-3 rounded-t-full bg-[#094067]/70"
+          key={`${height}-${index}`}
+          style={{ height: `${height}%` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function FinalCta({ onStartBuilding }: { onStartBuilding: () => void }) {
+  return (
+    <section className="border-y border-[#c2c7cf]/70 bg-[#e9f5ff] px-4 py-24 text-center sm:px-8 lg:px-16">
+      <h2 className="text-4xl font-bold tracking-[-0.02em] text-[#071e29] sm:text-5xl">
+        Ready to curate your keystrokes?
+      </h2>
+      <p className="mx-auto mt-6 max-w-2xl text-lg leading-7 text-[#42474e]">
+        Stop endlessly researching compatibility. Let Sharkeys guide you to the
+        perfect build in minutes.
+      </p>
+      <button
+        className="mt-10 inline-flex h-14 items-center justify-center gap-3 rounded-full bg-[#094067] px-8 text-lg font-bold text-white transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
+        onClick={onStartBuilding}
+        type="button"
+      >
+        Start Building Now
+        <ArrowRight className="h-5 w-5" aria-hidden />
+      </button>
+    </section>
+  );
+}
+
+function SharkeysFooter() {
+  const links = [
+    "Design Guide",
+    "Switch Library",
+    "Keycap Compatibility",
+    "Discord Community",
+    "Support",
+  ];
+
+  return (
+    <footer className="border-t border-[#c2c7cf] bg-[#d0e6f5] px-4 py-16 sm:px-8 lg:px-16">
+      <div className="mx-auto grid max-w-screen-2xl gap-8 md:grid-cols-[280px_minmax(0,1fr)]">
+        <div>
+          <div className="flex items-center gap-2 text-2xl font-bold text-[#071e29]">
+            <Keyboard className="h-6 w-6 text-[#094067]" aria-hidden />
+            Sharkeys
+          </div>
+          <p className="mt-4 max-w-xs text-base leading-6 text-[#42474e]">
+            Precision-engineered guidance for custom mechanical keyboard builds.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-6 md:justify-end">
+          {links.map((link) => (
+            <a
+              className="text-base text-[#42474e] transition hover:text-[#094067] hover:underline focus:outline-none focus:ring-4 focus:ring-[#43acff]/20"
+              href="#configurator"
+              key={link}
+            >
+              {link}
+            </a>
+          ))}
+        </div>
+      </div>
+    </footer>
   );
 }
 
@@ -883,15 +1384,19 @@ function WorkspaceHeader({
       : "No estimate";
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+    <div className="sharkeys-soft-shadow rounded-3xl border border-[#c2c7cf] bg-white p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-medium uppercase tracking-normal text-zinc-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#00639d]">
             Sharkeys Configurator
           </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-normal text-zinc-950">
+          <h2 className="mt-2 text-3xl font-bold tracking-[-0.01em] text-[#071e29]">
             Validated keyboard workspace
-          </h1>
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#42474e]">
+            Review generated builds, inspect catalog parts, save compatible
+            builds, or run your own manual validation check.
+          </p>
         </div>
         <div className="grid grid-cols-2 gap-2 text-right sm:grid-cols-3">
           <Metric label="Validated builds" value={`${result?.recommendations.length ?? 0}`} />
@@ -905,11 +1410,11 @@ function WorkspaceHeader({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-28 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
-      <p className="text-[11px] font-medium uppercase tracking-normal text-zinc-500">
+    <div className="min-w-28 rounded-2xl border border-[#c2c7cf] bg-[#e9f5ff] px-3 py-2">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#42474e]">
         {label}
       </p>
-      <p className="mt-1 text-sm font-semibold text-zinc-950">{value}</p>
+      <p className="mt-1 text-sm font-bold text-[#071e29]">{value}</p>
     </div>
   );
 }
@@ -917,9 +1422,9 @@ function Metric({ label, value }: { label: string; value: string }) {
 function IntentPanel({ result }: { result: RecommendationResult | null }) {
   if (!result) {
     return (
-      <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-zinc-950">Intent</h2>
-        <p className="mt-2 text-sm leading-6 text-zinc-600">
+      <div className="rounded-3xl border border-[#c2c7cf] bg-white p-5 shadow-sm">
+        <h2 className="text-sm font-bold text-[#071e29]">Extracted preferences</h2>
+        <p className="mt-2 text-sm leading-6 text-[#42474e]">
           Submit a request to see extracted build criteria.
         </p>
       </div>
@@ -948,25 +1453,25 @@ function IntentPanel({ result }: { result: RecommendationResult | null }) {
   ];
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+    <div className="rounded-3xl border border-[#c2c7cf] bg-white p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-zinc-950">Intent</h2>
-        <span className="rounded-full border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600">
+        <h2 className="text-sm font-bold text-[#071e29]">Extracted preferences</h2>
+        <span className="rounded-full border border-[#c2c7cf] bg-[#e9f5ff] px-2.5 py-1 text-xs font-semibold text-[#094067]">
           {result.source.replaceAll("_", " ")}
         </span>
       </div>
       <dl className="grid grid-cols-2 gap-3">
         {rows.map(([label, value]) => (
           <div key={label}>
-            <dt className="text-[11px] font-medium uppercase tracking-normal text-zinc-500">
+            <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#42474e]">
               {label}
             </dt>
-            <dd className="mt-1 text-sm font-medium text-zinc-900">{value}</dd>
+            <dd className="mt-1 text-sm font-semibold text-[#071e29]">{value}</dd>
           </div>
         ))}
       </dl>
       {result.criteria.maxPrice ? (
-        <p className="mt-3 border-t border-zinc-100 pt-3 text-xs text-zinc-500">
+        <p className="mt-3 border-t border-[#c2c7cf]/70 pt-3 text-xs text-[#42474e]">
           Catalog budget: {formatMoney(result.criteria.maxPrice, result.criteria.currency ?? "MYR")}
         </p>
       ) : null}
@@ -984,10 +1489,10 @@ function RecommendationList({
   selectedId: string | null;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
+    <div className="rounded-3xl border border-[#c2c7cf] bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2 px-1">
-        <Layers3 className="h-4 w-4 text-zinc-500" aria-hidden />
-        <h2 className="text-sm font-semibold text-zinc-950">Compare builds</h2>
+        <Layers3 className="h-4 w-4 text-[#00639d]" aria-hidden />
+        <h2 className="text-sm font-bold text-[#071e29]">Compare builds</h2>
       </div>
       <div className="space-y-2">
         {recommendations.map((recommendation, index) => {
@@ -1002,10 +1507,10 @@ function RecommendationList({
 
           return (
             <button
-              className={`w-full rounded-md border p-3 text-left transition ${
+              className={`w-full rounded-2xl border p-3 text-left transition ${
                 selected
-                  ? "border-emerald-300 bg-emerald-50"
-                  : "border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50"
+                  ? "border-[#00639d] bg-[#ddf1ff]"
+                  : "border-[#c2c7cf] bg-white hover:border-[#00639d] hover:bg-[#f5faff]"
               }`}
               key={recommendation.id}
               onClick={() => onSelect(recommendation)}
@@ -1013,19 +1518,19 @@ function RecommendationList({
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-normal text-zinc-500">
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
                     Build {index + 1}
                   </p>
-                  <p className="mt-1 text-sm font-semibold leading-5 text-zinc-950">
+                  <p className="mt-1 text-sm font-bold leading-5 text-[#071e29]">
                     {recommendation.components.case.name}
                   </p>
                 </div>
-                <span className="rounded-full border border-emerald-200 bg-white px-2 py-1 text-xs font-medium text-emerald-700">
+                <span className="rounded-full border border-[#c2c7cf] bg-white px-2 py-1 text-xs font-semibold text-[#094067]">
                   Valid
                 </span>
               </div>
-              <p className="mt-2 text-sm font-medium text-zinc-800">{price}</p>
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-2 text-sm font-bold text-[#071e29]">{price}</p>
+              <p className="mt-1 text-xs text-[#42474e]">
                 {recommendation.components.switch.name}
               </p>
             </button>
@@ -1055,26 +1560,26 @@ function RecommendationInspector({
     null;
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white shadow-sm">
-      <div className="border-b border-zinc-200 p-4">
+    <div className="overflow-hidden rounded-3xl border border-[#c2c7cf] bg-white shadow-sm">
+      <div className="border-b border-[#c2c7cf] p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[#c2c7cf] bg-[#ddf1ff] px-2.5 py-1 text-xs font-semibold text-[#094067]">
               <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
               Rule-engine validated
             </div>
-            <h2 className="text-xl font-semibold tracking-normal text-zinc-950">
+            <h2 className="text-2xl font-bold tracking-[-0.01em] text-[#071e29]">
               {recommendation.title}
             </h2>
-            <p className="mt-1 text-sm text-zinc-600">
+            <p className="mt-2 text-sm leading-6 text-[#42474e]">
               {recommendation.explanations[0]}
             </p>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-xs font-medium uppercase tracking-normal text-zinc-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
               Estimated total
             </p>
-            <p className="mt-1 text-2xl font-semibold text-zinc-950">
+            <p className="mt-1 text-3xl font-bold text-[#071e29]">
               {recommendation.estimatedPrice === null
                 ? "Unavailable"
                 : formatMoney(
@@ -1083,7 +1588,7 @@ function RecommendationInspector({
                   )}
             </p>
             <button
-              className="mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-md bg-zinc-950 px-3 text-sm font-medium text-white transition hover:bg-zinc-800"
+              className="mt-3 inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#094067] px-4 text-sm font-bold text-white transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
               onClick={() => onSaveRecommendation(recommendation)}
               type="button"
             >
@@ -1095,7 +1600,7 @@ function RecommendationInspector({
       </div>
 
       <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="border-b border-zinc-200 p-4 lg:border-b-0 lg:border-r">
+        <div className="border-b border-[#c2c7cf] p-5 lg:border-b-0 lg:border-r">
           <KeyboardPreview layout={layout} />
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -1105,23 +1610,23 @@ function RecommendationInspector({
 
               return (
                 <button
-                  className={`rounded-md border p-3 text-left transition ${
+                  className={`rounded-2xl border p-3 text-left transition ${
                     active
-                      ? "border-emerald-300 bg-emerald-50"
-                      : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-white"
+                      ? "border-[#00639d] bg-[#ddf1ff]"
+                      : "border-[#c2c7cf] bg-[#f5faff] hover:border-[#00639d] hover:bg-white"
                   }`}
                   key={category}
                   onClick={() => onActiveCategoryChange(category)}
                   type="button"
                 >
-                  <p className="text-[11px] font-medium uppercase tracking-normal text-zinc-500">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#42474e]">
                     {categoryLabels[category]}
                   </p>
-                  <p className="mt-1 line-clamp-2 text-sm font-semibold text-zinc-950">
+                  <p className="mt-1 line-clamp-2 text-sm font-bold text-[#071e29]">
                     {component.name}
                   </p>
-                  <p className="mt-1 text-xs text-zinc-500">{component.brand}</p>
-                  <p className="mt-2 text-xs leading-4 text-zinc-500">
+                  <p className="mt-1 text-xs text-[#00639d]">{component.brand}</p>
+                  <p className="mt-2 text-xs leading-4 text-[#42474e]">
                     {categorySummaries[category]}
                   </p>
                 </button>
@@ -1145,13 +1650,13 @@ function KeyboardPreview({ layout }: { layout: string | null }) {
   const rows = getLayoutPreviewRows(layout);
 
   return (
-    <div className="rounded-md border border-zinc-800 bg-zinc-950 p-3">
+    <div className="sharkeys-keyboard-preview rounded-3xl border border-[#c2c7cf] p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-white">Layout canvas</p>
-          <p className="text-xs text-zinc-400">{layout ?? "auto"} layout preview</p>
+          <p className="text-sm font-bold text-[#071e29]">Layout canvas</p>
+          <p className="text-xs text-[#42474e]">{layout ?? "auto"} layout preview</p>
         </div>
-        <Keyboard className="h-5 w-5 text-zinc-400" aria-hidden />
+        <Keyboard className="h-5 w-5 text-[#094067]" aria-hidden />
       </div>
       <div className="grid gap-1.5">
         {rows.map((row, rowIndex) => (
@@ -1162,7 +1667,7 @@ function KeyboardPreview({ layout }: { layout: string | null }) {
           >
             {row.map((keycap, keyIndex) => (
               <span
-                className="flex h-8 min-w-0 items-center justify-center rounded-[4px] border border-zinc-600 bg-zinc-700 px-1 text-[11px] font-medium text-zinc-100 shadow-sm"
+                className="sharkeys-keycap flex h-8 min-w-0 items-center justify-center rounded-lg border border-[#c2c7cf] bg-white px-1 text-[11px] font-semibold text-[#42474e]"
                 key={`${rowIndex}-${keyIndex}-${keycap}`}
               >
                 {keycap}
@@ -1185,7 +1690,7 @@ function ComponentDetails({
   if (!component) {
     return (
       <div className="p-4">
-        <p className="text-sm text-zinc-600">No component selected.</p>
+        <p className="text-sm text-[#42474e]">No component selected.</p>
       </div>
     );
   }
@@ -1197,18 +1702,18 @@ function ComponentDetails({
 
   return (
     <aside className="p-4">
-      <p className="text-xs font-medium uppercase tracking-normal text-zinc-500">
+      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
         {categoryLabels[category]}
       </p>
-      <h3 className="mt-1 text-base font-semibold leading-6 text-zinc-950">
+      <h3 className="mt-1 text-base font-bold leading-6 text-[#071e29]">
         {component.name}
       </h3>
-      <p className="mt-1 text-sm text-zinc-500">{component.brand}</p>
-      <p className="mt-4 text-sm leading-6 text-zinc-700">
+      <p className="mt-1 text-sm text-[#00639d]">{component.brand}</p>
+      <p className="mt-4 text-sm leading-6 text-[#42474e]">
         {component.description}
       </p>
 
-      <dl className="mt-4 grid gap-3 border-y border-zinc-200 py-4">
+      <dl className="mt-4 grid gap-3 border-y border-[#c2c7cf] py-4">
         <DetailRow label="Price" value={formatComponentPrice(component)} />
         <DetailRow
           label="Layouts"
@@ -1227,19 +1732,19 @@ function ComponentDetails({
       </dl>
 
       <div className="mt-4 space-y-2">
-        <p className="text-xs font-medium uppercase tracking-normal text-zinc-500">
+        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
           Source
         </p>
-        <p className="text-sm font-medium text-zinc-900">
+        <p className="text-sm font-bold text-[#071e29]">
           {sourceVendor ?? "Vendor metadata unavailable"}
         </p>
         {sourceType ? (
-          <p className="text-xs text-zinc-500">{sourceType.replaceAll("_", " ")}</p>
+          <p className="text-xs text-[#42474e]">{sourceType.replaceAll("_", " ")}</p>
         ) : null}
-        {sourceNote ? <p className="text-xs leading-5 text-zinc-500">{sourceNote}</p> : null}
+        {sourceNote ? <p className="text-xs leading-5 text-[#42474e]">{sourceNote}</p> : null}
         {component.vendorUrl ? (
           <a
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-[#094067] hover:text-[#002a47] hover:underline"
             href={component.vendorUrl}
             rel="noreferrer"
             target="_blank"
@@ -1256,10 +1761,10 @@ function ComponentDetails({
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[11px] font-medium uppercase tracking-normal text-zinc-500">
+      <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#42474e]">
         {label}
       </dt>
-      <dd className="mt-1 text-sm text-zinc-900">{value}</dd>
+      <dd className="mt-1 text-sm text-[#071e29]">{value}</dd>
     </div>
   );
 }
@@ -1270,14 +1775,14 @@ function CompatibilityPanel({
   recommendation: RecommendationBuild;
 }) {
   return (
-    <div className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 p-3">
+    <div className="mt-4 rounded-2xl border border-[#c2c7cf] bg-[#f5faff] p-4">
       <div className="flex items-start gap-2">
-        <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-emerald-700" aria-hidden />
+        <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-[#094067]" aria-hidden />
         <div>
-          <p className="text-sm font-semibold text-zinc-950">
+          <p className="text-sm font-bold text-[#071e29]">
             Compatibility status
           </p>
-          <p className="mt-1 text-sm text-zinc-600">
+          <p className="mt-1 text-sm text-[#42474e]">
             {recommendation.validation.explanations[0]}
           </p>
         </div>
@@ -1295,7 +1800,7 @@ function CompatibilityPanel({
           ))}
         </div>
       ) : (
-        <p className="mt-3 rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm text-emerald-800">
+        <p className="mt-3 rounded-2xl border border-[#c2c7cf] bg-white px-3 py-2 text-sm text-[#094067]">
           No compatibility warnings from the rule engine.
         </p>
       )}
@@ -1336,10 +1841,10 @@ function ManualSelectionPanel({
     isCatalogLoading || isManualValidating || !manualSelectionComplete;
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+    <div className="rounded-3xl border border-[#c2c7cf] bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
-        <SlidersHorizontal className="h-4 w-4 text-zinc-500" aria-hidden />
-        <h2 className="text-sm font-semibold text-zinc-950">Manual build check</h2>
+        <SlidersHorizontal className="h-4 w-4 text-[#00639d]" aria-hidden />
+        <h2 className="text-sm font-bold text-[#071e29]">Manual build check</h2>
       </div>
 
       {catalogError ? (
@@ -1349,11 +1854,11 @@ function ManualSelectionPanel({
       <div className="grid gap-3">
         {componentCategories.map((category) => (
           <label className="block" key={category}>
-            <span className="mb-1 flex items-center justify-between gap-2 text-xs font-medium uppercase tracking-normal text-zinc-500">
+            <span className="mb-1 flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
               {categoryLabels[category]}
             </span>
             <select
-              className="h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-zinc-100"
+              className="h-10 w-full rounded-lg border border-[#c2c7cf] bg-white px-3 text-sm text-[#071e29] outline-none transition focus:border-[#00639d] focus:ring-4 focus:ring-[#43acff]/20 disabled:bg-[#e9f5ff]"
               disabled={hasMounted && shouldDisableCatalogControls}
               onChange={(event) => onSelect(category, event.target.value)}
               value={manualSelection[category] ?? ""}
@@ -1372,7 +1877,7 @@ function ManualSelectionPanel({
       </div>
 
       <button
-        className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+        className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#094067] px-4 text-sm font-bold text-white transition hover:bg-[#002a47] disabled:cursor-not-allowed disabled:bg-[#72777f]"
         disabled={hasMounted && shouldDisableManualValidation}
         onClick={onValidate}
         type="button"
@@ -1396,9 +1901,9 @@ function ManualSelectionPanel({
 
       {manualValidation ? (
         <div
-          className={`mt-3 rounded-md border p-3 text-sm ${
+          className={`mt-3 rounded-2xl border p-3 text-sm ${
             manualValidation.isValid
-              ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+              ? "border-[#c2c7cf] bg-[#ddf1ff] text-[#094067]"
               : "border-red-200 bg-red-50 text-red-900"
           }`}
         >
@@ -1423,7 +1928,7 @@ function ManualSelectionPanel({
           </ul>
           {manualValidation.isValid ? (
             <button
-              className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-emerald-700 px-3 text-sm font-medium text-white transition hover:bg-emerald-800"
+              className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[#094067] px-3 text-sm font-bold text-white transition hover:bg-[#002a47]"
               onClick={onSaveValidatedManualBuild}
               type="button"
             >
@@ -1457,23 +1962,24 @@ function SavedBuildsGallery({
   return (
     <section
       aria-label="Saved builds gallery"
-      className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
+      className="rounded-3xl border border-[#c2c7cf] bg-white p-5 shadow-sm"
+      id="saved-builds-gallery"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-normal text-zinc-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#00639d]">
             Local gallery
           </p>
-          <h2 className="mt-1 text-base font-semibold text-zinc-950">
+          <h2 className="mt-1 text-base font-bold text-[#071e29]">
             Saved builds
           </h2>
-          <p className="mt-1 text-sm text-zinc-600">
+          <p className="mt-1 text-sm text-[#42474e]">
             Saved in this browser for local prototype review.
           </p>
         </div>
         <button
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={savedBuilds.length === 0}
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-3 text-sm font-semibold text-[#42474e] transition hover:bg-[#e9f5ff] disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={savedBuildsLoaded && savedBuilds.length === 0}
           onClick={onClear}
           type="button"
         >
@@ -1492,13 +1998,13 @@ function SavedBuildsGallery({
       ) : null}
 
       {!savedBuildsLoaded ? (
-        <p className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
+        <p className="mt-4 rounded-2xl border border-[#c2c7cf] bg-[#f5faff] px-3 py-2 text-sm text-[#42474e]">
           Loading saved builds...
         </p>
       ) : null}
 
       {savedBuildsLoaded && savedBuilds.length === 0 ? (
-        <p className="mt-4 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-3 py-4 text-sm text-zinc-600">
+        <p className="mt-4 rounded-2xl border border-dashed border-[#c2c7cf] bg-[#f5faff] px-3 py-4 text-sm text-[#42474e]">
           No saved builds yet. Save a validated recommendation or a compatible
           manual build to keep it here.
         </p>
@@ -1538,21 +2044,21 @@ function SavedBuildCard({
       : "No estimate";
 
   return (
-    <article className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
+    <article className="rounded-2xl border border-[#c2c7cf] bg-[#f5faff] p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-emerald-200 bg-white px-2 py-1 text-xs font-medium text-emerald-700">
+            <span className="rounded-full border border-[#c2c7cf] bg-white px-2 py-1 text-xs font-semibold text-[#094067]">
               {savedBuild.validation.isValid ? "Compatible" : "Needs review"}
             </span>
-            <span className="rounded-full border border-zinc-200 bg-white px-2 py-1 text-xs font-medium text-zinc-600">
+            <span className="rounded-full border border-[#c2c7cf] bg-white px-2 py-1 text-xs font-semibold text-[#42474e]">
               Saved {savedBuild.source}
             </span>
           </div>
-          <h3 className="mt-2 text-sm font-semibold leading-5 text-zinc-950">
+          <h3 className="mt-2 text-sm font-bold leading-5 text-[#071e29]">
             {savedBuild.title}
           </h3>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-[#42474e]">
             {new Date(savedBuild.createdAt).toLocaleString("en-MY", {
               dateStyle: "medium",
               timeStyle: "short",
@@ -1560,28 +2066,28 @@ function SavedBuildCard({
           </p>
         </div>
         <div className="text-left sm:text-right">
-          <p className="text-xs font-medium uppercase tracking-normal text-zinc-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
             Estimated total
           </p>
-          <p className="mt-1 text-base font-semibold text-zinc-950">{price}</p>
+          <p className="mt-1 text-base font-bold text-[#071e29]">{price}</p>
         </div>
       </div>
 
-      <dl className="mt-3 grid gap-2 border-y border-zinc-200 py-3 sm:grid-cols-2">
+      <dl className="mt-3 grid gap-2 border-y border-[#c2c7cf] py-3 sm:grid-cols-2">
         {componentCategories.map((category) => {
           const component = catalogById.get(savedBuild.componentIds[category]);
 
           return (
             <div key={category}>
-              <dt className="text-[11px] font-medium uppercase tracking-normal text-zinc-500">
+              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#42474e]">
                 {categoryLabels[category]}
               </dt>
-              <dd className="mt-1 text-sm text-zinc-900">
+              <dd className="mt-1 text-sm text-[#071e29]">
                 {component?.name ?? savedBuild.componentIds[category]}
               </dd>
               {component?.vendorUrl ? (
                 <a
-                  className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800"
+                  className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[#094067] hover:text-[#002a47] hover:underline"
                   href={component.vendorUrl}
                   rel="noreferrer"
                   target="_blank"
@@ -1597,7 +2103,7 @@ function SavedBuildCard({
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-zinc-950 px-3 text-sm font-medium text-white transition hover:bg-zinc-800"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[#094067] px-3 text-sm font-bold text-white transition hover:bg-[#002a47]"
           onClick={() => onLoad(savedBuild)}
           type="button"
         >
@@ -1605,7 +2111,7 @@ function SavedBuildCard({
           Load build
         </button>
         <button
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-3 text-sm font-semibold text-[#42474e] transition hover:bg-[#e9f5ff]"
           onClick={() => onDelete(savedBuild.id)}
           type="button"
         >
@@ -1619,12 +2125,12 @@ function SavedBuildCard({
 
 function EmptyWorkspace() {
   return (
-    <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-8 text-center shadow-sm">
-      <PackageSearch className="mx-auto h-9 w-9 text-zinc-400" aria-hidden />
-      <h2 className="mt-3 text-base font-semibold text-zinc-950">
+    <div className="rounded-3xl border border-dashed border-[#c2c7cf] bg-white p-10 text-center shadow-sm">
+      <PackageSearch className="mx-auto h-10 w-10 text-[#00639d]" aria-hidden />
+      <h2 className="mt-4 text-lg font-bold text-[#071e29]">
         Ready for configuration
       </h2>
-      <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-zinc-600">
+      <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[#42474e]">
         Recommendations, component inspection, and manual validation appear here.
       </p>
     </div>
@@ -1633,9 +2139,9 @@ function EmptyWorkspace() {
 
 function EmptyRecommendationState({ result }: { result: RecommendationResult }) {
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900 shadow-sm">
+    <div className="rounded-3xl border border-[#c2c7cf] bg-white p-6 text-sm text-[#071e29] shadow-sm">
       <div className="mb-2 flex items-center gap-2 font-semibold">
-        <AlertCircle className="h-4 w-4" aria-hidden />
+        <AlertCircle className="h-4 w-4 text-[#ba1a1a]" aria-hidden />
         No validated build found
       </div>
       <ul className="space-y-1">
@@ -1664,12 +2170,12 @@ function Notice({
   const toneClasses = {
     amber: "border-amber-200 bg-amber-50 text-amber-900",
     red: "border-red-200 bg-red-50 text-red-800",
-    sky: "border-sky-200 bg-sky-50 text-sky-900",
+    sky: "border-[#c2c7cf] bg-[#ddf1ff] text-[#094067]",
   };
 
   return (
     <div
-      className={`flex gap-2 rounded-md border p-3 text-sm ${toneClasses[tone]} ${className}`}
+      className={`flex gap-2 rounded-2xl border p-3 text-sm ${toneClasses[tone]} ${className}`}
     >
       <Icon className="mt-0.5 h-4 w-4 flex-none" aria-hidden />
       <p>{message}</p>

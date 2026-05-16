@@ -2,7 +2,7 @@
 
 Sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 7.5: live Supabase catalog setup readiness.
+This repository is currently in Phase 8: Stitch-based front-facing configurator UI.
 
 ## Stack
 
@@ -275,6 +275,17 @@ Saved builds are persisted with browser `localStorage` under `sharkeys.savedBuil
 
 The save buttons are only exposed after deterministic validation has succeeded. Recommendation saves use recommendations already validated by `src/lib/recommendations`, while manual saves require a successful `POST /api/builds/validate` result first. Loading a saved build places its component IDs into the manual panel so it can be revalidated before further use.
 
+## Phase 8 Stitch UI
+
+Phase 8 rebuilds the main user-facing experience using the Stitch design sources in:
+
+- `/Users/fluffyunicorn/Downloads/stitch_ai_keyboard_configurator/sharkeys/DESIGN.md`
+- `/Users/fluffyunicorn/Downloads/stitch_ai_keyboard_configurator/sharkeys_landing_page_with_keybot/code.html`
+
+The UI now follows the light Sharkeys design system: pale blue surfaces, white rounded cards, Satoshi typography, deep-blue primary actions, strong whitespace, and a prompt-first configurator flow. The landing page includes a sticky navigation bar, the functional recommendation prompt, quick prompt chips, a static Keybot FAQ helper, validated recommendation results, manual validation, saved builds, a four-step “The intelligent way to build” section, a bento feature section, final CTA, and footer.
+
+This phase is frontend-only. Existing API routes, deterministic compatibility validation, live Supabase catalog reads, MYR pricing, vendor links, and localStorage saved builds are preserved. Keybot is currently static/local guidance only and does not call an LLM backend.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
@@ -294,6 +305,12 @@ Phase 5 expands the configurator UI and recommendation review experience with va
 Phase 6 adds local saved-build persistence, a gallery panel, and clone/load flows without auth or live Supabase integration.
 
 Phase 7 adds Supabase-backed catalog reads with a seed fallback, keeping the app usable offline while preparing the catalog for hosted persistence.
+
+Phase 7.5 adds local scripts and documentation for applying, seeding, and verifying the live Supabase catalog setup.
+
+Phase 7.6 activates and verifies the live Supabase catalog while keeping public access read-only and secrets out of version control.
+
+Phase 8 rebuilds the front-facing UI from the Stitch design references while preserving the existing recommendation, validation, manual builder, saved builds, Supabase, and API behavior.
 
 ## Architecture Rule
 
