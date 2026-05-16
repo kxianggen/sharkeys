@@ -8,9 +8,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sharkeys",
+  title: "sharkeys",
   description:
-    "AI-assisted custom mechanical keyboard configuration platform.",
+    "sharkeys is an AI-assisted custom mechanical keyboard configuration platform.",
 };
 
 export default function RootLayout({

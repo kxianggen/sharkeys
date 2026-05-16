@@ -197,6 +197,8 @@ describe("RecommendationDemo", () => {
         name: /Build your dream keyboard in a few words/i,
       }),
     ).toBeInTheDocument();
+    expect(screen.getAllByText("sharkeys").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Sharkeys")).not.toBeInTheDocument();
     expect(screen.getAllByText("Keybot").length).toBeGreaterThan(0);
     expect(screen.getByText(/The intelligent way to build/i)).toBeInTheDocument();
     expect(screen.getByText("Manual build check")).toBeInTheDocument();

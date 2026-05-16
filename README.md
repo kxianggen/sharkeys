@@ -1,6 +1,6 @@
-# Sharkeys
+# sharkeys
 
-Sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
+sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
 This repository is currently in Phase 8: Stitch-based front-facing configurator UI.
 
@@ -282,7 +282,7 @@ Phase 8 rebuilds the main user-facing experience using the Stitch design sources
 - `/Users/fluffyunicorn/Downloads/stitch_ai_keyboard_configurator/sharkeys/DESIGN.md`
 - `/Users/fluffyunicorn/Downloads/stitch_ai_keyboard_configurator/sharkeys_landing_page_with_keybot/code.html`
 
-The UI now follows the light Sharkeys design system: pale blue surfaces, white rounded cards, Satoshi typography, deep-blue primary actions, strong whitespace, and a prompt-first configurator flow. The landing page includes a sticky navigation bar, the functional recommendation prompt, quick prompt chips, a static Keybot FAQ helper, validated recommendation results, manual validation, saved builds, a four-step “The intelligent way to build” section, a bento feature section, final CTA, and footer.
+The UI now follows the light sharkeys design system: pale blue surfaces, white rounded cards, Satoshi typography, deep-blue primary actions, strong whitespace, and a prompt-first configurator flow. The landing page includes a sticky navigation bar, the functional recommendation prompt, quick prompt chips, a static Keybot FAQ helper, validated recommendation results, manual validation, saved builds, a four-step “The intelligent way to build” section, a bento feature section, final CTA, and footer.
 
 This phase is frontend-only. Existing API routes, deterministic compatibility validation, live Supabase catalog reads, MYR pricing, vendor links, and localStorage saved builds are preserved. Keybot is currently static/local guidance only and does not call an LLM backend.
 

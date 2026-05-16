@@ -979,7 +979,7 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
             <Keyboard className="h-6 w-6" aria-hidden />
           </span>
           <span className="text-2xl font-bold tracking-[-0.01em]">
-            Sharkeys
+            sharkeys
           </span>
         </a>
 
@@ -1319,7 +1319,7 @@ function FinalCta({ onStartBuilding }: { onStartBuilding: () => void }) {
         Ready to curate your keystrokes?
       </h2>
       <p className="mx-auto mt-6 max-w-2xl text-lg leading-7 text-[#42474e]">
-        Stop endlessly researching compatibility. Let Sharkeys guide you to the
+        Stop endlessly researching compatibility. Let sharkeys guide you to the
         perfect build in minutes.
       </p>
       <button
@@ -1349,7 +1349,7 @@ function SharkeysFooter() {
         <div>
           <div className="flex items-center gap-2 text-2xl font-bold text-[#071e29]">
             <Keyboard className="h-6 w-6 text-[#094067]" aria-hidden />
-            Sharkeys
+            sharkeys
           </div>
           <p className="mt-4 max-w-xs text-base leading-6 text-[#42474e]">
             Precision-engineered guidance for custom mechanical keyboard builds.
@@ -1388,7 +1388,7 @@ function WorkspaceHeader({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#00639d]">
-            Sharkeys Configurator
+            sharkeys configurator
           </p>
           <h2 className="mt-2 text-3xl font-bold tracking-[-0.01em] text-[#071e29]">
             Validated keyboard workspace
