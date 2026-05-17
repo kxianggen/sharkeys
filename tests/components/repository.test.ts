@@ -13,12 +13,12 @@ import type { ComponentCategory, KeyboardBuildSelection } from "@/lib/types";
 
 const validBuildSelection: KeyboardBuildSelection = {
   componentIds: {
-    case: "case_zuoya_gmk67_v2_kit_case",
-    pcb: "pcb_zuoya_gmk67_v2_hotswap",
-    plate: "plate_zuoya_gmk67_v2_pc",
+    case: "case_keychron_v2_max_65_abs",
+    pcb: "pcb_keychron_v2_max_65_hotswap",
+    plate: "plate_keychron_v2_max_65_pc",
     switch: "switch_gateron_milky_yellow_pro",
-    keycap: "keycap_mecha_bow_cherry_pbt",
-    stabilizer: "stab_zuoya_gmk67_plate_mount",
+    keycap: "keycap_unknown_pudding_oem_pbt",
+    stabilizer: "stab_keychron_v2_max_screw_in",
   },
   preferences: {
     layout: "65",
@@ -35,10 +35,10 @@ describe("component repository helpers", () => {
   });
 
   it("looks up a component by ID", () => {
-    const component = getComponentById("pcb_zuoya_gmk67_v2_hotswap");
+    const component = getComponentById("pcb_keychron_v2_max_65_hotswap");
 
     expect(component?.category).toBe("pcb");
-    expect(component?.name).toBe("Zuoya GMK67 V2 Hotswap PCB");
+    expect(component?.name).toBe("Keychron V2 Max 65% Tri-Mode Hotswap PCB");
   });
 
   it("filters components by category", () => {
@@ -59,9 +59,24 @@ describe("component repository helpers", () => {
   it("groups components by category", () => {
     const grouped = groupComponentsByCategory();
 
-    expect(grouped.case).toHaveLength(3);
-    expect(grouped.pcb).toHaveLength(3);
-    expect(grouped.switch).toHaveLength(5);
+    expect(grouped.case).toHaveLength(5);
+    expect(grouped.pcb).toHaveLength(2);
+    expect(grouped.plate).toHaveLength(5);
+    expect(grouped.switch).toHaveLength(13);
+    expect(grouped.keycap).toHaveLength(10);
+    expect(grouped.stabilizer).toHaveLength(7);
+  });
+
+  it("does not encode unverified stabilizer support as deterministic PCB data", () => {
+    const pcbs = listComponentsByCategory("pcb");
+
+    expect(
+      pcbs.filter(
+        (component) =>
+          component.metadata?.stabilizerTypeSupportConfidence ===
+          "needs verification",
+      ),
+    ).toEqual([]);
   });
 
   it("searches components by simple criteria", () => {
@@ -76,7 +91,7 @@ describe("component repository helpers", () => {
     expect(results.map((component) => component.id)).toEqual(
       expect.arrayContaining([
         "switch_gateron_milky_yellow_pro",
-        "switch_akko_v3_cream_yellow_pro",
+        "switch_akko_cream_yellow_v3_pro",
       ]),
     );
   });

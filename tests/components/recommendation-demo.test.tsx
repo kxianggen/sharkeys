@@ -272,12 +272,12 @@ describe("RecommendationDemo", () => {
     expect(
       await screen.findByText("Rule-engine validated"),
     ).toBeInTheDocument();
-    expect(getSelect("Case").value).toBe("case_zuoya_gmk67_v2_kit_case");
-    expect(getSelect("PCB").value).toBe("pcb_zuoya_gmk67_v2_hotswap");
-    expect(getSelect("Plate").value).toBe("plate_zuoya_gmk67_v2_pc");
-    expect(getSelect("Switch").value).toBe("switch_gateron_milky_yellow_pro");
-    expect(getSelect("Keycap").value).toBe("keycap_mecha_bow_cherry_pbt");
-    expect(getSelect("Stabilizer").value).toBe("stab_zuoya_gmk67_plate_mount");
+    expect(getSelect("Case").value).toBe("case_keychron_v2_max_65_abs");
+    expect(getSelect("PCB").value).toBe("pcb_keychron_v2_max_65_hotswap");
+    expect(getSelect("Plate").value).toBe("plate_keychron_v2_max_65_pc");
+    expect(getSelect("Switch").value).toBe("switch_gateron_seasalt_smoothie");
+    expect(getSelect("Keycap").value).toBe("keycap_unknown_pudding_oem_pbt");
+    expect(getSelect("Stabilizer").value).toBe("stab_keychron_v2_max_screw_in");
     expect(
       screen.getByRole("button", { name: /Validate manual build/i }),
     ).toBeEnabled();
@@ -296,7 +296,7 @@ describe("RecommendationDemo", () => {
     expect(
       await screen.findByText("Rule-engine validated"),
     ).toBeInTheDocument();
-    expect(getSelect("Case").value).toBe("case_zuoya_gmk67_v2_kit_case");
+    expect(getSelect("Case").value).toBe("case_keychron_v2_max_65_abs");
 
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
       target: { value: "beginner friendly creamy 65% keyboard under $50" },
@@ -331,7 +331,7 @@ describe("RecommendationDemo", () => {
       await screen.findByText("Rule-engine validated"),
     ).toBeInTheDocument();
     expect(screen.getByText(/Estimated total/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Zuoya GMK67/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Keychron V2 Max/i).length).toBeGreaterThan(0);
     expect(screen.getByText("Open vendor page")).toBeInTheDocument();
   });
 
@@ -355,13 +355,13 @@ describe("RecommendationDemo", () => {
     expect(
       await within(gallery).findByText(/Saved recommendation/i),
     ).toBeInTheDocument();
-    expect(within(gallery).getByText(/RM 390.10/i)).toBeInTheDocument();
+    expect(within(gallery).getByText(/RM\s*455/i)).toBeInTheDocument();
     expect(within(gallery).getAllByText("Vendor").length).toBeGreaterThan(0);
 
     await waitFor(() => {
       expect(
         window.localStorage.getItem("sharkeys.savedBuilds.v1"),
-      ).toContain("Zuoya GMK67");
+      ).toContain("Keychron V2 Max");
     });
   });
 
@@ -395,12 +395,12 @@ describe("RecommendationDemo", () => {
       name: /Load build/i,
     }));
 
-    expect(getSelect("Case").value).toBe("case_zuoya_gmk67_v2_kit_case");
-    expect(getSelect("PCB").value).toBe("pcb_zuoya_gmk67_v2_hotswap");
-    expect(getSelect("Plate").value).toBe("plate_zuoya_gmk67_v2_pc");
-    expect(getSelect("Switch").value).toBe("switch_gateron_milky_yellow_pro");
-    expect(getSelect("Keycap").value).toBe("keycap_mecha_bow_cherry_pbt");
-    expect(getSelect("Stabilizer").value).toBe("stab_zuoya_gmk67_plate_mount");
+    expect(getSelect("Case").value).toBe("case_keychron_v2_max_65_abs");
+    expect(getSelect("PCB").value).toBe("pcb_keychron_v2_max_65_hotswap");
+    expect(getSelect("Plate").value).toBe("plate_keychron_v2_max_65_pc");
+    expect(getSelect("Switch").value).toBe("switch_gateron_seasalt_smoothie");
+    expect(getSelect("Keycap").value).toBe("keycap_unknown_pudding_oem_pbt");
+    expect(getSelect("Stabilizer").value).toBe("stab_keychron_v2_max_screw_in");
 
     fireEvent.click(screen.getByRole("button", { name: /Validate manual build/i }));
     expect(await screen.findByText("Compatible build")).toBeInTheDocument();
@@ -431,7 +431,7 @@ describe("RecommendationDemo", () => {
       await within(gallery).findByText(/Saved manual/i),
     ).toBeInTheDocument();
     expect(
-      within(gallery).getAllByText(/Manual build: Zuoya GMK67/i).length,
+      within(gallery).getAllByText(/Manual build: Keychron V2 Max/i).length,
     ).toBeGreaterThan(0);
   });
 

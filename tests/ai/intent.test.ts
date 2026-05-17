@@ -254,10 +254,10 @@ describe("intent preparation", () => {
     });
 
     expect(preparation.candidateComponentIds.case).toContain(
-      "case_zuoya_gmk67_v2_kit_case",
+      "case_keychron_v2_max_65_abs",
     );
     expect(preparation.candidateComponentIds.pcb).toContain(
-      "pcb_zuoya_gmk67_v2_hotswap",
+      "pcb_keychron_v2_max_65_hotswap",
     );
     expect(preparation.candidateComponentIds.switch).toContain(
       "switch_gateron_milky_yellow_pro",
@@ -273,14 +273,14 @@ describe("intent preparation", () => {
       beginnerFriendly: false,
       switchTechnology: "mechanical",
       priorities: ["sound"],
-      constraints: ["polycarbonate"],
+      constraints: ["FR4"],
       clarificationNeeded: false,
       clarificationQuestion: null,
     });
 
-    expect(preparation.criteria.query).toBe("typing polycarbonate");
+    expect(preparation.criteria.query).toBe("typing FR4");
     expect(preparation.candidateComponentIds.plate).toEqual([
-      "plate_mkb_siren_vk87_pc",
+      "plate_weikav_star80_tkl_fr4",
     ]);
   });
 
@@ -302,7 +302,7 @@ describe("intent preparation", () => {
       "programming nonexistent foam blend",
     );
     expect(preparation.candidateComponentIds.pcb).toContain(
-      "pcb_zuoya_gmk67_v2_hotswap",
+      "pcb_keychron_v2_max_65_hotswap",
     );
   });
 });
