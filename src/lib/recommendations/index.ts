@@ -2,6 +2,7 @@ export {
   buildValidatedRecommendations,
   createRecommendationResult,
   generateRecommendationsFromMessage,
+  scoreRecommendation,
 } from "./service";
 export {
   recommendationResultSchema,

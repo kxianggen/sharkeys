@@ -183,6 +183,80 @@ describe("extractKeyboardIntent", () => {
     expect(result.source).toBe("openai");
     expect(result.intent.layout).toBe("tkl");
   });
+
+  it("uses configurable OpenAI model and max output tokens", async () => {
+    const previousApiKey = process.env.OPENAI_API_KEY;
+    const previousModel = process.env.OPENAI_MODEL;
+    const previousMaxOutputTokens = process.env.OPENAI_MAX_OUTPUT_TOKENS;
+    const calls: unknown[] = [];
+
+    process.env.OPENAI_API_KEY = "test-openai-key";
+    process.env.OPENAI_MODEL = "gpt-test-ranking-model";
+    process.env.OPENAI_MAX_OUTPUT_TOKENS = "321";
+
+    try {
+      const result = await extractKeyboardIntent(
+        {
+          message: "I want a thocky TKL build.",
+        },
+        {
+          client: {
+            responses: {
+              parse: async (request: unknown) => {
+                calls.push(request);
+
+                return {
+                  output_parsed: {
+                    budget: null,
+                    layout: "tkl",
+                    soundProfile: "thocky",
+                    useCase: "typing",
+                    beginnerFriendly: false,
+                    switchTechnology: "mechanical",
+                    priorities: ["sound", "feel"],
+                    constraints: ["TKL"],
+                    clarificationNeeded: false,
+                    clarificationQuestion: null,
+                  },
+                };
+              },
+            },
+          } as never,
+        },
+      );
+
+      expect(result.source).toBe("openai");
+      expect(calls[0]).toMatchObject({
+        model: "gpt-test-ranking-model",
+        max_output_tokens: 321,
+      });
+    } finally {
+      restoreEnv("OPENAI_API_KEY", previousApiKey);
+      restoreEnv("OPENAI_MODEL", previousModel);
+      restoreEnv("OPENAI_MAX_OUTPUT_TOKENS", previousMaxOutputTokens);
+    }
+  });
+
+  it("falls back safely when OpenAI returns a rate limit error", async () => {
+    const result = await extractKeyboardIntent(
+      {
+        message: "quiet office keyboard under RM800",
+      },
+      {
+        client: {
+          responses: {
+            parse: async () => {
+              throw { status: 429 };
+            },
+          },
+        } as never,
+      },
+    );
+
+    expect(result.source).toBe("fallback_error");
+    expect(result.intent.soundProfile).toBe("silent");
+    expect(result.error).toContain("rate limit or quota");
+  });
 });
 
 describe("intent preparation", () => {
@@ -306,3 +380,11 @@ describe("intent preparation", () => {
     );
   });
 });
+
+function restoreEnv(key: string, previousValue: string | undefined) {
+  if (previousValue === undefined) {
+    delete process.env[key];
+  } else {
+    process.env[key] = previousValue;
+  }
+}

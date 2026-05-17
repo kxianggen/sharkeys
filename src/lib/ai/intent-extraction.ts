@@ -1,6 +1,7 @@
 import { zodTextFormat } from "openai/helpers/zod";
 import type OpenAI from "openai";
 
+import { readOptionalOpenAIConfig } from "@/lib/env";
 import { createOpenAIClient } from "@/lib/openai";
 import type { CurrencyCode } from "@/lib/types";
 
@@ -18,16 +19,19 @@ type ExtractKeyboardIntentOptions = {
   apiKey?: string;
   client?: OpenAIIntentClient;
   model?: string;
+  maxOutputTokens?: number;
 };
-
-const defaultIntentModel = "gpt-4o-mini";
 
 export async function extractKeyboardIntent(
   input: UserIntentRequest,
   options: ExtractKeyboardIntentOptions = {},
 ): Promise<IntentExtractionResult> {
   const request = userIntentRequestSchema.parse(input);
-  const apiKey = options.apiKey ?? process.env.OPENAI_API_KEY;
+  const config = readOptionalOpenAIConfig();
+  const apiKey = options.apiKey ?? config.OPENAI_API_KEY;
+  const model = options.model ?? config.OPENAI_MODEL;
+  const maxOutputTokens =
+    options.maxOutputTokens ?? config.OPENAI_MAX_OUTPUT_TOKENS;
 
   if (!options.client && !apiKey) {
     return intentExtractionResultSchema.parse({
@@ -41,7 +45,7 @@ export async function extractKeyboardIntent(
   try {
     const client = options.client ?? createOpenAIClient(apiKey);
     const response = await client.responses.parse({
-      model: options.model ?? defaultIntentModel,
+      model,
       input: [
         {
           role: "system",
@@ -65,6 +69,7 @@ export async function extractKeyboardIntent(
           "keyboard_intent",
         ),
       },
+      max_output_tokens: maxOutputTokens,
     });
     const parsedIntent = response.output_parsed;
 
@@ -84,10 +89,7 @@ export async function extractKeyboardIntent(
     return intentExtractionResultSchema.parse({
       intent: parseLocalFallbackIntent(request.message),
       source: "fallback_error",
-      error:
-        error instanceof Error
-          ? error.message
-          : "Intent extraction failed unexpectedly.",
+      error: formatOpenAIError(error, "Intent extraction"),
     });
   }
 }
@@ -100,19 +102,22 @@ function parseLocalFallbackIntent(message: string) {
   const switchTechnology = parseSwitchTechnology(text);
   const useCase = parseUseCase(text);
   const beginnerFriendly = parseBeginnerFriendly(text);
+  const connectionConstraints = parseConnectionConstraints(text);
   const priorities = dedupe([
     budget ? "budget" : undefined,
     soundProfile ? "sound" : undefined,
     switchTechnology ? "feel" : undefined,
     beginnerFriendly ? "beginner_friendly" : undefined,
     useCase === "gaming" ? "performance" : undefined,
+    connectionConstraints.includes("wireless") ? "wireless" : undefined,
   ]);
-  const missingFields = [
-    layout ? undefined : "layout",
-    budget ? undefined : "budget",
-    soundProfile ? undefined : "sound profile",
-    beginnerFriendly === null ? "beginner experience" : undefined,
-  ].filter((field): field is string => field !== undefined);
+  const clarificationQuestion = buildFallbackClarificationQuestion({
+    layout,
+    budget,
+    soundProfile,
+    useCase,
+    beginnerFriendly,
+  });
 
   return extractedKeyboardIntentSchema.parse({
     budget,
@@ -122,12 +127,9 @@ function parseLocalFallbackIntent(message: string) {
     beginnerFriendly,
     switchTechnology,
     priorities,
-    constraints: [],
-    clarificationNeeded: missingFields.length > 0,
-    clarificationQuestion:
-      missingFields.length > 0
-        ? `Could you clarify your ${missingFields.join(", ")}?`
-        : null,
+    constraints: connectionConstraints,
+    clarificationNeeded: clarificationQuestion !== null,
+    clarificationQuestion,
   });
 }
 
@@ -255,7 +257,7 @@ function parseSoundProfile(text: string) {
     return "thocky";
   }
 
-  if (/\bclacky\b/.test(text)) {
+  if (/\b(clacky|clicky)\b/.test(text)) {
     return "clacky";
   }
 
@@ -295,7 +297,7 @@ function parseUseCase(text: string) {
     return "office";
   }
 
-  if (/\btyping\b/.test(text)) {
+  if (/\b(typing|studying|study)\b/.test(text)) {
     return "typing";
   }
 
@@ -322,6 +324,71 @@ function parseBeginnerFriendly(text: string) {
   return null;
 }
 
+function parseConnectionConstraints(text: string) {
+  if (/\b(tri.?mode|wireless|bluetooth)\b/.test(text)) {
+    return ["wireless"];
+  }
+
+  if (/\bwired\b/.test(text)) {
+    return ["wired"];
+  }
+
+  return [];
+}
+
 function dedupe<T>(items: Array<T | undefined>) {
   return [...new Set(items.filter((item): item is T => item !== undefined))];
+}
+
+function buildFallbackClarificationQuestion({
+  layout,
+  budget,
+  soundProfile,
+  useCase,
+  beginnerFriendly,
+}: {
+  layout: string | null;
+  budget: ReturnType<typeof parseBudget>;
+  soundProfile: string | null;
+  useCase: string;
+  beginnerFriendly: boolean | null;
+}) {
+  if (!soundProfile && useCase === "unknown") {
+    return "Do you prefer quiet office typing, creamy study sound, or clacky gaming feedback?";
+  }
+
+  if (!layout) {
+    return "Do you want a compact 65%, 75%, or TKL layout?";
+  }
+
+  if (!budget) {
+    return "What budget range should sharkeys stay within?";
+  }
+
+  if (beginnerFriendly === null) {
+    return "Should this be beginner-friendly or are you comfortable with enthusiast parts?";
+  }
+
+  return null;
+}
+
+function formatOpenAIError(error: unknown, action: string) {
+  const status =
+    typeof error === "object" && error !== null && "status" in error
+      ? Number((error as { status?: unknown }).status)
+      : undefined;
+
+  if (status === 401 || status === 403) {
+    return `${action} failed because the OpenAI API key was rejected. Deterministic local fallback was used.`;
+  }
+
+  if (status === 408 || status === 429) {
+    return `${action} hit an OpenAI rate limit or quota issue. Deterministic local fallback was used.`;
+  }
+
+  if (status !== undefined && status >= 500) {
+    return `${action} failed because OpenAI was unavailable. Deterministic local fallback was used.`;
+  }
+
+  return `${action} failed unexpectedly. Deterministic local fallback was used.`;
 }

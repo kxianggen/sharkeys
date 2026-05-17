@@ -38,6 +38,17 @@ const requiredStabilizerSizesByLayout: Record<
   full: ["2u", "6.25u"],
 };
 
+type StructuralKitCategory = "case" | "pcb" | "plate" | "stabilizer";
+type StructuralKitComponent =
+  | CaseComponent
+  | PcbComponent
+  | PlateComponent
+  | StabilizerComponent;
+type KitLockedStructuralPart = {
+  category: StructuralKitCategory;
+  component: StructuralKitComponent;
+};
+
 export function validateBuildCompatibility(
   selection: KeyboardBuildSelection,
   catalog: readonly KeyboardComponent[],
@@ -51,6 +62,7 @@ export function validateBuildCompatibility(
   );
 
   validateLayoutCompatibility(parsedSelection, selectedComponents, issues);
+  validateKitStructuralIntegrity(selectedComponents, issues);
   validateMountCompatibility(selectedComponents, issues);
   validateSwitchCompatibility(selectedComponents, issues);
   validateKeycapCompatibility(parsedSelection, selectedComponents, issues);
@@ -286,6 +298,79 @@ function validateMountCompatibility(
   }
 }
 
+function validateKitStructuralIntegrity(
+  selected: SelectedKeyboardComponents,
+  issues: CompatibilityIssue[],
+) {
+  const kitLockedStructuralParts = getKitLockedStructuralParts(selected);
+
+  if (kitLockedStructuralParts.length === 0) {
+    return;
+  }
+
+  const kitIds = new Set(
+    kitLockedStructuralParts.map(({ component }) =>
+      getMetadataString(component.metadata, "kitId"),
+    ),
+  );
+
+  if (kitIds.size === 1 && !kitIds.has(undefined)) {
+    return;
+  }
+
+  issues.push({
+    code: "kit_structural_mismatch",
+    severity: "error",
+    message:
+      "Kit-derived structural parts must come from the same barebones kit. The selected case, PCB, plate, or included stabilizer are from different kits.",
+    affectedCategories: kitLockedStructuralParts.map(({ category }) => category),
+    affectedComponentIds: kitLockedStructuralParts.map(
+      ({ component }) => component.id,
+    ),
+  });
+}
+
+function getKitLockedStructuralParts(selected: SelectedKeyboardComponents) {
+  const structuralParts: KitLockedStructuralPart[] = [];
+
+  if (selected.case) {
+    structuralParts.push({ category: "case", component: selected.case });
+  }
+
+  if (selected.pcb) {
+    structuralParts.push({ category: "pcb", component: selected.pcb });
+  }
+
+  if (selected.plate) {
+    structuralParts.push({ category: "plate", component: selected.plate });
+  }
+
+  if (selected.stabilizer) {
+    structuralParts.push({
+      category: "stabilizer",
+      component: selected.stabilizer,
+    });
+  }
+
+  return structuralParts.filter((part) =>
+    isKitLockedStructuralComponent(part.category, part.component),
+  );
+}
+
+function isKitLockedStructuralComponent(
+  category: StructuralKitCategory,
+  component: StructuralKitComponent,
+) {
+  if (category === "stabilizer") {
+    return (
+      getMetadataBoolean(component.metadata, "kitLock") ||
+      getMetadataString(component.metadata, "sourceType") === "kit_derived"
+    );
+  }
+
+  return getMetadataBoolean(component.metadata, "kitLock");
+}
+
 function validateSwitchCompatibility(
   selected: SelectedKeyboardComponents,
   issues: CompatibilityIssue[],
@@ -516,4 +601,22 @@ function hasOverlap<T>(left: readonly T[], right: readonly T[]) {
 
 function intersect<T>(left: readonly T[], right: readonly T[]) {
   return left.filter((item) => right.includes(item));
+}
+
+function getMetadataString(
+  metadata: KeyboardComponent["metadata"],
+  key: string,
+) {
+  const value = metadata?.[key];
+
+  return typeof value === "string" ? value : undefined;
+}
+
+function getMetadataBoolean(
+  metadata: KeyboardComponent["metadata"],
+  key: string,
+) {
+  const value = metadata?.[key];
+
+  return typeof value === "boolean" ? value : false;
 }

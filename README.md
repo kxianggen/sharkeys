@@ -2,7 +2,7 @@
 
 sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 8: Stitch-based front-facing configurator UI.
+This repository is currently in Phase 9C.1: OpenAI-backed recommendation ranking and explanations.
 
 ## Stack
 
@@ -34,11 +34,15 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4.1-mini
+OPENAI_MAX_OUTPUT_TOKENS=800
 ```
 
 `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are optional for local demo work. When they are missing, the catalog APIs use the checked-in seed data. When they are present, server-side API routes try to read the public catalog tables from Supabase and fall back to seed data if the read fails.
 
 `SUPABASE_SERVICE_ROLE_KEY` is reserved for server-side administrative tasks only. It is not needed for Phase 7 catalog reads and must never be exposed to browser code.
+
+`OPENAI_API_KEY`, `OPENAI_MODEL`, and `OPENAI_MAX_OUTPUT_TOKENS` are used only by server-side intent extraction and explanation generation. The app remains usable without a key through deterministic local keyword extraction. `OPENAI_MODEL` defaults to `gpt-4.1-mini`, and `OPENAI_MAX_OUTPUT_TOKENS` defaults to `800`.
 
 ## Quality Commands
 
@@ -292,7 +296,19 @@ Phase 9B.2 replaces the earlier weak/prototype seed catalog with higher-confiden
 
 Fully buildable kit-derived anchors include Keychron V2 Max and Weikav Star 80. AL75 V2, Yunzii B87, and Yunzii QL75 remain represented only where deterministic fields are defensible; their PCB records are held until stabilizer compatibility can be verified. Standalone component records include Gateron, Akko, MMD, KTT, Outemu, Everglide, TX, C3 Equalz, Owlab, SP-Star, and FLCMMK items sourced from MKB.MY and KeebsProject. Retailers remain provenance only in metadata; ambiguous clone-style keycap sets use `brand: "Unknown"` until manufacturer/authenticity is verified.
 
+Kit-derived structural records include `metadata.kitId` and `metadata.kitLock: true`. The deterministic rule engine requires selected kit-derived case, PCB, plate, and included stabilizer records to come from the same barebones kit. This prevents unrealistic recommendations that mix structural parts from separate local kit listings, while standalone stabilizers and future standalone ecosystem parts can still be mixed through normal compatibility rules when their metadata supports it.
+
 This phase updates the offline catalog and Supabase seed-transform input only. It does not apply migrations, seed the live Supabase project, change API contracts, or change recommendation architecture. The deterministic rule engine remains the final compatibility gate.
+
+## Phase 9C.1 Recommendation Quality
+
+Phase 9C.1 improves recommendation quality while preserving the core safety architecture. OpenAI may interpret intent and phrase explanation text, but it still cannot invent products, compatibility facts, prices, vendors, or availability. Candidate builds are assembled from the catalog, validated by `validateBuildSelectionFromIds`, then ranked only after deterministic validation succeeds.
+
+Validated builds are ranked with a deterministic scoring layer that considers layout match, switch technology match, sound profile, use case, beginner-friendliness, normalized budget fit, warning count, and Malaysia catalog provenance. The ranking logic is testable and does not depend on an LLM call.
+
+Recommendation explanations now describe why the selected case, PCB, plate, switch, keycap, and stabilizer fit the prompt using selected component fields and validation output. Deterministic explanations remain the authoritative user-facing technical facts. When OpenAI is configured, it may process the already validated payload, but free-form model text is not appended to individual recommendation explanations; the service adds only a safe high-level notice. If OpenAI is missing, invalid, rate-limited, or unavailable, the service returns the deterministic fallback explanations instead.
+
+No-build responses are more specific. For example, 75% aluminum prompts currently explain that the curated catalog does not yet have a verified 75% PCB and stabilizer compatibility path instead of fabricating a build. Very vague prompts keep returning one clarification question so the user can narrow layout, sound, use case, or budget.
 
 ## Development Phases
 
@@ -323,6 +339,8 @@ Phase 8 rebuilds the front-facing UI from the Stitch design references while pre
 Phase 9B.1 researches Malaysia-local catalog candidates without changing app code or live data.
 
 Phase 9B.2 implements the curated offline catalog records from the research shortlist while holding uncertain products until specs or stock can be confirmed.
+
+Phase 9C.1 adds deterministic ranking, grounded recommendation explanations, configurable OpenAI model settings, and safer OpenAI failure fallbacks without changing the validation gate.
 
 ## Architecture Rule
 

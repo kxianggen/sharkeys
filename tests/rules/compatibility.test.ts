@@ -28,6 +28,22 @@ const validKeychronBuild: KeyboardBuildSelection = {
   },
 };
 
+const validWeikavBuild: KeyboardBuildSelection = {
+  name: "Thocky Weikav Star 80",
+  componentIds: {
+    case: "case_weikav_star80_tkl_aluminum",
+    pcb: "pcb_weikav_star80_tkl_hotswap",
+    plate: "plate_weikav_star80_tkl_fr4",
+    switch: "switch_gateron_oil_king",
+    keycap: "keycap_unknown_retro_9009_cherry_pbt",
+    stabilizer: "stab_weikav_star80_pcb_mount",
+  },
+  preferences: {
+    layout: "tkl",
+    soundProfile: "thocky",
+  },
+};
+
 const pairwiseOnlyCase = {
   id: "test_case_pairwise_60_65",
   category: "case",
@@ -106,6 +122,55 @@ const opticalSwitch = {
   soundProfile: "clacky",
 } satisfies KeyboardComponent;
 
+const differentKitTklPcb = {
+  id: "test_pcb_other_tkl_gasket_hotswap",
+  category: "pcb",
+  name: "Other Kit TKL Hotswap PCB",
+  brand: "Test Fixtures",
+  beginnerFriendly: true,
+  layouts: ["tkl"],
+  switchTechnologySupport: ["mechanical"],
+  pcbMountSupport: ["gasket_mount"],
+  stabilizerTypeSupport: ["pcb_mount"],
+  connection: "wired",
+  hotswap: true,
+  metadata: {
+    sourceType: "kit_derived",
+    kitId: "fixture_other_tkl",
+    kitLock: true,
+  },
+} satisfies KeyboardComponent;
+
+const kitLockedSwitchFixture = {
+  id: "test_switch_metadata_kit_lock_ignored",
+  category: "switch",
+  name: "Metadata Kit-Locked Mechanical Switch",
+  brand: "Test Fixtures",
+  beginnerFriendly: true,
+  switchTechnology: "mechanical",
+  pinCount: 5,
+  soundProfile: "creamy",
+  metadata: {
+    kitId: "unrelated_switch_kit",
+    kitLock: true,
+  },
+} satisfies KeyboardComponent;
+
+const kitLockedKeycapFixture = {
+  id: "test_keycap_metadata_kit_lock_ignored",
+  category: "keycap",
+  name: "Metadata Kit-Locked 65 Keycaps",
+  brand: "Test Fixtures",
+  beginnerFriendly: true,
+  keycapProfile: "cherry",
+  layoutSupport: ["65"],
+  compatibleSwitchTechnologies: ["mechanical"],
+  metadata: {
+    kitId: "unrelated_keycap_kit",
+    kitLock: true,
+  },
+} satisfies KeyboardComponent;
+
 function withTestComponents(...components: KeyboardComponent[]) {
   return [...keyboardComponents, ...components];
 }
@@ -133,6 +198,19 @@ describe("validateBuildCompatibility", () => {
     );
   });
 
+  it("passes a valid Weikav Star 80 kit-derived build", () => {
+    const result = validateBuildCompatibility(
+      validWeikavBuild,
+      keyboardComponents,
+    );
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toEqual([]);
+    expect(result.explanations).toContain(
+      "Build compatibility passed all deterministic Phase 1 validation rules.",
+    );
+  });
+
   it("blocks incompatible case and PCB layouts", () => {
     const result = validateBuildCompatibility(
       {
@@ -150,6 +228,88 @@ describe("validateBuildCompatibility", () => {
       "case_pcb_layout_mismatch",
     );
     expect(result.errors[0]?.affectedCategories).toContain("case");
+  });
+
+  it("blocks cross-kit structural combinations", () => {
+    const result = validateBuildCompatibility(
+      {
+        ...validKeychronBuild,
+        componentIds: {
+          ...validKeychronBuild.componentIds,
+          case: "case_weikav_star80_tkl_aluminum",
+        },
+      },
+      keyboardComponents,
+    );
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors.map((issue) => issue.code)).toContain(
+      "kit_structural_mismatch",
+    );
+    expect(
+      result.errors.find((issue) => issue.code === "kit_structural_mismatch")
+        ?.message,
+    ).toContain("same barebones kit");
+  });
+
+  it("blocks same-layout cross-kit TKL structural combinations", () => {
+    const result = validateBuildCompatibility(
+      {
+        ...validWeikavBuild,
+        componentIds: {
+          ...validWeikavBuild.componentIds,
+          pcb: differentKitTklPcb.id,
+          stabilizer: "stab_tx_ap_clip_in_pcb_mount",
+        },
+      },
+      withTestComponents(differentKitTklPcb),
+    );
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors.map((issue) => issue.code)).toContain(
+      "kit_structural_mismatch",
+    );
+    expect(result.errors.map((issue) => issue.code)).not.toContain(
+      "case_pcb_layout_mismatch",
+    );
+    expect(result.errors.map((issue) => issue.code)).not.toContain(
+      "case_pcb_mount_mismatch",
+    );
+  });
+
+  it("allows standalone stabilizers with kit-derived structural paths", () => {
+    const result = validateBuildCompatibility(
+      {
+        ...validWeikavBuild,
+        componentIds: {
+          ...validWeikavBuild.componentIds,
+          stabilizer: "stab_tx_ap_clip_in_pcb_mount",
+        },
+      },
+      keyboardComponents,
+    );
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it("does not apply kit lock semantics to switches or keycaps", () => {
+    const result = validateBuildCompatibility(
+      {
+        ...validKeychronBuild,
+        componentIds: {
+          ...validKeychronBuild.componentIds,
+          switch: kitLockedSwitchFixture.id,
+          keycap: kitLockedKeycapFixture.id,
+        },
+      },
+      withTestComponents(kitLockedSwitchFixture, kitLockedKeycapFixture),
+    );
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors.map((issue) => issue.code)).not.toContain(
+      "kit_structural_mismatch",
+    );
   });
 
   it("blocks builds where case, PCB, and plate have no shared physical layout", () => {
