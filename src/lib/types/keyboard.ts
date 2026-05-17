@@ -29,6 +29,7 @@ export const keycapProfileSchema = z.enum([
   "cherry",
   "oem",
   "xda",
+  "moa",
   "sa",
   "low_profile",
   "topre",

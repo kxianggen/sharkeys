@@ -11,15 +11,15 @@ import {
   type KeyboardComponent,
 } from "@/lib/types";
 
-const validGmk67Build: KeyboardBuildSelection = {
-  name: "Creamy GMK67",
+const validKeychronBuild: KeyboardBuildSelection = {
+  name: "Creamy Keychron V2 Max",
   componentIds: {
-    case: "case_zuoya_gmk67_v2_kit_case",
-    pcb: "pcb_zuoya_gmk67_v2_hotswap",
-    plate: "plate_zuoya_gmk67_v2_pc",
+    case: "case_keychron_v2_max_65_abs",
+    pcb: "pcb_keychron_v2_max_65_hotswap",
+    plate: "plate_keychron_v2_max_65_pc",
     switch: "switch_gateron_milky_yellow_pro",
-    keycap: "keycap_mecha_bow_cherry_pbt",
-    stabilizer: "stab_zuoya_gmk67_plate_mount",
+    keycap: "keycap_unknown_pudding_oem_pbt",
+    stabilizer: "stab_keychron_v2_max_screw_in",
   },
   preferences: {
     layout: "65",
@@ -95,6 +95,17 @@ const topReOnly65Keycap = {
   compatibleSwitchTechnologies: ["topre"],
 } satisfies KeyboardComponent;
 
+const opticalSwitch = {
+  id: "test_switch_optical_clicky",
+  category: "switch",
+  name: "Test Optical Clicky Switch",
+  brand: "Test Fixtures",
+  beginnerFriendly: true,
+  switchTechnology: "optical",
+  pinCount: 0,
+  soundProfile: "clacky",
+} satisfies KeyboardComponent;
+
 function withTestComponents(...components: KeyboardComponent[]) {
   return [...keyboardComponents, ...components];
 }
@@ -110,7 +121,7 @@ describe("keyboard component seed data", () => {
 describe("validateBuildCompatibility", () => {
   it("passes a fully valid build", () => {
     const result = validateBuildCompatibility(
-      validGmk67Build,
+      validKeychronBuild,
       keyboardComponents,
     );
 
@@ -125,10 +136,10 @@ describe("validateBuildCompatibility", () => {
   it("blocks incompatible case and PCB layouts", () => {
     const result = validateBuildCompatibility(
       {
-        ...validGmk67Build,
+        ...validKeychronBuild,
         componentIds: {
-          ...validGmk67Build.componentIds,
-          case: "case_razer_huntsman_mini_60_case",
+          ...validKeychronBuild.componentIds,
+          case: "case_weikav_star80_tkl_aluminum",
         },
       },
       keyboardComponents,
@@ -149,8 +160,8 @@ describe("validateBuildCompatibility", () => {
           pcb: pairwiseOnlyPcb.id,
           plate: pairwiseOnlyPlate.id,
           switch: "switch_gateron_milky_yellow_pro",
-          keycap: "keycap_mecha_bow_cherry_pbt",
-          stabilizer: "stab_zuoya_gmk67_plate_mount",
+          keycap: "keycap_unknown_pudding_oem_pbt",
+          stabilizer: "stab_keychron_v2_max_screw_in",
         },
       },
       withTestComponents(pairwiseOnlyCase, pairwiseOnlyPcb, pairwiseOnlyPlate),
@@ -168,9 +179,9 @@ describe("validateBuildCompatibility", () => {
   it("blocks plate layout mismatches", () => {
     const result = validateBuildCompatibility(
       {
-        ...validGmk67Build,
+        ...validKeychronBuild,
         componentIds: {
-          ...validGmk67Build.componentIds,
+          ...validKeychronBuild.componentIds,
           plate: layoutMismatchPlate.id,
         },
       },
@@ -190,9 +201,9 @@ describe("validateBuildCompatibility", () => {
   it("blocks mount compatibility mismatches", () => {
     const result = validateBuildCompatibility(
       {
-        ...validGmk67Build,
+        ...validKeychronBuild,
         componentIds: {
-          ...validGmk67Build.componentIds,
+          ...validKeychronBuild.componentIds,
           case: trayOnly65Case.id,
         },
       },
@@ -211,13 +222,13 @@ describe("validateBuildCompatibility", () => {
   it("blocks incompatible switch and PCB technology", () => {
     const result = validateBuildCompatibility(
       {
-        ...validGmk67Build,
+        ...validKeychronBuild,
         componentIds: {
-          ...validGmk67Build.componentIds,
-          switch: "switch_razer_clicky_optical",
+          ...validKeychronBuild.componentIds,
+          switch: opticalSwitch.id,
         },
       },
-      keyboardComponents,
+      withTestComponents(opticalSwitch),
     );
 
     expect(result.isValid).toBe(false);
@@ -229,9 +240,9 @@ describe("validateBuildCompatibility", () => {
   it("blocks keycap switch technology mismatches", () => {
     const result = validateBuildCompatibility(
       {
-        ...validGmk67Build,
+        ...validKeychronBuild,
         componentIds: {
-          ...validGmk67Build.componentIds,
+          ...validKeychronBuild.componentIds,
           keycap: topReOnly65Keycap.id,
         },
       },
@@ -247,10 +258,10 @@ describe("validateBuildCompatibility", () => {
   it("blocks stabilizer incompatibility", () => {
     const result = validateBuildCompatibility(
       {
-        ...validGmk67Build,
+        ...validKeychronBuild,
         componentIds: {
-          ...validGmk67Build.componentIds,
-          stabilizer: "stab_mkb_siren_vk87_screw_in",
+          ...validKeychronBuild.componentIds,
+          stabilizer: "stab_weikav_star80_pcb_mount",
         },
       },
       keyboardComponents,
@@ -266,7 +277,7 @@ describe("validateBuildCompatibility", () => {
     const result = validateBuildCompatibility(
       {
         componentIds: {
-          case: "case_zuoya_gmk67_v2_kit_case",
+          case: "case_keychron_v2_max_65_abs",
         },
       },
       keyboardComponents,
@@ -288,7 +299,7 @@ describe("validateBuildCompatibility", () => {
   it("keeps sound preference mismatches as warning-only issues", () => {
     const result = validateBuildCompatibility(
       {
-        ...validGmk67Build,
+        ...validKeychronBuild,
         preferences: {
           layout: "65",
           soundProfile: "silent",
@@ -307,9 +318,9 @@ describe("validateBuildCompatibility", () => {
   it("keeps beginner-friendly mismatches as warning-only issues", () => {
     const result = validateBuildCompatibility(
       {
-        ...validGmk67Build,
+        ...validKeychronBuild,
         componentIds: {
-          ...validGmk67Build.componentIds,
+          ...validKeychronBuild.componentIds,
           switch: "switch_gateron_oil_king",
         },
         preferences: {

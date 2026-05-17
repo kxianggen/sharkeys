@@ -99,12 +99,12 @@ curl -X POST http://localhost:3000/api/builds/validate \
   -H "Content-Type: application/json" \
   -d '{
     "componentIds": {
-      "case": "case_zuoya_gmk67_v2_kit_case",
-      "pcb": "pcb_zuoya_gmk67_v2_hotswap",
-      "plate": "plate_zuoya_gmk67_v2_pc",
+      "case": "case_keychron_v2_max_65_abs",
+      "pcb": "pcb_keychron_v2_max_65_hotswap",
+      "plate": "plate_keychron_v2_max_65_pc",
       "switch": "switch_gateron_milky_yellow_pro",
-      "keycap": "keycap_mecha_bow_cherry_pbt",
-      "stabilizer": "stab_zuoya_gmk67_plate_mount"
+      "keycap": "keycap_unknown_pudding_oem_pbt",
+      "stabilizer": "stab_keychron_v2_max_screw_in"
     },
     "preferences": {
       "layout": "65",
@@ -233,7 +233,7 @@ If no valid build can be assembled, the route returns explanations and a clarifi
 
 ## Phase 4.5 Malaysia-Local Seed Data
 
-Phase 4.5 replaces the fictional prototype catalog with a small curated Malaysia-focused dataset using MYR pricing and vendor/source metadata. Current source vendors include Mecha Malaysia, MKB.MY, KeebsProject Shopee, and a Razer Malaysia optical 60% reference for the optical-switch test path.
+Phase 4.5 replaced the fictional prototype catalog with a small curated Malaysia-focused dataset using MYR pricing and vendor/source metadata.
 
 The catalog is still a prototype dataset, not a scraper or live inventory feed. Prices and availability are not guaranteed. Vendor URLs and metadata are included for traceability, and kit-derived compatibility records are explicitly marked with `metadata.sourceType = "kit_derived"` and a source note.
 
@@ -286,6 +286,14 @@ The UI now follows the light sharkeys design system: pale blue surfaces, white r
 
 This phase is frontend-only. Existing API routes, deterministic compatibility validation, live Supabase catalog reads, MYR pricing, vendor links, and localStorage saved builds are preserved. Keybot is currently static/local guidance only and does not call an LLM backend.
 
+## Phase 9B.2 Curated Malaysia Catalog
+
+Phase 9B.2 replaces the earlier weak/prototype seed catalog with higher-confidence Malaysia-accessible catalog records from the Phase 9B research document. The offline seed catalog now contains 42 records: 5 cases, 2 PCBs, 5 plates, 13 switches, 10 keycap sets, and 7 stabilizer records.
+
+Fully buildable kit-derived anchors include Keychron V2 Max and Weikav Star 80. AL75 V2, Yunzii B87, and Yunzii QL75 remain represented only where deterministic fields are defensible; their PCB records are held until stabilizer compatibility can be verified. Standalone component records include Gateron, Akko, MMD, KTT, Outemu, Everglide, TX, C3 Equalz, Owlab, SP-Star, and FLCMMK items sourced from MKB.MY and KeebsProject. Retailers remain provenance only in metadata; ambiguous clone-style keycap sets use `brand: "Unknown"` until manufacturer/authenticity is verified.
+
+This phase updates the offline catalog and Supabase seed-transform input only. It does not apply migrations, seed the live Supabase project, change API contracts, or change recommendation architecture. The deterministic rule engine remains the final compatibility gate.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
@@ -311,6 +319,10 @@ Phase 7.5 adds local scripts and documentation for applying, seeding, and verify
 Phase 7.6 activates and verifies the live Supabase catalog while keeping public access read-only and secrets out of version control.
 
 Phase 8 rebuilds the front-facing UI from the Stitch design references while preserving the existing recommendation, validation, manual builder, saved builds, Supabase, and API behavior.
+
+Phase 9B.1 researches Malaysia-local catalog candidates without changing app code or live data.
+
+Phase 9B.2 implements the curated offline catalog records from the research shortlist while holding uncertain products until specs or stock can be confirmed.
 
 ## Architecture Rule
 

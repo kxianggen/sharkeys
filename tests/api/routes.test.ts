@@ -15,12 +15,12 @@ import {
 
 const validBuildPayload = {
   componentIds: {
-    case: "case_zuoya_gmk67_v2_kit_case",
-    pcb: "pcb_zuoya_gmk67_v2_hotswap",
-    plate: "plate_zuoya_gmk67_v2_pc",
+    case: "case_keychron_v2_max_65_abs",
+    pcb: "pcb_keychron_v2_max_65_hotswap",
+    plate: "plate_keychron_v2_max_65_pc",
     switch: "switch_gateron_milky_yellow_pro",
-    keycap: "keycap_mecha_bow_cherry_pbt",
-    stabilizer: "stab_zuoya_gmk67_plate_mount",
+    keycap: "keycap_unknown_pudding_oem_pbt",
+    stabilizer: "stab_keychron_v2_max_screw_in",
   },
   preferences: {
     layout: "65",
@@ -37,7 +37,7 @@ describe("component API routes", () => {
     const parsed = componentsListResponseSchema.parse(body);
 
     expect(response.status).toBe(200);
-    expect(parsed.data.count).toBe(5);
+    expect(parsed.data.count).toBe(13);
     expect(
       parsed.data.components.every((component) => component.category === "switch"),
     ).toBe(true);
@@ -45,13 +45,13 @@ describe("component API routes", () => {
 
   it("returns a component by ID", async () => {
     const response = await componentGET(new Request("http://localhost"), {
-      params: Promise.resolve({ id: "case_zuoya_gmk67_v2_kit_case" }),
+      params: Promise.resolve({ id: "case_keychron_v2_max_65_abs" }),
     });
     const body = await response.json();
     const parsed = componentResponseSchema.parse(body);
 
     expect(response.status).toBe(200);
-    expect(parsed.data.component.name).toBe("Zuoya GMK67 V2 65% Kit Case");
+    expect(parsed.data.component.name).toBe("Keychron V2 Max 65% ABS Case");
   });
 
   it("returns a useful error when a component ID is unknown", async () => {
@@ -74,7 +74,7 @@ describe("component API routes", () => {
 
     expect(response.status).toBe(200);
     expect(parsed.data.category).toBe("pcb");
-    expect(parsed.data.components).toHaveLength(3);
+    expect(parsed.data.components).toHaveLength(2);
   });
 
   it("rejects invalid category routes", async () => {

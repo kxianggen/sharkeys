@@ -33,13 +33,37 @@ function makeIntent(
 }
 
 const validCandidateIds: ComponentCandidateIdsByCategory = {
-  case: ["case_zuoya_gmk67_v2_kit_case"],
-  pcb: ["pcb_zuoya_gmk67_v2_hotswap"],
-  plate: ["plate_zuoya_gmk67_v2_pc"],
+  case: ["case_keychron_v2_max_65_abs"],
+  pcb: ["pcb_keychron_v2_max_65_hotswap"],
+  plate: ["plate_keychron_v2_max_65_pc"],
   switch: ["switch_gateron_milky_yellow_pro"],
-  keycap: ["keycap_mecha_bow_cherry_pbt"],
-  stabilizer: ["stab_zuoya_gmk67_plate_mount"],
+  keycap: ["keycap_unknown_pudding_oem_pbt"],
+  stabilizer: ["stab_keychron_v2_max_screw_in"],
 };
+
+async function withMissingOpenAiKey<T>(callback: () => Promise<T>) {
+  const previousApiKey = process.env.OPENAI_API_KEY;
+  delete process.env.OPENAI_API_KEY;
+
+  try {
+    return await callback();
+  } finally {
+    if (previousApiKey !== undefined) {
+      process.env.OPENAI_API_KEY = previousApiKey;
+    }
+  }
+}
+
+function expectValidatedRecommendations(
+  result: Awaited<ReturnType<typeof generateRecommendationsFromMessage>>,
+) {
+  expect(result.recommendations.length).toBeGreaterThan(0);
+  expect(
+    result.recommendations.every(
+      (recommendation) => recommendation.validation.isValid,
+    ),
+  ).toBe(true);
+}
 
 describe("recommendation service", () => {
   it("returns only builds that passed deterministic validation", () => {
@@ -70,8 +94,8 @@ describe("recommendation service", () => {
       candidateComponentIds: {
         ...validCandidateIds,
         case: [
-          "case_razer_huntsman_mini_60_case",
-          "case_zuoya_gmk67_v2_kit_case",
+          "case_weikav_star80_tkl_aluminum",
+          "case_keychron_v2_max_65_abs",
         ],
       },
       maxRecommendations: 2,
@@ -80,7 +104,7 @@ describe("recommendation service", () => {
     expect(assembly.rejectedBuildCount).toBeGreaterThan(0);
     expect(assembly.recommendations).toHaveLength(1);
     expect(assembly.recommendations[0].componentIds.case).toBe(
-      "case_zuoya_gmk67_v2_kit_case",
+      "case_keychron_v2_max_65_abs",
     );
     expect(assembly.recommendations[0].validation.isValid).toBe(true);
   });
@@ -96,12 +120,12 @@ describe("recommendation service", () => {
         switchTechnology: "mechanical",
       },
       candidateComponentIds: {
-        case: ["case_razer_huntsman_mini_60_case"],
-        pcb: ["pcb_zuoya_gmk67_v2_hotswap"],
-        plate: ["plate_mkb_siren_vk87_pc"],
+        case: ["case_weikav_star80_tkl_aluminum"],
+        pcb: ["pcb_keychron_v2_max_65_hotswap"],
+        plate: ["plate_weikav_star80_tkl_fr4"],
         switch: ["switch_gateron_milky_yellow_pro"],
-        keycap: ["keycap_mecha_bow_cherry_pbt"],
-        stabilizer: ["stab_zuoya_gmk67_plate_mount"],
+        keycap: ["keycap_unknown_pudding_oem_pbt"],
+        stabilizer: ["stab_keychron_v2_max_screw_in"],
       },
     };
     const result = createRecommendationResult(
@@ -275,10 +299,7 @@ describe("recommendation service", () => {
   });
 
   it("does not silently return unfiltered MYR builds for low USD office budgets", async () => {
-    const previousApiKey = process.env.OPENAI_API_KEY;
-    delete process.env.OPENAI_API_KEY;
-
-    try {
+    await withMissingOpenAiKey(async () => {
       const result = await generateRecommendationsFromMessage({
         message: "quiet office keyboard under $50",
       });
@@ -297,10 +318,75 @@ describe("recommendation service", () => {
       expect(result.explanations).toContain(
         "Estimated build price exceeds the extracted budget.",
       );
-    } finally {
-      if (previousApiKey !== undefined) {
-        process.env.OPENAI_API_KEY = previousApiKey;
-      }
-    }
+    });
+  });
+
+  it("returns a validated beginner-friendly 65% recommendation under RM500", async () => {
+    await withMissingOpenAiKey(async () => {
+      const result = await generateRecommendationsFromMessage({
+        message: "beginner friendly 65% keyboard under RM500",
+      });
+
+      expect(result.intent.layout).toBe("65");
+      expect(result.intent.budget).toMatchObject({
+        amount: 500,
+        currency: "MYR",
+      });
+      expectValidatedRecommendations(result);
+      expect(result.recommendations[0].estimatedPrice).toBeLessThanOrEqual(500);
+    });
+  });
+
+  it("returns a validated quiet office recommendation under RM800", async () => {
+    await withMissingOpenAiKey(async () => {
+      const result = await generateRecommendationsFromMessage({
+        message: "quiet office keyboard under RM800",
+      });
+
+      expect(result.intent.useCase).toBe("office");
+      expect(result.intent.soundProfile).toBe("silent");
+      expectValidatedRecommendations(result);
+      expect(result.recommendations[0].estimatedPrice).toBeLessThanOrEqual(800);
+    });
+  });
+
+  it("holds 75% aluminum recommendations until PCB stabilizer support is verified", async () => {
+    await withMissingOpenAiKey(async () => {
+      const result = await generateRecommendationsFromMessage({
+        message: "75% aluminum keyboard",
+      });
+
+      expect(result.intent.layout).toBe("75");
+      expect(result.recommendations).toEqual([]);
+      expect(result.explanations).toContain(
+        "No seed candidates were available for: pcb.",
+      );
+    });
+  });
+
+  it("returns a validated TKL typing recommendation path", async () => {
+    await withMissingOpenAiKey(async () => {
+      const result = await generateRecommendationsFromMessage({
+        message: "TKL typing keyboard",
+      });
+
+      expect(result.intent.layout).toBe("tkl");
+      expect(result.intent.useCase).toBe("typing");
+      expectValidatedRecommendations(result);
+    });
+  });
+
+  it("returns a validated clacky/clicky recommendation path", async () => {
+    await withMissingOpenAiKey(async () => {
+      const result = await generateRecommendationsFromMessage({
+        message: "clacky/clicky keyboard",
+      });
+
+      expect(result.intent.soundProfile).toBe("clacky");
+      expectValidatedRecommendations(result);
+      expect(result.recommendations[0].components.switch.soundProfile).toBe(
+        "clacky",
+      );
+    });
   });
 });
