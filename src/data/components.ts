@@ -10,6 +10,7 @@ function kitDerivedMetadata({
   sourceUrl,
   observedKitName,
   observedKitPrice,
+  kitId,
   notes,
   officialSourceUrl,
 }: {
@@ -17,11 +18,14 @@ function kitDerivedMetadata({
   sourceUrl: string;
   observedKitName: string;
   observedKitPrice?: number;
+  kitId: string;
   notes?: string[];
   officialSourceUrl?: string;
 }) {
   return {
     sourceType: "kit_derived",
+    kitId,
+    kitLock: true,
     sourceNote:
       "Derived from a vendor-listed keyboard kit for prototype compatibility testing.",
     sourceVendor,
@@ -67,6 +71,7 @@ const keychronV2MaxMetadata = kitDerivedMetadata({
     "https://www.keychron.com/products/keychron-v2-max-qmk-via-wireless-custom-mechanical-keyboard",
   observedKitName: "Keychron V2 Max",
   observedKitPrice: 449,
+  kitId: "keychron_v2_max",
   notes: [
     "MKB.MY listed assembled variants at research time; barebone variant should be rechecked before live seeding.",
     "Official Keychron page confirms gasket mount, PC plate, 3/5-pin hot-swap, and screw-in PCB stabilizers.",
@@ -79,6 +84,7 @@ const weikavStar80Metadata = kitDerivedMetadata({
     "https://www.keebsproject.com/product/ready-stock-star-80-wireless-tkl-87-cnc-aluminum-case-hot-swap-rgb-gasket-mechanical-keyboard-kit-keebs-project",
   observedKitName: "Weikav Star 80",
   observedKitPrice: 395,
+  kitId: "weikav_star80",
 });
 
 const al75V2Metadata = kitDerivedMetadata({
@@ -87,6 +93,7 @@ const al75V2Metadata = kitDerivedMetadata({
     "https://www.keebsproject.com/product/ready-stock-al75-v2-wireless-cnc-aluminum-case-hot-swap-rgb-gasket-mechanical-keyboard-kit-gasket-customized",
   observedKitName: "AL75 V2",
   observedKitPrice: 339,
+  kitId: "al75_v2",
   notes: [
     "Vendor page lists gasket mount, aluminum case, tri-mode connectivity, FR4/PC plate variants, and 3/5-pin hot-swap.",
     "Stabilizer type is not stated on the source page; screw-in compatibility should be manually verified before live catalog seeding.",
@@ -100,6 +107,7 @@ const yunziiB87Metadata = kitDerivedMetadata({
     "https://www.keebsproject.com/product/ready-stock-yunzii-b87-80-viaqmk-full-kit-custom-mechanical-keyboard",
   observedKitName: "Yunzii B87",
   observedKitPrice: 319,
+  kitId: "yunzii_b87",
   notes: [
     "Vendor page lists ABS frame, gasket structure, tri-mode connectivity, QMK/VIA, and 3/5-pin hot-swap.",
     "Plate material and stabilizer type need verification.",
@@ -114,6 +122,7 @@ const yunziiQl75Metadata = kitDerivedMetadata({
     "https://www.yunzii.com/en-ca/products/yunzii-ql75-vintage-retro-typewriter-qmk-via-mechanical-keyboard",
   observedKitName: "Yunzii QL75",
   observedKitPrice: 439,
+  kitId: "yunzii_ql75",
   notes: [
     "Vendor and official pages list top mount, QMK/VIA, tri-mode connectivity, 75% layout, and 3/5-pin hot-swap.",
     "Case material, plate material, and stabilizer type need verification.",

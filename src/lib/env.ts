@@ -13,6 +13,29 @@ const openAIEnvSchema = z.object({
   OPENAI_API_KEY: z.string().min(1),
 });
 
+export const defaultOpenAIModel = "gpt-4.1-mini";
+export const defaultOpenAIMaxOutputTokens = 800;
+
+const optionalOpenAIConfigSchema = z.object({
+  OPENAI_API_KEY: z
+    .preprocess(emptyStringToUndefined, z.string().trim().min(1).optional()),
+  OPENAI_MODEL: z
+    .preprocess(
+      emptyStringToUndefined,
+      z.string().trim().min(1).default(defaultOpenAIModel),
+    ),
+  OPENAI_MAX_OUTPUT_TOKENS: z
+    .preprocess(
+      emptyStringToUndefined,
+      z.coerce
+        .number()
+        .int()
+        .positive()
+        .max(4096)
+        .default(defaultOpenAIMaxOutputTokens),
+    ),
+});
+
 type EnvironmentMap = Record<string, string | undefined>;
 
 const supabasePlaceholderValues = new Set([
@@ -42,6 +65,10 @@ export function readOpenAIEnv(env: EnvironmentMap = process.env) {
   return openAIEnvSchema.parse(env);
 }
 
+export function readOptionalOpenAIConfig(env: EnvironmentMap = process.env) {
+  return optionalOpenAIConfigSchema.parse(env);
+}
+
 function hasSupabasePlaceholderValue(
   env: z.infer<typeof supabasePublicEnvSchema>,
 ) {
@@ -53,4 +80,8 @@ function hasSupabasePlaceholderValue(
 
 function isSupabasePlaceholderValue(value: string) {
   return supabasePlaceholderValues.has(value.trim().toLowerCase());
+}
+
+function emptyStringToUndefined(value: unknown) {
+  return typeof value === "string" && value.trim() === "" ? undefined : value;
 }

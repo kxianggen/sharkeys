@@ -4,6 +4,7 @@ import {
   buildValidatedRecommendations,
   createRecommendationResult,
   generateRecommendationsFromMessage,
+  scoreRecommendation,
 } from "@/lib/recommendations";
 import { extractedKeyboardIntentSchema, prepareIntentMatches } from "@/lib/ai";
 import { PROTOTYPE_USD_TO_MYR_RATE } from "@/lib/pricing";
@@ -141,7 +142,7 @@ describe("recommendation service", () => {
     expect(result.recommendations).toEqual([]);
     expect(result.explanations[0]).toContain("No valid build");
     expect(result.clarificationPrompt).toBe(
-      "Would you prefer a 60% or 65% layout?",
+      "Try adding a layout, sound profile, use case, or budget so sharkeys can narrow the validated catalog paths.",
     );
   });
 
@@ -174,6 +175,38 @@ describe("recommendation service", () => {
     expect(result.explanations).toContain(
       "Estimated build price exceeds the extracted budget.",
     );
+  });
+
+  it("ranks closer sound and use-case matches above looser valid builds", () => {
+    const intent = makeIntent({
+      budget: {
+        amount: 800,
+        currency: "MYR",
+        label: "premium",
+      },
+      soundProfile: "silent",
+      useCase: "office",
+      priorities: ["sound"],
+    });
+    const assembly = buildValidatedRecommendations({
+      intent,
+      candidateComponentIds: {
+        ...validCandidateIds,
+        switch: [
+          "switch_gateron_milky_yellow_pro",
+          "switch_akko_penguin_silent",
+        ],
+      },
+      maxRecommendations: 2,
+    });
+
+    expect(assembly.recommendations).toHaveLength(2);
+    expect(assembly.recommendations[0].components.switch.id).toBe(
+      "switch_akko_penguin_silent",
+    );
+    expect(
+      scoreRecommendation(assembly.recommendations[0], intent),
+    ).toBeGreaterThan(scoreRecommendation(assembly.recommendations[1], intent));
   });
 
   it("returns MYR price estimates for Malaysia seed recommendations", () => {
@@ -359,8 +392,12 @@ describe("recommendation service", () => {
       expect(result.intent.layout).toBe("75");
       expect(result.recommendations).toEqual([]);
       expect(result.explanations).toContain(
-        "No seed candidates were available for: pcb.",
+        "The current curated catalog does not yet have a verified 75% PCB and stabilizer compatibility path.",
       );
+      expect(result.explanations).toContain(
+        "No catalog candidates were available for: pcb.",
+      );
+      expect(result.clarificationPrompt).toContain("Try allowing TKL or 65%");
     });
   });
 
@@ -373,6 +410,29 @@ describe("recommendation service", () => {
       expect(result.intent.layout).toBe("tkl");
       expect(result.intent.useCase).toBe("typing");
       expectValidatedRecommendations(result);
+    });
+  });
+
+  it("does not recommend cross-kit structural combinations", async () => {
+    await withMissingOpenAiKey(async () => {
+      const result = await generateRecommendationsFromMessage({
+        message: "TKL typing keyboard",
+      });
+
+      expectValidatedRecommendations(result);
+
+      for (const recommendation of result.recommendations) {
+        const structuralKitIds = [
+          recommendation.components.case,
+          recommendation.components.pcb,
+          recommendation.components.plate,
+          recommendation.components.stabilizer,
+        ]
+          .filter(isKitLockedStructuralComponent)
+          .map((component) => getMetadataString(component.metadata, "kitId"));
+
+        expect(new Set(structuralKitIds).size).toBeLessThanOrEqual(1);
+      }
     });
   });
 
@@ -389,4 +449,195 @@ describe("recommendation service", () => {
       );
     });
   });
+
+  it("uses OpenAI explanation calls only for a safe overall notice", async () => {
+    const result = await generateRecommendationsFromMessage(
+      {
+        message: "beginner friendly creamy 65% keyboard under RM500",
+      },
+      {
+        extraction: {
+          intent: makeIntent({
+            budget: {
+              amount: 500,
+              currency: "MYR",
+              label: "mid_range",
+            },
+          }),
+          source: "openai",
+        },
+        catalogComponents: keyboardComponents.filter((component) =>
+          Object.values(validCandidateIds).flat().includes(component.id),
+        ),
+        maxRecommendations: 1,
+        explanationClient: {
+          responses: {
+            parse: async () => ({
+              output_parsed: {
+                recommendations: [
+                  {
+                    id: "validated_build_1",
+                    explanations: [
+                      "Keychron V2 Max and Gateron Milky Yellow Pro fit the validated 65% creamy brief.",
+                    ],
+                  },
+                ],
+                overallExplanations: [
+                  "AI wording was generated only from selected component facts.",
+                ],
+                clarificationPrompt: null,
+              },
+            }),
+          },
+        } as never,
+      },
+    );
+
+    expectValidatedRecommendations(result);
+    expect(result.explanations).toContain(
+      "AI wording was generated from already validated recommendation facts; technical recommendation explanations remain deterministic.",
+    );
+    expect(result.recommendations[0].explanations).not.toContain(
+      "Keychron V2 Max and Gateron Milky Yellow Pro fit the validated 65% creamy brief.",
+    );
+  });
+
+  it("does not include hallucinated OpenAI recommendation claims", async () => {
+    const hallucinatedClaim =
+      "The unselected Glorious GMMK Pro aluminum optical PCB from FakeVendor costs MYR 199 and is fully compatible.";
+    const result = await generateRecommendationsFromMessage(
+      {
+        message: "beginner friendly creamy 65% keyboard under RM500",
+      },
+      {
+        extraction: {
+          intent: makeIntent({
+            budget: {
+              amount: 500,
+              currency: "MYR",
+              label: "mid_range",
+            },
+          }),
+          source: "openai",
+        },
+        catalogComponents: keyboardComponents.filter((component) =>
+          Object.values(validCandidateIds).flat().includes(component.id),
+        ),
+        maxRecommendations: 1,
+        explanationClient: {
+          responses: {
+            parse: async () => ({
+              output_parsed: {
+                recommendations: [
+                  {
+                    id: "validated_build_1",
+                    explanations: [hallucinatedClaim],
+                  },
+                ],
+                overallExplanations: [hallucinatedClaim],
+                clarificationPrompt: "Buy the fake optical build instead.",
+              },
+            }),
+          },
+        } as never,
+      },
+    );
+    const allRecommendationText =
+      result.recommendations[0].explanations.join(" ");
+
+    expectValidatedRecommendations(result);
+    expect(allRecommendationText).not.toContain("Glorious GMMK Pro");
+    expect(allRecommendationText).not.toContain("FakeVendor");
+    expect(allRecommendationText).not.toContain("optical PCB");
+    expect(allRecommendationText).not.toContain("MYR 199");
+    expect(result.explanations).not.toContain(hallucinatedClaim);
+    expect(result.clarificationPrompt).toBeNull();
+    expect(result.explanations).toContain(
+      "AI wording was generated from already validated recommendation facts; technical recommendation explanations remain deterministic.",
+    );
+  });
+
+  it("keeps deterministic recommendations when OpenAI explanation generation fails", async () => {
+    const result = await generateRecommendationsFromMessage(
+      {
+        message: "beginner friendly creamy 65% keyboard under RM500",
+      },
+      {
+        extraction: {
+          intent: makeIntent({
+            budget: {
+              amount: 500,
+              currency: "MYR",
+              label: "mid_range",
+            },
+          }),
+          source: "openai",
+        },
+        catalogComponents: keyboardComponents.filter((component) =>
+          Object.values(validCandidateIds).flat().includes(component.id),
+        ),
+        maxRecommendations: 1,
+        explanationClient: {
+          responses: {
+            parse: async () => {
+              throw { status: 429 };
+            },
+          },
+        } as never,
+      },
+    );
+
+    expectValidatedRecommendations(result);
+    expect(result.error).toContain(
+      "OpenAI explanation generation failed; deterministic explanations were used.",
+    );
+  });
+
+  it("keeps recommendation explanations grounded in selected component data", () => {
+    const result = createRecommendationResult(
+      {
+        intent: makeIntent(),
+        source: "openai",
+      },
+      {
+        preparation: {
+          criteria: {
+            layout: "65",
+            soundProfile: "creamy",
+            currency: "MYR",
+          },
+          candidateComponentIds: validCandidateIds,
+        },
+        maxRecommendations: 1,
+      },
+    );
+    const recommendation = result.recommendations[0];
+    const explanationText = recommendation.explanations.join(" ");
+
+    expect(explanationText).toContain(recommendation.components.case.name);
+    expect(explanationText).toContain(recommendation.components.switch.name);
+    expect(explanationText).toContain(recommendation.components.keycap.name);
+    expect(explanationText).toContain(
+      recommendation.components.stabilizer.name,
+    );
+    expect(explanationText).toContain("deterministic compatibility validation");
+  });
 });
+
+function isKitLockedStructuralComponent(component: {
+  metadata?: Record<string, unknown>;
+}) {
+  return (
+    component.metadata?.kitLock === true ||
+    component.metadata?.sourceType === "kit_derived"
+  );
+}
+
+function getMetadataString(
+  metadata: Record<string, unknown> | undefined,
+  key: string,
+) {
+  const value = metadata?.[key];
+
+  return typeof value === "string" ? value : undefined;
+}
