@@ -15,6 +15,10 @@
 /tmp/
 /.playwright-cli/
 
+# local design extraction artifacts
+/design-research/
+/design-extract-output/
+
 # next.js
 /.next/
 /out/

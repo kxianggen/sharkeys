@@ -32,6 +32,7 @@ import {
 
 import type { CompatibilityResult, KeyboardComponent } from "@/lib/types";
 import type { RecommendationsApiResponse } from "@/lib/recommendations/schemas";
+import type { KeybotApiResponse } from "@/lib/keybot/schemas";
 
 type RecommendationResult = RecommendationsApiResponse["data"];
 type RecommendationBuild = RecommendationResult["recommendations"][number];
@@ -76,6 +77,14 @@ type SavedBuild = {
   estimatedPrice: number | null;
   estimatedPriceCurrency: KeyboardComponent["priceCurrency"] | null;
   validation: CompatibilityResult;
+};
+
+type KeybotChatMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  relatedComponentIds?: string[];
+  source?: KeybotApiResponse["data"]["source"];
 };
 
 const componentCategories: ComponentCategory[] = [
@@ -941,7 +950,12 @@ export function RecommendationDemo() {
               />
 
               <div className="lg:hidden">
-                <KeybotPanel />
+                <KeybotPanel
+                  catalogById={catalogById}
+                  manualSelection={manualSelection}
+                  result={result}
+                  selectedRecommendation={selectedRecommendation}
+                />
               </div>
             </aside>
           </div>
@@ -954,7 +968,12 @@ export function RecommendationDemo() {
       <SharkeysFooter />
 
       <div className="hidden lg:block">
-        <FloatingKeybot />
+        <FloatingKeybot
+          catalogById={catalogById}
+          manualSelection={manualSelection}
+          result={result}
+          selectedRecommendation={selectedRecommendation}
+        />
       </div>
     </div>
   );
@@ -1012,7 +1031,21 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
   );
 }
 
-function FloatingKeybot() {
+type KeybotPanelProps = {
+  catalogById: Map<string, KeyboardComponent>;
+  floating?: boolean;
+  manualSelection: ManualSelection;
+  onClose?: () => void;
+  result: RecommendationResult | null;
+  selectedRecommendation: RecommendationBuild | null;
+};
+
+function FloatingKeybot({
+  catalogById,
+  manualSelection,
+  result,
+  selectedRecommendation,
+}: Omit<KeybotPanelProps, "floating" | "onClose">) {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!isOpen) {
@@ -1028,33 +1061,119 @@ function FloatingKeybot() {
     );
   }
 
-  return <KeybotPanel floating onClose={() => setIsOpen(false)} />;
+  return (
+    <KeybotPanel
+      catalogById={catalogById}
+      floating
+      manualSelection={manualSelection}
+      onClose={() => setIsOpen(false)}
+      result={result}
+      selectedRecommendation={selectedRecommendation}
+    />
+  );
 }
 
 function KeybotPanel({
+  catalogById,
   floating = false,
+  manualSelection,
   onClose,
-}: {
-  floating?: boolean;
-  onClose?: () => void;
-}) {
+  result,
+  selectedRecommendation,
+}: KeybotPanelProps) {
   const faqs = [
-    {
-      question: "What is a thocky keyboard?",
-      answer:
-        "A deeper, rounded sound profile often influenced by switch choice, plate material, case design, and foam.",
-    },
-    {
-      question: "Linear vs tactile switches",
-      answer:
-        "Linear switches press smoothly. Tactile switches add a small bump so you can feel actuation.",
-    },
-    {
-      question: "What is a hot-swappable PCB?",
-      answer:
-        "A PCB that lets you install or replace switches without soldering, useful for beginners and testing.",
-    },
+    "What is a thocky keyboard?",
+    "Linear vs tactile switches",
+    "What is a hot-swappable PCB?",
   ] as const;
+  const [messages, setMessages] = useState<KeybotChatMessage[]>([
+    {
+      id: "keybot-welcome",
+      role: "assistant",
+      content:
+        "Hi, I’m Keybot. Ask about switches, sound, layouts, compatibility, or your current validated build.",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function sendKeybotMessage(messageText: string) {
+    const trimmedMessage = messageText.trim();
+
+    if (!trimmedMessage || isSending) {
+      return;
+    }
+
+    const userMessage: KeybotChatMessage = {
+      id: createKeybotMessageId("user"),
+      role: "user",
+      content: trimmedMessage,
+    };
+    const nextMessages = [...messages, userMessage];
+
+    setMessages(nextMessages);
+    setInput("");
+    setError(null);
+    setIsSending(true);
+
+    try {
+      const response = await fetch("/api/keybot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: trimmedMessage,
+          context: buildKeybotRequestContext({
+            history: nextMessages,
+            manualSelection,
+            result,
+            selectedRecommendation,
+          }),
+        }),
+      });
+      const body = (await response.json()) as
+        | KeybotApiResponse
+        | ApiErrorResponse;
+
+      if (!response.ok || !body.success) {
+        throw new Error(
+          "error" in body ? body.error.message : "Keybot could not answer.",
+        );
+      }
+
+      setMessages((current) => [
+        ...current,
+        {
+          id: createKeybotMessageId("assistant"),
+          role: "assistant",
+          content: body.data.answer,
+          relatedComponentIds: body.data.relatedComponentIds,
+          source: body.data.source,
+        },
+      ]);
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Keybot could not answer right now.";
+
+      setError(message);
+      setMessages((current) => [
+        ...current,
+        {
+          id: createKeybotMessageId("assistant"),
+          role: "assistant",
+          content:
+            "I could not reach Keybot just now. The main configurator still uses deterministic validation for recommendations.",
+          source: "fallback_error",
+        },
+      ]);
+    } finally {
+      setIsSending(false);
+    }
+  }
 
   return (
     <section
@@ -1089,47 +1208,137 @@ function KeybotPanel({
         </div>
 
         <div className="space-y-4 p-5">
-          <div className="rounded-2xl rounded-tl-md border border-[#c2c7cf]/60 bg-[#e9f5ff] p-3 text-sm leading-6 text-[#071e29]">
-            Hi, I’m your keyboard guide. I can explain common keyboard terms
-            while the main prompt generates real validated builds.
+          <div
+            aria-live="polite"
+            className="max-h-80 space-y-3 overflow-y-auto pr-1"
+          >
+            {messages.map((message) => (
+              <div
+                className={`rounded-2xl border p-3 text-sm leading-6 ${
+                  message.role === "assistant"
+                    ? "rounded-tl-md border-[#c2c7cf]/60 bg-[#e9f5ff] text-[#071e29]"
+                    : "rounded-tr-md border-[#094067]/20 bg-[#094067] text-white"
+                }`}
+                key={message.id}
+              >
+                <p>{message.content}</p>
+                {message.source && message.source !== "openai" ? (
+                  <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] opacity-70">
+                    {message.source === "fallback_missing_api_key"
+                      ? "Local grounded fallback"
+                      : "Safe fallback"}
+                  </p>
+                ) : null}
+                {message.relatedComponentIds &&
+                message.relatedComponentIds.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {message.relatedComponentIds.slice(0, 4).map((id) => {
+                      const component = catalogById.get(id);
+
+                      return (
+                        <span
+                          className="rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-[#094067]"
+                          key={id}
+                        >
+                          {component?.name ?? id}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+            {isSending ? (
+              <div className="flex items-center gap-2 rounded-2xl rounded-tl-md border border-[#c2c7cf]/60 bg-[#e9f5ff] p-3 text-sm font-semibold text-[#094067]">
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                Keybot is checking grounded catalog facts...
+              </div>
+            ) : null}
           </div>
 
           <div className="space-y-2">
             {faqs.map((faq) => (
-              <details
-                className="rounded-2xl border border-[#c2c7cf]/70 bg-[#ddf1ff] p-3 text-left"
-                key={faq.question}
+              <button
+                className="w-full rounded-2xl border border-[#c2c7cf]/70 bg-[#ddf1ff] p-3 text-left text-sm font-bold text-[#094067] transition hover:border-[#00639d] hover:bg-[#d5ebfb] focus:outline-none focus:ring-4 focus:ring-[#43acff]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isSending}
+                key={faq}
+                onClick={() => void sendKeybotMessage(faq)}
+                type="button"
               >
-                <summary className="cursor-pointer text-sm font-bold text-[#094067]">
-                  {faq.question}
-                </summary>
-                <p className="mt-2 text-sm leading-6 text-[#42474e]">
-                  {faq.answer}
-                </p>
-              </details>
+                {faq}
+              </button>
             ))}
           </div>
+          {error ? (
+            <p className="rounded-2xl border border-[#ba1a1a]/20 bg-[#fff5f5] px-3 py-2 text-xs font-semibold text-[#ba1a1a]">
+              {error}
+            </p>
+          ) : null}
         </div>
 
-        <div className="flex items-center gap-2 border-t border-[#c2c7cf] p-3">
+        <form
+          className="flex items-center gap-2 border-t border-[#c2c7cf] p-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void sendKeybotMessage(input);
+          }}
+        >
           <input
             aria-label="Keybot question"
             className="min-w-0 flex-1 rounded-full border border-transparent bg-transparent px-3 py-2 text-sm text-[#071e29] placeholder:text-[#42474e]/60 focus:border-[#00639d] focus:outline-none focus:ring-4 focus:ring-[#43acff]/20"
-            placeholder="Ask about switches, sound, layouts..."
-            readOnly
+            disabled={isSending}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder="Ask about switches, sound, layouts, or your current build..."
+            value={input}
           />
           <button
-            aria-label="Keybot chat is static for now"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#43acff] text-[#003e66] opacity-80"
-            disabled
-            type="button"
+            aria-label="Send Keybot question"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#43acff] text-[#003e66] transition hover:bg-[#00639d] hover:text-white focus:outline-none focus:ring-4 focus:ring-[#43acff]/30 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isSending || input.trim().length === 0}
+            type="submit"
           >
-            <Send className="h-4 w-4" aria-hidden />
+            {isSending ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Send className="h-4 w-4" aria-hidden />
+            )}
           </button>
-        </div>
+        </form>
       </div>
     </section>
   );
+}
+
+function createKeybotMessageId(prefix: "assistant" | "user") {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+function buildKeybotRequestContext({
+  history,
+  manualSelection,
+  result,
+  selectedRecommendation,
+}: {
+  history: KeybotChatMessage[];
+  manualSelection: ManualSelection;
+  result: RecommendationResult | null;
+  selectedRecommendation: RecommendationBuild | null;
+}) {
+  const selectedComponentIds =
+    selectedRecommendation?.componentIds ??
+    (Object.values(manualSelection).some(Boolean) ? manualSelection : undefined);
+
+  return {
+    conversationHistory: history.slice(-6).map((message) => ({
+      role: message.role,
+      content: message.content,
+    })),
+    currentIntent: result?.intent,
+    currentRecommendationIds: result?.recommendations
+      .map((recommendation) => recommendation.id)
+      .slice(0, 6),
+    selectedComponentIds,
+  };
 }
 
 function HowItWorksSection() {
