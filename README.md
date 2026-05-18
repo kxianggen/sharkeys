@@ -286,9 +286,9 @@ Phase 8 rebuilds the main user-facing experience using the Stitch design sources
 - `/Users/fluffyunicorn/Downloads/stitch_ai_keyboard_configurator/sharkeys/DESIGN.md`
 - `/Users/fluffyunicorn/Downloads/stitch_ai_keyboard_configurator/sharkeys_landing_page_with_keybot/code.html`
 
-The UI now follows the light sharkeys design system: pale blue surfaces, white rounded cards, Satoshi typography, deep-blue primary actions, strong whitespace, and a prompt-first configurator flow. The landing page includes a sticky navigation bar, the functional recommendation prompt, quick prompt chips, a static Keybot FAQ helper, validated recommendation results, manual validation, saved builds, a four-step “The intelligent way to build” section, a bento feature section, final CTA, and footer.
+The UI now follows the light sharkeys design system: pale blue surfaces, white rounded cards, Satoshi typography, deep-blue primary actions, strong whitespace, and a prompt-first configurator flow. The landing page includes a sticky navigation bar, the functional recommendation prompt, quick prompt chips, a Keybot helper panel, validated recommendation results, manual validation, saved builds, a four-step “The intelligent way to build” section, a bento feature section, final CTA, and footer.
 
-This phase is frontend-only. Existing API routes, deterministic compatibility validation, live Supabase catalog reads, MYR pricing, vendor links, and localStorage saved builds are preserved. Keybot is currently static/local guidance only and does not call an LLM backend.
+This phase is frontend-only. Existing API routes, deterministic compatibility validation, live Supabase catalog reads, MYR pricing, vendor links, and localStorage saved builds are preserved.
 
 ## Phase 9B.2 Curated Malaysia Catalog
 
@@ -309,6 +309,14 @@ Validated builds are ranked with a deterministic scoring layer that considers la
 Recommendation explanations now describe why the selected case, PCB, plate, switch, keycap, and stabilizer fit the prompt using selected component fields and validation output. Deterministic explanations remain the authoritative user-facing technical facts. When OpenAI is configured, it may process the already validated payload, but free-form model text is not appended to individual recommendation explanations; the service adds only a safe high-level notice. If OpenAI is missing, invalid, rate-limited, or unavailable, the service returns the deterministic fallback explanations instead.
 
 No-build responses are more specific. For example, 75% aluminum prompts currently explain that the curated catalog does not yet have a verified 75% PCB and stabilizer compatibility path instead of fabricating a build. Very vague prompts keep returning one clarification question so the user can narrow layout, sound, use case, or budget.
+
+## Phase 9D.1 Grounded Keybot Assistant
+
+Phase 9D.1 turns Keybot from a static FAQ panel into a functional conversational helper through `POST /api/keybot`.
+
+Keybot can answer keyboard concept questions, explain layouts and switch terms, summarize selected validated builds, explain no-build outcomes, and call the existing recommendation service when the user asks for a build suggestion. It uses the current catalog and deterministic validation output as grounding context. If OpenAI is configured, Keybot may reword grounded facts into a concise answer; if the server-side OpenAI key is missing or OpenAI fails, it falls back to deterministic local responses.
+
+Keybot does not invent products, prices, vendors, availability, stock, or compatibility facts. It does not mutate Supabase, apply migrations, perform purchases, or bypass `validateBuildSelectionFromIds`. Build suggestions remain validated recommendation results only, and kit-derived structural parts continue to obey `metadata.kitId` / `metadata.kitLock` compatibility rules.
 
 ## Development Phases
 
@@ -341,6 +349,8 @@ Phase 9B.1 researches Malaysia-local catalog candidates without changing app cod
 Phase 9B.2 implements the curated offline catalog records from the research shortlist while holding uncertain products until specs or stock can be confirmed.
 
 Phase 9C.1 adds deterministic ranking, grounded recommendation explanations, configurable OpenAI model settings, and safer OpenAI failure fallbacks without changing the validation gate.
+
+Phase 9D.1 adds a grounded Keybot conversational assistant backed by `POST /api/keybot`, catalog context, deterministic validation, and safe OpenAI/fallback behavior.
 
 ## Architecture Rule
 

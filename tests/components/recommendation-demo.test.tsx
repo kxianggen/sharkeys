@@ -12,6 +12,7 @@ import {
   type RecommendationResult,
 } from "@/lib/recommendations";
 import { extractedKeyboardIntentSchema } from "@/lib/ai";
+import { keybotApiResponseSchema } from "@/lib/keybot";
 
 const recommendationResult = createRecommendationResult({
   source: "fallback_missing_api_key",
@@ -68,7 +69,10 @@ function jsonResponse(body: unknown) {
   });
 }
 
-function mockFetch(recommendationResponses: ApiResponseQueue = [recommendationResult]) {
+function mockFetch(
+  recommendationResponses: ApiResponseQueue = [recommendationResult],
+  options: { keybotDelayMs?: number; keybotShouldFail?: boolean } = {},
+) {
   const responses = [...recommendationResponses];
 
   vi.stubGlobal(
@@ -106,6 +110,46 @@ function mockFetch(recommendationResponses: ApiResponseQueue = [recommendationRe
         });
       }
 
+      if (url === "/api/keybot") {
+        if (options.keybotDelayMs) {
+          await new Promise((resolve) =>
+            window.setTimeout(resolve, options.keybotDelayMs),
+          );
+        }
+
+        if (options.keybotShouldFail) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: {
+                message: "Keybot is unavailable.",
+              },
+            }),
+            {
+              status: 500,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
+          );
+        }
+
+        return jsonResponse(
+          keybotApiResponseSchema.parse({
+            success: true,
+            data: {
+              answer:
+                "Thocky means a deeper rounded keyboard sound in the current catalog context.",
+              source: "fallback_missing_api_key",
+              usedCatalogContext: true,
+              usedRecommendationEngine: false,
+              relatedComponentIds: ["switch_gateron_milky_yellow_pro"],
+              clarificationQuestion: null,
+            },
+          }),
+        );
+      }
+
       return jsonResponse({
         success: false,
         error: {
@@ -122,6 +166,14 @@ function getSelect(label: string) {
 
 function getSavedGallery() {
   return screen.getByRole("region", { name: /Saved builds gallery/i });
+}
+
+function getLastKeybotPanel() {
+  const panels = screen.getAllByRole("region", {
+    name: /Keybot keyboard helper/i,
+  });
+
+  return panels[panels.length - 1];
 }
 
 function createLocalStorageMock() {
@@ -257,6 +309,68 @@ describe("RecommendationDemo", () => {
     expect(
       screen.queryByRole("button", { name: /Close Keybot assistant/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("sends Keybot questions and renders grounded assistant responses", async () => {
+    mockFetch([recommendationResult], { keybotDelayMs: 20 });
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Open Keybot assistant/i,
+      }),
+    );
+
+    const panel = getLastKeybotPanel();
+
+    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+      target: { value: "What is a thocky keyboard?" },
+    });
+    fireEvent.click(
+      within(panel).getByRole("button", {
+        name: /Send Keybot question/i,
+      }),
+    );
+
+    expect(
+      await within(panel).findByText(/Keybot is checking grounded catalog facts/i),
+    ).toBeInTheDocument();
+    expect(
+      await within(panel).findByText(/deeper rounded keyboard sound/i),
+    ).toBeInTheDocument();
+    expect(within(panel).getByText(/Local grounded fallback/i)).toBeInTheDocument();
+    expect(
+      within(panel).getByText(/Gateron Milky Yellow Pro/i),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a Keybot error fallback when the assistant route fails", async () => {
+    mockFetch([recommendationResult], { keybotShouldFail: true });
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Open Keybot assistant/i,
+      }),
+    );
+
+    const panel = getLastKeybotPanel();
+
+    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+      target: { value: "Can you explain this build?" },
+    });
+    fireEvent.click(
+      within(panel).getByRole("button", {
+        name: /Send Keybot question/i,
+      }),
+    );
+
+    expect(
+      await within(panel).findByText(/Keybot is unavailable/i),
+    ).toBeInTheDocument();
+    expect(
+      within(panel).getByText(/could not reach Keybot just now/i),
+    ).toBeInTheDocument();
   });
 
   it("loads recommendation component IDs into the manual panel", async () => {
