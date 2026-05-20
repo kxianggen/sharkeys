@@ -2,7 +2,7 @@
 
 sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 9C.1: OpenAI-backed recommendation ranking and explanations.
+This repository is currently in Phase 9E: Keybot conversation memory and better context.
 
 ## Stack
 
@@ -324,6 +324,12 @@ Phase 9D.2 polishes the Keybot UI into a floating desktop assistant and mobile b
 
 This phase is UI/UX-focused. It does not change the recommendation architecture, deterministic validation gate, Supabase schema, migrations, live data, or OpenAI grounding rules.
 
+## Phase 9E Keybot Conversation Memory
+
+Phase 9E adds short-lived, client-local Keybot conversation continuity so follow-up questions such as “why that one?” or “make it cheaper” can use the current selected build context. The browser sends only the recent few chat turns with each request; no server-side chat storage, database tables, or Supabase writes are added.
+
+Recent conversation text is only a wording hint. Technical facts still come from catalog records, selected build IDs, recommendation results, and deterministic validation rules.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
@@ -359,6 +365,8 @@ Phase 9C.1 adds deterministic ranking, grounded recommendation explanations, con
 Phase 9D.1 adds a grounded Keybot conversational assistant backed by `POST /api/keybot`, catalog context, deterministic validation, and safe OpenAI/fallback behavior.
 
 Phase 9D.2 polishes the Keybot floating assistant, grounded trust states, no-build/fallback presentation, and mobile bottom-sheet behavior without backend architecture changes.
+
+Phase 9E adds short-lived local Keybot conversation continuity for grounded follow-up answers while keeping technical authority in catalog IDs and deterministic validation.
 
 ## Architecture Rule
 

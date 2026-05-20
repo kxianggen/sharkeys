@@ -63,6 +63,58 @@ describe("Keybot API route", () => {
     });
   });
 
+  it("accepts bounded recent messages", async () => {
+    await withFallbackEnv(async () => {
+      const response = await keybotPOST(
+        new Request("http://localhost/api/keybot", {
+          method: "POST",
+          body: JSON.stringify({
+            message: "why that one?",
+            context: {
+              recentMessages: [
+                {
+                  role: "user",
+                  content: "Recommend a quiet office keyboard under RM800",
+                },
+                {
+                  role: "assistant",
+                  content: "I found a validated build.",
+                },
+              ],
+            },
+          }),
+        }),
+      );
+      const body = await response.json();
+      const parsed = keybotApiResponseSchema.parse(body);
+
+      expect(response.status).toBe(200);
+      expect(parsed.data.answer).toContain("generate or select a build");
+    });
+  });
+
+  it("rejects oversized recent messages", async () => {
+    const response = await keybotPOST(
+      new Request("http://localhost/api/keybot", {
+        method: "POST",
+        body: JSON.stringify({
+          message: "why that one?",
+          context: {
+            recentMessages: Array.from({ length: 7 }, (_, index) => ({
+              role: index % 2 === 0 ? "user" : "assistant",
+              content: `message ${index}`,
+            })),
+          },
+        }),
+      }),
+    );
+    const body = await response.json();
+    const parsed = apiErrorResponseSchema.parse(body);
+
+    expect(response.status).toBe(400);
+    expect(parsed.error.code).toBe("invalid_request");
+  });
+
   it("uses the recommendation engine for build questions without an OpenAI API key", async () => {
     await withFallbackEnv(async () => {
       const response = await keybotPOST(

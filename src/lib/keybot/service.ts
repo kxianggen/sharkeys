@@ -41,8 +41,13 @@ type KeybotClassification =
   | "compatibility_question"
   | "component_question"
   | "concept_question"
+  | "comparison_followup"
   | "cost_reduction"
+  | "followup_compatibility"
+  | "followup_explanation"
+  | "refinement_request"
   | "small_talk"
+  | "switch_explanation"
   | "vague_question";
 
 type KeybotFacts = {
@@ -261,6 +266,26 @@ function classifyKeybotMessage(message: string): KeybotClassification {
     return "cost_reduction";
   }
 
+  if (isComparisonFollowupMessage(text)) {
+    return "comparison_followup";
+  }
+
+  if (isSwitchExplanationMessage(text)) {
+    return "switch_explanation";
+  }
+
+  if (isExplanationFollowupMessage(text)) {
+    return "followup_explanation";
+  }
+
+  if (isFollowupCompatibilityMessage(text)) {
+    return "followup_compatibility";
+  }
+
+  if (isRefinementRequestMessage(text)) {
+    return "refinement_request";
+  }
+
   if (
     conceptDefinitions.some((definition) => definition.pattern.test(text)) &&
     /\b(what|explain|define|meaning|vs|versus)\b/i.test(text)
@@ -312,15 +337,29 @@ function needsCatalogComponents(
     return true;
   }
 
-  return !["small_talk", "capability_help", "cost_reduction"].includes(
-    classification,
-  );
+  return ![
+    "small_talk",
+    "capability_help",
+    "cost_reduction",
+    "comparison_followup",
+    "followup_compatibility",
+    "followup_explanation",
+    "refinement_request",
+    "switch_explanation",
+  ].includes(classification);
 }
 
 function shouldSearchCatalogRelevance(classification: KeybotClassification) {
-  return !["small_talk", "capability_help", "cost_reduction"].includes(
-    classification,
-  );
+  return ![
+    "small_talk",
+    "capability_help",
+    "cost_reduction",
+    "comparison_followup",
+    "followup_compatibility",
+    "followup_explanation",
+    "refinement_request",
+    "switch_explanation",
+  ].includes(classification);
 }
 
 function hasSelectedComponentContext(request: KeybotRequest) {
@@ -361,8 +400,53 @@ function isCostReductionMessage(text: string) {
     /\b(can i make this cheaper|make it cheaper|make this cheaper|how to reduce cost|reduce cost|lower cost|lower price|cut cost|save money|cheaper alternative)\b/i.test(
       text,
     ) ||
+    /^\s*cheaper\s*[?.!]*\s*$/i.test(text) ||
     (/\bcheaper\b/i.test(text) &&
       /\b(alternative|option|build|this|it|one|way|direction)\b/i.test(text))
+  );
+}
+
+function isSwitchExplanationMessage(text: string) {
+  return (
+    /\bwhy\b.*\b(choose|chose|chosen|pick|picked|select|selected)\b.*\bswitch\b/i.test(
+      text,
+    ) ||
+    /\bwhy\s+(this|that|the)\s+switch\b/i.test(text)
+  );
+}
+
+function isExplanationFollowupMessage(text: string) {
+  return (
+    /\bwhy\s+(that one|this one|this|that|it)\b/i.test(text) ||
+    /\bwhy\b.*\b(choose|chose|chosen|pick|picked|recommend|recommended)\b.*\b(it|this|that|one)\b/i.test(
+      text,
+    ) ||
+    /\bexplain\s+(that|this|the)\s+(recommendation|build|choice)\b/i.test(text)
+  );
+}
+
+function isComparisonFollowupMessage(text: string) {
+  return /\bcompare\b.*\b(previous|prior|last|this|that|build)\b/i.test(text);
+}
+
+function isFollowupCompatibilityMessage(text: string) {
+  return (
+    /\b(is|are)\s+(this|that|it|these|they)\s+compatible\b/i.test(text) ||
+    /\bwill\s+(this|that|it|these|they)\s+fit\b/i.test(text) ||
+    /\bcan i use\s+(this|that|it|these|they)\b.*\b(with|in)\b/i.test(text) ||
+    /\bcheck compatibility\b/i.test(text)
+  );
+}
+
+function isRefinementRequestMessage(text: string) {
+  return (
+    /\bwhat about\b.*\b(quieter|quiet|creamier|creamy|clackier|clacky|thockier|thocky|65%?|75%?|tkl)\b/i.test(
+      text,
+    ) ||
+    /\b(make|try)\s+(it|this|that|the build)?\s*(quieter|quiet|creamier|creamy|clackier|clacky|thockier|thocky)\b/i.test(
+      text,
+    ) ||
+    /\bwhat about\s+(a\s+)?(65%?|75%?|tkl)\b/i.test(text)
   );
 }
 
@@ -480,6 +564,26 @@ function buildDeterministicAnswer(facts: Omit<KeybotFacts, "deterministicAnswer"
     return buildCostReductionAnswer(facts);
   }
 
+  if (facts.classification === "followup_explanation") {
+    return buildSelectedBuildExplanationAnswer(facts);
+  }
+
+  if (facts.classification === "switch_explanation") {
+    return buildSelectedSwitchExplanationAnswer(facts);
+  }
+
+  if (facts.classification === "comparison_followup") {
+    return buildComparisonFollowupAnswer(facts);
+  }
+
+  if (facts.classification === "followup_compatibility") {
+    return buildFollowupCompatibilityAnswer(facts);
+  }
+
+  if (facts.classification === "refinement_request") {
+    return buildRefinementRequestAnswer(facts);
+  }
+
   if (facts.classification === "concept_question" && conceptAnswer) {
     return conceptAnswer;
   }
@@ -562,6 +666,154 @@ function buildCostReductionAnswer(
     .join(" ");
 }
 
+function buildSelectedBuildExplanationAnswer(
+  facts: Omit<KeybotFacts, "deterministicAnswer">,
+) {
+  if (facts.selectedComponents.length === 0) {
+    return [
+      "I can explain why that build was chosen after you generate or select a build.",
+      "Recent chat wording can help me understand what you mean by that one, but the actual explanation needs selected catalog component IDs and deterministic validation results.",
+    ].join(" ");
+  }
+
+  const validationText = facts.selectedValidation
+    ? facts.selectedValidation.isValid
+      ? "The selected build passed deterministic compatibility validation."
+      : `The selected build is not fully compatible yet: ${formatIssues(
+          facts.selectedValidation.errors,
+        )}.`
+    : "I can see selected catalog parts, but I do not have a complete validation result for every required category.";
+  const criteria = describeCurrentIntent(facts.request.context?.currentIntent);
+  const selectedSummary = summarizeSelectedComponentNames(facts.selectedComponents);
+  const warningText =
+    facts.selectedValidation && facts.selectedValidation.warnings.length > 0
+      ? ` Warnings: ${formatIssues(facts.selectedValidation.warnings)}.`
+      : "";
+
+  return [
+    validationText,
+    criteria
+      ? `It matches the current request signals I have: ${criteria}.`
+      : "The strongest grounded signal I have is the current selected build context.",
+    `Selected catalog parts: ${selectedSummary}.`,
+    `${warningText}I will not add product, stock, price, or compatibility claims beyond the catalog and deterministic rules.`,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function buildSelectedSwitchExplanationAnswer(
+  facts: Omit<KeybotFacts, "deterministicAnswer">,
+) {
+  const switchComponent = facts.selectedComponents.find(
+    (component) => component.category === "switch",
+  );
+
+  if (!switchComponent) {
+    return "I can explain the selected switch after you generate or select a build with a switch. I do not have a trusted selected switch ID yet.";
+  }
+
+  const switchDetails = [
+    `${switchComponent.name} is the selected switch.`,
+    `The catalog lists it as ${switchComponent.switchTechnology} technology.`,
+    switchComponent.soundProfile
+      ? `Its stored sound profile is ${switchComponent.soundProfile}.`
+      : "The catalog does not store a specific sound profile for it.",
+    switchComponent.beginnerFriendly
+      ? "It is marked beginner-friendly."
+      : "It is not marked beginner-friendly in the catalog.",
+  ];
+  const compatibilityText =
+    facts.selectedValidation?.isValid === true
+      ? "Because the selected build passed deterministic validation, the switch is compatible with the selected PCB/plate path in this build."
+      : facts.selectedValidation
+        ? "I cannot claim the switch is compatible with the whole build because deterministic validation did not pass."
+        : "I need a complete selected build before making PCB or plate compatibility claims.";
+
+  return [...switchDetails, compatibilityText].join(" ");
+}
+
+function buildComparisonFollowupAnswer(
+  facts: Omit<KeybotFacts, "deterministicAnswer">,
+) {
+  if (facts.selectedComponents.length === 0) {
+    return "I need a selected current build before I can compare it accurately. Recent messages can hint at what you mean by previous, but they are not trusted product data.";
+  }
+
+  const hasPriorBuildHint = getRecentMessages(facts.request).some((message) =>
+    /\bbuild|recommend|case|pcb|plate|switch|keycap|stabilizer\b/i.test(
+      message.content,
+    ),
+  );
+
+  if (!hasPriorBuildHint) {
+    return [
+      `Current selected build context: ${summarizeSelectedComponentNames(
+        facts.selectedComponents,
+      )}.`,
+      "I do not have trusted previous selected component IDs to compare against. Select or generate the other build, then ask me to compare them.",
+    ].join(" ");
+  }
+
+  return [
+    `For the current selected build, I can verify these catalog parts: ${summarizeSelectedComponentNames(
+      facts.selectedComponents,
+    )}.`,
+    "I can only compare the previous build at a high level from recent wording, not as authoritative product data. For an accurate comparison, select the previous build so I can use its catalog IDs and deterministic validation result.",
+  ].join(" ");
+}
+
+function buildFollowupCompatibilityAnswer(
+  facts: Omit<KeybotFacts, "deterministicAnswer">,
+) {
+  if (!facts.selectedValidation) {
+    const missingCategories = requiredComponentCategories
+      .filter(
+        (category) =>
+          !facts.selectedComponents.some(
+            (component) => component.category === category,
+          ),
+      )
+      .map(categoryLabel)
+      .join(", ");
+
+    return [
+      "I need a selected build before I can check compatibility for this follow-up.",
+      missingCategories
+        ? `Missing selected categories: ${missingCategories}.`
+        : "Select or generate a build first, then ask again.",
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return summarizeSelectedValidation(facts);
+}
+
+function buildRefinementRequestAnswer(
+  facts: Omit<KeybotFacts, "deterministicAnswer">,
+) {
+  const refinement = describeRequestedRefinement(facts.request.message);
+
+  if (facts.selectedComponents.length === 0) {
+    return [
+      `I can help refine toward ${refinement} after you generate or select a build.`,
+      `Try a prompt like "${buildRefinedPrompt(refinement)}" so the recommendation engine can search and validate a fresh build.`,
+    ].join(" ");
+  }
+
+  return [
+    `Treat ${refinement} as a new preference for the current build context.`,
+    `Current selected parts: ${summarizeSelectedComponentNames(
+      facts.selectedComponents,
+    )}.`,
+    `The grounded next step is to run a new validated recommendation search, for example: "${buildRefinedPrompt(
+      refinement,
+    )}"`,
+    "I will not mutate the selected build or invent swap candidates without a validated recommendation result.",
+  ].join(" ");
+}
+
 function categoryLabel(category: KeyboardComponent["category"]) {
   switch (category) {
     case "case":
@@ -577,6 +829,81 @@ function categoryLabel(category: KeyboardComponent["category"]) {
     case "stabilizer":
       return "stabilizers";
   }
+}
+
+function summarizeSelectedComponentNames(
+  components: readonly KeyboardComponent[],
+) {
+  return components
+    .map((component) => `${categoryLabel(component.category)} ${component.name}`)
+    .join(", ");
+}
+
+function describeCurrentIntent(
+  intent: NonNullable<KeybotRequest["context"]>["currentIntent"],
+) {
+  if (!intent) {
+    return "";
+  }
+
+  const parts = [
+    intent.layout ? `${intent.layout} layout` : null,
+    intent.soundProfile ? `${intent.soundProfile} sound` : null,
+    intent.useCase !== "unknown" ? `${intent.useCase} use case` : null,
+    intent.beginnerFriendly === true ? "beginner-friendly" : null,
+    intent.budget?.amount !== null && intent.budget?.amount !== undefined
+      ? `budget up to ${intent.budget.amount}`
+      : null,
+  ].filter((part): part is string => part !== null);
+
+  return parts.join(", ");
+}
+
+function describeRequestedRefinement(message: string) {
+  const text = message.toLowerCase();
+
+  if (/\bquieter|quiet|silent\b/.test(text)) {
+    return "a quieter or silent direction";
+  }
+
+  if (/\bcreamier|creamy\b/.test(text)) {
+    return "a creamier sound profile";
+  }
+
+  if (/\bclackier|clacky\b/.test(text)) {
+    return "a clackier sound profile";
+  }
+
+  if (/\bthockier|thocky\b/.test(text)) {
+    return "a thockier sound profile";
+  }
+
+  if (/\b65%?|65\b/.test(text)) {
+    return "a 65% layout";
+  }
+
+  if (/\b75%?|75\b/.test(text)) {
+    return "a 75% layout";
+  }
+
+  if (/\btkl\b/.test(text)) {
+    return "a TKL layout";
+  }
+
+  return "that changed preference";
+}
+
+function buildRefinedPrompt(refinement: string) {
+  return `Find a validated ${refinement} keyboard build within my budget`;
+}
+
+function formatIssues(issues: CompatibilityResult["issues"]) {
+  return (
+    issues
+      .map((issue) => issue.message)
+      .slice(0, 2)
+      .join(" ") || "no detailed issue message is available"
+  );
 }
 
 function buildKitLockAnswer(
@@ -721,7 +1048,7 @@ function buildOpenAIPromptPayload(facts: KeybotFacts) {
     classification: facts.classification,
     deterministicDraftAnswer: facts.deterministicAnswer,
     clarificationQuestion: facts.clarificationQuestion,
-    conversationHistory: facts.request.context?.conversationHistory ?? [],
+    recentMessages: getRecentMessages(facts.request),
     currentIntent: facts.request.context?.currentIntent ?? null,
     rules: [
       "The deterministicDraftAnswer is already grounded and safe.",
@@ -761,6 +1088,14 @@ function buildOpenAIPromptPayload(facts: KeybotFacts) {
         }
       : null,
   };
+}
+
+function getRecentMessages(request: KeybotRequest) {
+  return (
+    request.context?.recentMessages ??
+    request.context?.conversationHistory ??
+    []
+  );
 }
 
 function toComponentFact(component: KeyboardComponent) {

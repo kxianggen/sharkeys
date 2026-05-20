@@ -142,6 +142,139 @@ describe("Keybot service", () => {
     });
   });
 
+  it("explains why that selected build was chosen using grounded context", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateRequestWithCatalog({
+        message: "why that one?",
+        context: {
+          selectedComponentIds: {
+            case: "case_keychron_v2_max_65_abs",
+            pcb: "pcb_keychron_v2_max_65_hotswap",
+            plate: "plate_keychron_v2_max_65_pc",
+            switch: "switch_akko_penguin_silent",
+            keycap: "keycap_unknown_standard_white_jp_cherry",
+            stabilizer: "stab_keychron_v2_max_screw_in",
+          },
+        },
+      });
+
+      expect(result.answer).toContain("deterministic compatibility");
+      expect(result.answer).toContain("Keychron V2 Max 65% ABS Case");
+      expect(result.answer).toContain("Akko Penguin Silent Tactile Switch");
+      expect(result.answer).not.toContain("FakeBoard");
+      expect(result.usedCatalogContext).toBe(true);
+      expect(result.usedRecommendationEngine).toBe(false);
+    });
+  });
+
+  it("explains the selected switch when a selected build exists", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateRequestWithCatalog({
+        message: "why did you choose this switch?",
+        context: {
+          selectedComponentIds: {
+            case: "case_keychron_v2_max_65_abs",
+            pcb: "pcb_keychron_v2_max_65_hotswap",
+            plate: "plate_keychron_v2_max_65_pc",
+            switch: "switch_akko_penguin_silent",
+            keycap: "keycap_unknown_standard_white_jp_cherry",
+            stabilizer: "stab_keychron_v2_max_screw_in",
+          },
+        },
+      });
+
+      expect(result.answer).toContain("Akko Penguin Silent Tactile Switch");
+      expect(result.answer).toContain("selected switch");
+      expect(result.answer).toContain("sound profile is silent");
+      expect(result.answer).toContain("deterministic validation");
+      expect(result.relatedComponentIds).toContain(
+        "switch_akko_penguin_silent",
+      );
+    });
+  });
+
+  it("asks for selected context before explaining a switch follow-up", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateWithCatalog(
+        "why did you choose this switch?",
+      );
+
+      expect(result.answer).toContain("trusted selected switch ID");
+      expect(result.relatedComponentIds).toEqual([]);
+      expect(result.usedCatalogContext).toBe(false);
+      expect(result.usedRecommendationEngine).toBe(false);
+    });
+  });
+
+  it("checks selected compatibility with deterministic validation for follow-ups", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateRequestWithCatalog({
+        message: "is this compatible?",
+        context: {
+          selectedComponentIds: {
+            case: "case_keychron_v2_max_65_abs",
+            pcb: "pcb_keychron_v2_max_65_hotswap",
+            plate: "plate_keychron_v2_max_65_pc",
+            switch: "switch_akko_penguin_silent",
+            keycap: "keycap_unknown_standard_white_jp_cherry",
+            stabilizer: "stab_keychron_v2_max_screw_in",
+          },
+        },
+      });
+
+      expect(result.answer).toContain("compatible");
+      expect(result.answer).toContain("deterministic rule engine");
+      expect(result.usedCatalogContext).toBe(true);
+    });
+  });
+
+  it("treats quieter follow-ups as refinement requests instead of random products", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateRequestWithCatalog({
+        message: "what about quieter?",
+        context: {
+          selectedComponentIds: {
+            case: "case_keychron_v2_max_65_abs",
+            pcb: "pcb_keychron_v2_max_65_hotswap",
+            plate: "plate_keychron_v2_max_65_pc",
+            switch: "switch_gateron_seasalt_smoothie",
+            keycap: "keycap_unknown_standard_white_jp_cherry",
+            stabilizer: "stab_keychron_v2_max_screw_in",
+          },
+        },
+      });
+
+      expect(result.answer).toContain("new preference");
+      expect(result.answer).toContain("quieter or silent direction");
+      expect(result.answer).toContain("new validated recommendation search");
+      expect(result.answer).not.toContain("random");
+      expect(result.usedRecommendationEngine).toBe(false);
+    });
+  });
+
+  it("does not trust recent messages as product facts", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateRequestWithCatalog({
+        message: "why that one?",
+        context: {
+          recentMessages: [
+            {
+              role: "assistant",
+              content:
+                "The FakeBoard X uses ImaginaryVendor switches and costs MYR 99.",
+            },
+          ],
+        },
+      });
+
+      expect(result.answer).toContain("selected catalog component IDs");
+      expect(result.answer).not.toContain("FakeBoard X");
+      expect(result.answer).not.toContain("ImaginaryVendor");
+      expect(result.answer).not.toContain("MYR 99");
+      expect(result.relatedComponentIds).toEqual([]);
+    });
+  });
+
   it("answers concept questions with deterministic fallback when the OpenAI key is missing", async () => {
     await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
       const result = await generateWithCatalog("What is a thocky keyboard?");
