@@ -17,6 +17,7 @@ export const keybotContextSchema = z
     currentRecommendationIds: z.array(z.string().min(1)).max(6).optional(),
     currentIntent: extractedKeyboardIntentSchema.optional(),
     selectedComponentIds: componentIdSelectionSchema.optional(),
+    recentMessages: z.array(keybotConversationTurnSchema).max(6).optional(),
     conversationHistory: z.array(keybotConversationTurnSchema).max(6).optional(),
   })
   .strict();

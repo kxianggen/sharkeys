@@ -179,6 +179,10 @@ function getKeybotRequestBodies() {
         context?: {
           currentIntent?: Record<string, unknown>;
           currentRecommendationIds?: string[];
+          recentMessages?: Array<{
+            content: string;
+            role: "assistant" | "user";
+          }>;
           selectedComponentIds?: Record<string, string>;
         };
         message: string;
@@ -410,6 +414,56 @@ describe("RecommendationDemo", () => {
     ).toBeInTheDocument();
   });
 
+  it("sends recent Keybot messages after a chat turn", async () => {
+    mockFetch([recommendationResult], { keybotDelayMs: 20 });
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Open Keybot assistant/i,
+      }),
+    );
+
+    const panel = getLastKeybotPanel();
+
+    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+      target: { value: "What is thocky?" },
+    });
+    fireEvent.click(
+      within(panel).getByRole("button", {
+        name: /Send Keybot question/i,
+      }),
+    );
+
+    await within(panel).findByText(/deeper rounded keyboard sound/i);
+
+    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+      target: { value: "why that one?" },
+    });
+    fireEvent.click(
+      within(panel).getByRole("button", {
+        name: /Send Keybot question/i,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(getKeybotRequestBodies()).toHaveLength(2);
+    });
+
+    const requestBody = getLastKeybotRequestBody();
+
+    expect(requestBody.message).toBe("why that one?");
+    expect(requestBody.context?.recentMessages?.length).toBeGreaterThanOrEqual(
+      3,
+    );
+    expect(requestBody.context?.recentMessages?.at(-2)?.content).toBe(
+      "What is thocky?",
+    );
+    expect(requestBody.context?.recentMessages?.at(-1)?.content).toContain(
+      "Thocky means",
+    );
+  });
+
   it("highlights no-build blocker responses with suggested next actions", async () => {
     mockFetch([recommendationResult], {
       keybotResponse: {
@@ -521,6 +575,52 @@ describe("RecommendationDemo", () => {
     expect(requestBody.context?.currentIntent?.soundProfile).toBe("creamy");
     expect(requestBody.context?.selectedComponentIds?.switch).toBe(
       "switch_gateron_seasalt_smoothie",
+    );
+  });
+
+  it("sends follow-up payload with selected recommendation and recent context", async () => {
+    mockFetch([recommendationResult], { keybotDelayMs: 20 });
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Creamy sound for studying/i,
+      }),
+    );
+
+    expect(
+      await screen.findByText("Rule-engine validated"),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Open Keybot assistant/i,
+      }),
+    );
+
+    const panel = getLastKeybotPanel();
+
+    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+      target: { value: "why that one?" },
+    });
+    fireEvent.click(
+      within(panel).getByRole("button", {
+        name: /Send Keybot question/i,
+      }),
+    );
+
+    await within(panel).findByText(/deeper rounded keyboard sound/i);
+
+    const requestBody = getLastKeybotRequestBody();
+
+    expect(requestBody.message).toBe("why that one?");
+    expect(requestBody.context?.recentMessages?.[0]?.content).toContain(
+      "Hi, I’m Keybot",
+    );
+    expect(requestBody.context?.currentRecommendationIds).toContain(
+      recommendationResult.recommendations[0].id,
+    );
+    expect(requestBody.context?.selectedComponentIds?.case).toBe(
+      "case_keychron_v2_max_65_abs",
     );
   });
 

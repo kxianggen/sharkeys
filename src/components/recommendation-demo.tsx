@@ -1189,7 +1189,7 @@ function KeybotPanel({
         body: JSON.stringify({
           message: trimmedMessage,
           context: buildKeybotRequestContext({
-            history: nextMessages,
+            history: messages,
             manualSelection,
             result,
             selectedRecommendation,
@@ -1622,9 +1622,9 @@ function buildKeybotRequestContext({
     (Object.values(manualSelection).some(Boolean) ? manualSelection : undefined);
 
   return {
-    conversationHistory: history.slice(-6).map((message) => ({
+    recentMessages: history.slice(-6).map((message) => ({
       role: message.role,
-      content: message.content,
+      content: message.content.slice(0, 1200),
     })),
     currentIntent: result?.intent,
     currentRecommendationIds: result?.recommendations
