@@ -4,6 +4,7 @@ import { keyboardComponents } from "@/data";
 import {
   generateKeybotResponse,
   type GenerateKeybotResponseOptions,
+  type KeybotRequest,
 } from "@/lib/keybot";
 
 const openAIKeyEnv = "OPENAI" + "_API_KEY";
@@ -54,7 +55,93 @@ function generateWithCatalog(
   );
 }
 
+function generateRequestWithCatalog(
+  request: KeybotRequest,
+  options: GenerateKeybotResponseOptions = {},
+) {
+  return generateKeybotResponse(request, {
+    catalogComponents: keyboardComponents,
+    ...options,
+  });
+}
+
 describe("Keybot service", () => {
+  it("answers small talk without unrelated catalog suggestions", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateWithCatalog("Hi, how are you?");
+
+      expect(result.source).toBe("fallback_missing_api_key");
+      expect(result.answer).toContain("Hey, I'm Keybot");
+      expect(result.answer).toContain("switches");
+      expect(result.answer).toContain("compatibility");
+      expect(result.answer).not.toContain("Gateron");
+      expect(result.answer).not.toContain("Keychron");
+      expect(result.answer).not.toContain("Yunzii");
+      expect(result.relatedComponentIds).toEqual([]);
+      expect(result.usedCatalogContext).toBe(false);
+      expect(result.usedRecommendationEngine).toBe(false);
+    });
+  });
+
+  it("answers capability help without listing catalog products", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateWithCatalog("What can you do?");
+
+      expect(result.source).toBe("fallback_missing_api_key");
+      expect(result.answer).toContain("explain keyboard terms");
+      expect(result.answer).toContain("recommend builds");
+      expect(result.answer).toContain("deterministic validation");
+      expect(result.answer).not.toContain("Gateron");
+      expect(result.relatedComponentIds).toEqual([]);
+      expect(result.usedRecommendationEngine).toBe(false);
+    });
+  });
+
+  it("asks for build context before offering cheaper directions", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateWithCatalog("Can I make this cheaper?");
+
+      expect(result.source).toBe("fallback_missing_api_key");
+      expect(result.answer).toContain("after you generate or select a build");
+      expect(result.answer).toContain("quiet office keyboard under RM500");
+      expect(result.answer).not.toContain("Gateron");
+      expect(result.relatedComponentIds).toEqual([]);
+      expect(result.usedCatalogContext).toBe(false);
+      expect(result.usedRecommendationEngine).toBe(false);
+    });
+  });
+
+  it("uses selected build context for grounded cheaper guidance", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateRequestWithCatalog({
+        message: "Can I make this cheaper?",
+        context: {
+          selectedComponentIds: {
+            case: "case_keychron_v2_max_65_abs",
+            pcb: "pcb_keychron_v2_max_65_hotswap",
+            plate: "plate_keychron_v2_max_65_pc",
+            switch: "switch_akko_penguin_silent",
+            keycap: "keycap_unknown_standard_white_jp_cherry",
+            stabilizer: "stab_keychron_v2_max_screw_in",
+          },
+        },
+      });
+
+      expect(result.source).toBe("fallback_missing_api_key");
+      expect(result.answer).toContain("current build context");
+      expect(result.answer).toContain("Keychron V2 Max 65% ABS Case");
+      expect(result.answer).toContain("Akko Penguin Silent Tactile Switch");
+      expect(result.answer).toContain("lower budget");
+      expect(result.answer).toContain("kit-locked structural parts");
+      expect(result.answer).toContain("will not invent lower-priced products");
+      expect(result.relatedComponentIds).toContain(
+        "switch_akko_penguin_silent",
+      );
+      expect(result.usedCatalogContext).toBe(true);
+      expect(result.usedRecommendationEngine).toBe(false);
+    });
+  });
+
   it("answers concept questions with deterministic fallback when the OpenAI key is missing", async () => {
     await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
       const result = await generateWithCatalog("What is a thocky keyboard?");
@@ -88,6 +175,21 @@ describe("Keybot service", () => {
       expect(result.answer).toContain("could not find");
       expect(result.answer).toContain("75% PCB");
       expect(result.clarificationQuestion).toContain("Try allowing TKL or 65%");
+    });
+  });
+
+  it("explains kit-locked structural part mismatches", async () => {
+    await withOpenAIEnv({ [openAIKeyEnv]: undefined }, async () => {
+      const result = await generateWithCatalog(
+        "Can I use Star 80 PCB in Yunzii B87 case?",
+      );
+
+      expect(result.source).toBe("fallback_missing_api_key");
+      expect(result.answer).toContain("kit-derived structural parts");
+      expect(result.answer).toContain("same kitId");
+      expect(result.answer).toContain("Weikav Star 80 PCB");
+      expect(result.answer).toContain("Yunzii B87 case");
+      expect(result.usedRecommendationEngine).toBe(false);
     });
   });
 

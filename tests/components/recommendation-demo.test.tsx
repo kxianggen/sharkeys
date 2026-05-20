@@ -12,7 +12,7 @@ import {
   type RecommendationResult,
 } from "@/lib/recommendations";
 import { extractedKeyboardIntentSchema } from "@/lib/ai";
-import { keybotApiResponseSchema } from "@/lib/keybot";
+import { keybotApiResponseSchema, type KeybotApiResponse } from "@/lib/keybot";
 
 const recommendationResult = createRecommendationResult({
   source: "fallback_missing_api_key",
@@ -71,13 +71,17 @@ function jsonResponse(body: unknown) {
 
 function mockFetch(
   recommendationResponses: ApiResponseQueue = [recommendationResult],
-  options: { keybotDelayMs?: number; keybotShouldFail?: boolean } = {},
+  options: {
+    keybotDelayMs?: number;
+    keybotResponse?: KeybotApiResponse["data"];
+    keybotShouldFail?: boolean;
+  } = {},
 ) {
   const responses = [...recommendationResponses];
 
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (input: RequestInfo | URL) => {
+    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input.toString();
 
       if (url === "/api/components") {
@@ -111,6 +115,8 @@ function mockFetch(
       }
 
       if (url === "/api/keybot") {
+        void init;
+
         if (options.keybotDelayMs) {
           await new Promise((resolve) =>
             window.setTimeout(resolve, options.keybotDelayMs),
@@ -137,7 +143,7 @@ function mockFetch(
         return jsonResponse(
           keybotApiResponseSchema.parse({
             success: true,
-            data: {
+            data: options.keybotResponse ?? {
               answer:
                 "Thocky means a deeper rounded keyboard sound in the current catalog context.",
               source: "fallback_missing_api_key",
@@ -158,6 +164,37 @@ function mockFetch(
       });
     }),
   );
+}
+
+function getKeybotRequestBodies() {
+  return vi
+    .mocked(fetch)
+    .mock.calls.filter(([input]) => input.toString() === "/api/keybot")
+    .map(([, init]) => {
+      if (typeof init?.body !== "string") {
+        throw new Error("Expected Keybot request body to be a JSON string.");
+      }
+
+      return JSON.parse(init.body) as {
+        context?: {
+          currentIntent?: Record<string, unknown>;
+          currentRecommendationIds?: string[];
+          selectedComponentIds?: Record<string, string>;
+        };
+        message: string;
+      };
+    });
+}
+
+function getLastKeybotRequestBody() {
+  const bodies = getKeybotRequestBodies();
+  const body = bodies.at(-1);
+
+  if (!body) {
+    throw new Error("Expected at least one Keybot request.");
+  }
+
+  return body;
 }
 
 function getSelect(label: string) {
@@ -251,7 +288,9 @@ describe("RecommendationDemo", () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText("sharkeys").length).toBeGreaterThan(0);
     expect(screen.queryByText("Sharkeys")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Keybot").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("button", { name: /Open Keybot assistant/i }),
+    ).toHaveTextContent(/Ask Keybot/i);
     expect(screen.getByText(/The intelligent way to build/i)).toBeInTheDocument();
     expect(screen.getByText("Manual build check")).toBeInTheDocument();
     const submitButton = screen.getByRole("button", {
@@ -290,6 +329,10 @@ describe("RecommendationDemo", () => {
     });
 
     expect(openButton).toBeInTheDocument();
+    expect(openButton).toHaveTextContent(/Ask Keybot/i);
+    expect(
+      screen.queryByRole("region", { name: /Keybot keyboard helper/i }),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /Close Keybot assistant/i }),
     ).not.toBeInTheDocument();
@@ -309,6 +352,27 @@ describe("RecommendationDemo", () => {
     expect(
       screen.queryByRole("button", { name: /Close Keybot assistant/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("sends quick action chips as real Keybot messages", async () => {
+    mockFetch([recommendationResult], { keybotDelayMs: 20 });
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Open Keybot assistant/i,
+      }),
+    );
+
+    const panel = getLastKeybotPanel();
+
+    fireEvent.click(within(panel).getByRole("button", { name: /What is thocky/i }));
+
+    expect(await within(panel).findAllByText("What is thocky?")).toHaveLength(2);
+    expect(
+      await within(panel).findByText(/deeper rounded keyboard sound/i),
+    ).toBeInTheDocument();
+    expect(getLastKeybotRequestBody().message).toBe("What is thocky?");
   });
 
   it("sends Keybot questions and renders grounded assistant responses", async () => {
@@ -333,14 +397,55 @@ describe("RecommendationDemo", () => {
     );
 
     expect(
-      await within(panel).findByText(/Keybot is checking grounded catalog facts/i),
+      await within(panel).findByText(/Checking catalog facts/i),
     ).toBeInTheDocument();
     expect(
       await within(panel).findByText(/deeper rounded keyboard sound/i),
     ).toBeInTheDocument();
-    expect(within(panel).getByText(/Local grounded fallback/i)).toBeInTheDocument();
+    expect(
+      within(panel).getByText(/Using local grounded fallback/i),
+    ).toBeInTheDocument();
     expect(
       within(panel).getByText(/Gateron Milky Yellow Pro/i),
+    ).toBeInTheDocument();
+  });
+
+  it("highlights no-build blocker responses with suggested next actions", async () => {
+    mockFetch([recommendationResult], {
+      keybotResponse: {
+        answer:
+          "I could not find a validated build for that request in the current catalog. The catalog does not yet have a verified 75% PCB and stabilizer compatibility path.",
+        clarificationQuestion: "Try allowing TKL or 65% instead.",
+        relatedComponentIds: [],
+        source: "fallback_missing_api_key",
+        usedCatalogContext: true,
+        usedRecommendationEngine: true,
+      },
+    });
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Open Keybot assistant/i,
+      }),
+    );
+
+    const panel = getLastKeybotPanel();
+
+    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+      target: { value: "Why no 75% aluminum build?" },
+    });
+    fireEvent.click(
+      within(panel).getByRole("button", {
+        name: /Send Keybot question/i,
+      }),
+    );
+
+    expect(await within(panel).findByText(/Build blocker/i)).toBeInTheDocument();
+    expect(within(panel).getByRole("button", { name: /Try 65%/i })).toBeEnabled();
+    expect(within(panel).getByRole("button", { name: /Try TKL/i })).toBeEnabled();
+    expect(
+      within(panel).getByText(/Using local grounded fallback/i),
     ).toBeInTheDocument();
   });
 
@@ -371,6 +476,87 @@ describe("RecommendationDemo", () => {
     expect(
       within(panel).getByText(/could not reach Keybot just now/i),
     ).toBeInTheDocument();
+    expect(within(panel).getByText(/Route unavailable/i)).toBeInTheDocument();
+  });
+
+  it("passes selected recommendation context to Keybot", async () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Creamy sound for studying/i,
+      }),
+    );
+
+    expect(
+      await screen.findByText("Rule-engine validated"),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Open Keybot assistant/i,
+      }),
+    );
+
+    const panel = getLastKeybotPanel();
+
+    expect(within(panel).getByText(/Active build context/i)).toBeInTheDocument();
+    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+      target: { value: "Why did you choose this switch?" },
+    });
+    fireEvent.click(
+      within(panel).getByRole("button", {
+        name: /Send Keybot question/i,
+      }),
+    );
+
+    await within(panel).findByText(/deeper rounded keyboard sound/i);
+
+    const requestBody = getLastKeybotRequestBody();
+
+    expect(requestBody.message).toBe("Why did you choose this switch?");
+    expect(requestBody.context?.currentRecommendationIds).toContain(
+      recommendationResult.recommendations[0].id,
+    );
+    expect(requestBody.context?.currentIntent?.soundProfile).toBe("creamy");
+    expect(requestBody.context?.selectedComponentIds?.switch).toBe(
+      "switch_gateron_seasalt_smoothie",
+    );
+  });
+
+  it("passes manual selection context to Keybot before recommendations exist", async () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    await waitFor(() => {
+      expect(getSelect("Case")).toBeEnabled();
+    });
+    fireEvent.change(getSelect("Case"), {
+      target: { value: "case_keychron_v2_max_65_abs" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Open Keybot assistant/i,
+      }),
+    );
+
+    const panel = getLastKeybotPanel();
+
+    expect(within(panel).getByText(/Manual selection/i)).toBeInTheDocument();
+    fireEvent.click(
+      within(panel).getByRole("button", {
+        name: /Check compatibility/i,
+      }),
+    );
+
+    await within(panel).findByText(/deeper rounded keyboard sound/i);
+
+    const requestBody = getLastKeybotRequestBody();
+
+    expect(requestBody.message).toBe("Check compatibility for my current build");
+    expect(requestBody.context?.selectedComponentIds?.case).toBe(
+      "case_keychron_v2_max_65_abs",
+    );
   });
 
   it("loads recommendation component IDs into the manual panel", async () => {
