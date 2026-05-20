@@ -37,9 +37,12 @@ export type GenerateKeybotResponseOptions = {
 
 type KeybotClassification =
   | "build_request"
+  | "capability_help"
   | "compatibility_question"
   | "component_question"
   | "concept_question"
+  | "cost_reduction"
+  | "small_talk"
   | "vague_question";
 
 type KeybotFacts = {
@@ -109,9 +112,15 @@ export async function generateKeybotResponse(
   options: GenerateKeybotResponseOptions = {},
 ): Promise<KeybotResponse> {
   const request = keybotRequestSchema.parse(input);
-  const catalogComponents =
-    options.catalogComponents ?? (await getCatalogComponents());
-  const facts = await buildKeybotFacts(request, catalogComponents);
+  const classification = classifyKeybotMessage(request.message);
+  const catalogComponents = needsCatalogComponents(request, classification)
+    ? options.catalogComponents ?? (await getCatalogComponents())
+    : [];
+  const facts = await buildKeybotFacts(
+    request,
+    catalogComponents,
+    classification,
+  );
   const config = readOptionalOpenAIConfig();
   const apiKey = options.apiKey ?? config.OPENAI_API_KEY;
 
@@ -188,12 +197,11 @@ export async function generateKeybotResponse(
 async function buildKeybotFacts(
   request: KeybotRequest,
   catalogComponents: readonly KeyboardComponent[],
+  classification: KeybotClassification,
 ): Promise<KeybotFacts> {
-  const classification = classifyKeybotMessage(request.message);
-  const relevantComponents = findRelevantCatalogComponents(
-    request.message,
-    catalogComponents,
-  );
+  const relevantComponents = shouldSearchCatalogRelevance(classification)
+    ? findRelevantCatalogComponents(request.message, catalogComponents)
+    : [];
   const selectedComponents = resolveSelectedComponents(
     request.context?.selectedComponentIds,
     catalogComponents,
@@ -241,6 +249,18 @@ async function buildKeybotFacts(
 function classifyKeybotMessage(message: string): KeybotClassification {
   const text = message.toLowerCase();
 
+  if (isSmallTalkMessage(text)) {
+    return "small_talk";
+  }
+
+  if (isCapabilityHelpMessage(text)) {
+    return "capability_help";
+  }
+
+  if (isCostReductionMessage(text)) {
+    return "cost_reduction";
+  }
+
   if (
     conceptDefinitions.some((definition) => definition.pattern.test(text)) &&
     /\b(what|explain|define|meaning|vs|versus)\b/i.test(text)
@@ -282,6 +302,74 @@ function classifyKeybotMessage(message: string): KeybotClassification {
   }
 
   return "vague_question";
+}
+
+function needsCatalogComponents(
+  request: KeybotRequest,
+  classification: KeybotClassification,
+) {
+  if (hasSelectedComponentContext(request)) {
+    return true;
+  }
+
+  return !["small_talk", "capability_help", "cost_reduction"].includes(
+    classification,
+  );
+}
+
+function shouldSearchCatalogRelevance(classification: KeybotClassification) {
+  return !["small_talk", "capability_help", "cost_reduction"].includes(
+    classification,
+  );
+}
+
+function hasSelectedComponentContext(request: KeybotRequest) {
+  const selectedComponentIds = request.context?.selectedComponentIds;
+
+  return selectedComponentIds
+    ? Object.values(selectedComponentIds).some(Boolean)
+    : false;
+}
+
+function isSmallTalkMessage(text: string) {
+  const normalized = text.replace(/[!?.,]/g, " ").replace(/\s+/g, " ").trim();
+
+  if (hasKeyboardTaskSignal(normalized)) {
+    return false;
+  }
+
+  return (
+    /^(hi|hello|hey)( keybot)?( how are you| hows it going)?$/.test(
+      normalized,
+    ) ||
+    /^(good morning|good afternoon|good evening|thanks|thank you|thx|how are you|hows it going)( keybot)?$/.test(
+      normalized,
+    )
+  );
+}
+
+function isCapabilityHelpMessage(text: string) {
+  const normalized = text.replace(/[!?.,]/g, " ").replace(/\s+/g, " ").trim();
+
+  return /^(help|what can you do|what do you do|how can you help|how can you help me|what can keybot do)$/.test(
+    normalized,
+  );
+}
+
+function isCostReductionMessage(text: string) {
+  return (
+    /\b(can i make this cheaper|make it cheaper|make this cheaper|how to reduce cost|reduce cost|lower cost|lower price|cut cost|save money|cheaper alternative)\b/i.test(
+      text,
+    ) ||
+    (/\bcheaper\b/i.test(text) &&
+      /\b(alternative|option|build|this|it|one|way|direction)\b/i.test(text))
+  );
+}
+
+function hasKeyboardTaskSignal(text: string) {
+  return /\b(recommend|suggest|find|build|switch|layout|sound|profile|compatible|compatibility|pcb|plate|case|keycap|stabilizer|budget|cheaper|cost|price|thocky|creamy|clacky|silent|quiet|tkl|65|75)\b/.test(
+    text,
+  );
 }
 
 function findRelevantCatalogComponents(
@@ -380,6 +468,18 @@ function buildDeterministicAnswer(facts: Omit<KeybotFacts, "deterministicAnswer"
     definition.pattern.test(facts.request.message),
   )?.answer;
 
+  if (facts.classification === "small_talk") {
+    return buildSmallTalkAnswer(facts.request.message);
+  }
+
+  if (facts.classification === "capability_help") {
+    return buildCapabilityHelpAnswer();
+  }
+
+  if (facts.classification === "cost_reduction") {
+    return buildCostReductionAnswer(facts);
+  }
+
   if (facts.classification === "concept_question" && conceptAnswer) {
     return conceptAnswer;
   }
@@ -406,6 +506,77 @@ function buildDeterministicAnswer(facts: Omit<KeybotFacts, "deterministicAnswer"
     facts.clarificationQuestion ??
     "I can help with layouts, switches, sound profiles, compatibility, or turning your build idea into a validated sharkeys prompt."
   );
+}
+
+function buildSmallTalkAnswer(message: string) {
+  if (/\b(thanks|thank you|thx)\b/i.test(message)) {
+    return "You're welcome. I'm Keybot, and I can help with switches, layouts, sound profiles, compatibility, budgets, and explaining selected keyboard builds.";
+  }
+
+  return "Hey, I'm Keybot. I'm doing well and ready to help with your keyboard build. Ask me about switches, layouts, sound profiles, compatibility, budgets, or ways to make a selected build cheaper.";
+}
+
+function buildCapabilityHelpAnswer() {
+  return [
+    "I can explain keyboard terms, recommend builds that pass deterministic validation, explain why a recommendation was chosen, check compatibility constraints, and suggest cheaper directions when you have a selected build context.",
+    "I stay bounded to sharkeys catalog facts and compatibility rules, so I will not invent products, stock, prices, vendors, or unsupported fit claims.",
+  ].join(" ");
+}
+
+function buildCostReductionAnswer(
+  facts: Omit<KeybotFacts, "deterministicAnswer">,
+) {
+  if (facts.selectedComponents.length === 0) {
+    return [
+      "I can help reduce cost after you generate or select a build.",
+      'Try a prompt like "quiet office keyboard under RM500," then ask me what can be made cheaper in that selected build.',
+      "I will keep any suggestions grounded in the catalog and deterministic compatibility rules.",
+    ].join(" ");
+  }
+
+  const selectedSummary = facts.selectedComponents
+    .map((component) => `${categoryLabel(component.category)} ${component.name}`)
+    .join(", ");
+  const hasKitLockedStructuralParts = facts.selectedComponents.some(
+    (component) =>
+      ["case", "pcb", "plate", "stabilizer"].includes(component.category) &&
+      component.metadata?.kitLock === true,
+  );
+  const kitLockGuidance = hasKitLockedStructuralParts
+    ? " Keep kit-locked structural parts together; swapping only one of the case, PCB, plate, or included stabilizer can break deterministic compatibility."
+    : "";
+  const compatibilityStatus = facts.selectedValidation
+    ? ` The current selected parts are ${
+        facts.selectedValidation.isValid
+          ? "deterministically compatible"
+          : "not fully compatible yet"
+      }.`
+    : "";
+
+  return [
+    `For the current build context, I can give grounded cost-reduction direction from the selected parts: ${selectedSummary}.`,
+    `${compatibilityStatus}${kitLockGuidance}`,
+    "The safest lower-cost path is to run a new validated prompt with a lower budget, then compare results. Non-structural parts such as switches, keycaps, and standalone stabilizers are usually the first places to explore, but I am not computing an exact cheaper swap list here. I will not invent lower-priced products or compatibility claims that are not in the catalog.",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function categoryLabel(category: KeyboardComponent["category"]) {
+  switch (category) {
+    case "case":
+      return "case";
+    case "pcb":
+      return "PCB";
+    case "plate":
+      return "plate";
+    case "switch":
+      return "switch";
+    case "keycap":
+      return "keycaps";
+    case "stabilizer":
+      return "stabilizers";
+  }
 }
 
 function buildKitLockAnswer(

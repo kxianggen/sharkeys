@@ -83,6 +83,7 @@ type KeybotChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  isRouteFailure?: boolean;
   relatedComponentIds?: string[];
   source?: KeybotApiResponse["data"]["source"];
 };
@@ -124,6 +125,44 @@ const quickPrompts = [
 const smokePromptExamples = [
   "creamy 65% beginner keyboard under RM500",
   "optical 60% clacky gaming build",
+] as const;
+
+const keybotQuickActions = [
+  {
+    label: "What is thocky?",
+    message: "What is thocky?",
+  },
+  {
+    label: "Why this switch?",
+    message: "Why did you choose this switch?",
+  },
+  {
+    label: "Can I make it cheaper?",
+    message: "Can I make it cheaper?",
+  },
+  {
+    label: "Check compatibility",
+    message: "Check compatibility for my current build",
+  },
+] as const;
+
+const keybotBlockerActions = [
+  {
+    label: "Try 65%",
+    message: "Try a 65% layout instead",
+  },
+  {
+    label: "Try TKL",
+    message: "Try a TKL layout instead",
+  },
+  {
+    label: "Relax budget",
+    message: "Relax the budget and suggest a validated build",
+  },
+  {
+    label: "Explain why",
+    message: "Explain why that build is blocked",
+  },
 ] as const;
 
 const savedBuildsStorageKey = "sharkeys.savedBuilds.v1";
@@ -948,15 +987,6 @@ export function RecommendationDemo() {
                 onSaveValidatedManualBuild={saveValidatedManualBuild}
                 onValidate={() => void validateManualSelection()}
               />
-
-              <div className="lg:hidden">
-                <KeybotPanel
-                  catalogById={catalogById}
-                  manualSelection={manualSelection}
-                  result={result}
-                  selectedRecommendation={selectedRecommendation}
-                />
-              </div>
             </aside>
           </div>
         </div>
@@ -967,14 +997,12 @@ export function RecommendationDemo() {
       <FinalCta onStartBuilding={focusPrompt} />
       <SharkeysFooter />
 
-      <div className="hidden lg:block">
-        <FloatingKeybot
-          catalogById={catalogById}
-          manualSelection={manualSelection}
-          result={result}
-          selectedRecommendation={selectedRecommendation}
-        />
-      </div>
+      <FloatingKeybot
+        catalogById={catalogById}
+        manualSelection={manualSelection}
+        result={result}
+        selectedRecommendation={selectedRecommendation}
+      />
     </div>
   );
 }
@@ -1052,11 +1080,18 @@ function FloatingKeybot({
     return (
       <button
         aria-label="Open Keybot assistant"
-        className="sharkeys-soft-shadow fixed bottom-6 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border border-[#c2c7cf] bg-[#094067] text-white transition hover:-translate-y-0.5 hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
+        className="sharkeys-soft-shadow fixed bottom-4 right-4 z-40 inline-flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-full border border-[#c2c7cf] bg-[#fffffe] px-4 py-3 text-left text-[#071e29] transition hover:-translate-y-0.5 hover:border-[#3DA9FC] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#3DA9FC]/30 sm:bottom-6 sm:right-6"
         onClick={() => setIsOpen(true)}
         type="button"
       >
-        <Bot className="h-7 w-7" aria-hidden />
+        <KeybotAvatar />
+        <span className="min-w-0">
+          <span className="block text-sm font-bold leading-4">Ask Keybot</span>
+          <span className="mt-0.5 hidden items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5F6C7B] sm:flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#2F8F46]" />
+            Grounded
+          </span>
+        </span>
       </button>
     );
   }
@@ -1081,22 +1116,50 @@ function KeybotPanel({
   result,
   selectedRecommendation,
 }: KeybotPanelProps) {
-  const faqs = [
-    "What is a thocky keyboard?",
-    "Linear vs tactile switches",
-    "What is a hot-swappable PCB?",
-  ] as const;
   const [messages, setMessages] = useState<KeybotChatMessage[]>([
     {
       id: "keybot-welcome",
       role: "assistant",
       content:
-        "Hi, I’m Keybot. Ask about switches, sound, layouts, compatibility, or your current validated build.",
+        "Hi, I’m Keybot. Ask about switches, sound, layouts, compatibility, or your current build.",
     },
   ]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const contextSummary = getKeybotContextSummary({
+    catalogById,
+    manualSelection,
+    selectedRecommendation,
+  });
+  const loadingLabel = contextSummary
+    ? "Validating build context..."
+    : "Checking catalog facts...";
+
+  useEffect(() => {
+    if (!floating || !onClose) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [floating, onClose]);
+
+  useEffect(() => {
+    if (typeof messagesEndRef.current?.scrollIntoView === "function") {
+      messagesEndRef.current.scrollIntoView({
+        block: "end",
+      });
+    }
+  }, [messages, isSending]);
 
   async function sendKeybotMessage(messageText: string) {
     const trimmedMessage = messageText.trim();
@@ -1166,7 +1229,8 @@ function KeybotPanel({
           id: createKeybotMessageId("assistant"),
           role: "assistant",
           content:
-            "I could not reach Keybot just now. The main configurator still uses deterministic validation for recommendations.",
+            "I could not reach Keybot just now. The main configurator still uses deterministic validation.",
+          isRouteFailure: true,
           source: "fallback_error",
         },
       ]);
@@ -1180,132 +1244,361 @@ function KeybotPanel({
       aria-label="Keybot keyboard helper"
       className={
         floating
-          ? "fixed bottom-6 right-6 z-40 w-96 max-w-[calc(100vw-3rem)]"
+          ? "fixed inset-x-3 bottom-3 z-50 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[28rem] sm:max-w-[calc(100vw-3rem)]"
           : "w-full"
       }
     >
-      <div className="sharkeys-soft-shadow overflow-hidden rounded-3xl border border-[#c2c7cf] bg-white">
-        <div className="flex items-center gap-3 bg-[#002a47] p-5 text-white">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#094067]">
-            <Bot className="h-5 w-5" aria-hidden />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="font-bold">Keybot</h2>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/70">
-              Keyboard terms, build help, and FAQs
-            </p>
-          </div>
-          {onClose ? (
-            <button
-              aria-label="Close Keybot assistant"
-              className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/60"
-              onClick={onClose}
-              type="button"
-            >
-              <X className="h-4 w-4" aria-hidden />
-            </button>
-          ) : null}
-        </div>
-
-        <div className="space-y-4 p-5">
-          <div
-            aria-live="polite"
-            className="max-h-80 space-y-3 overflow-y-auto pr-1"
-          >
-            {messages.map((message) => (
-              <div
-                className={`rounded-2xl border p-3 text-sm leading-6 ${
-                  message.role === "assistant"
-                    ? "rounded-tl-md border-[#c2c7cf]/60 bg-[#e9f5ff] text-[#071e29]"
-                    : "rounded-tr-md border-[#094067]/20 bg-[#094067] text-white"
-                }`}
-                key={message.id}
+      <div
+        className={`sharkeys-soft-shadow flex max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-[28px] border border-[#c2c7cf] bg-[#fffffe] ${
+          floating ? "sm:h-[640px]" : ""
+        }`}
+      >
+        <div className="border-b border-[#c2c7cf]/70 p-4">
+          <div className="flex items-center gap-3">
+            <KeybotAvatar />
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base font-bold leading-5 text-[#071e29]">
+                Keybot
+              </h2>
+              <p className="text-xs font-semibold text-[#5F6C7B]">
+                Grounded assistant
+              </p>
+            </div>
+            {onClose ? (
+              <button
+                aria-label="Close Keybot assistant"
+                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-[#5F6C7B] transition hover:bg-[#D8EEFE] hover:text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#3DA9FC]/25"
+                onClick={onClose}
+                type="button"
               >
-                <p>{message.content}</p>
-                {message.source && message.source !== "openai" ? (
-                  <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] opacity-70">
-                    {message.source === "fallback_missing_api_key"
-                      ? "Local grounded fallback"
-                      : "Safe fallback"}
-                  </p>
-                ) : null}
-                {message.relatedComponentIds &&
-                message.relatedComponentIds.length > 0 ? (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {message.relatedComponentIds.slice(0, 4).map((id) => {
-                      const component = catalogById.get(id);
-
-                      return (
-                        <span
-                          className="rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-[#094067]"
-                          key={id}
-                        >
-                          {component?.name ?? id}
-                        </span>
-                      );
-                    })}
-                  </div>
-                ) : null}
-              </div>
-            ))}
-            {isSending ? (
-              <div className="flex items-center gap-2 rounded-2xl rounded-tl-md border border-[#c2c7cf]/60 bg-[#e9f5ff] p-3 text-sm font-semibold text-[#094067]">
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                Keybot is checking grounded catalog facts...
-              </div>
+                <X className="h-4 w-4" aria-hidden />
+              </button>
             ) : null}
           </div>
 
-          <div className="space-y-2">
-            {faqs.map((faq) => (
-              <button
-                className="w-full rounded-2xl border border-[#c2c7cf]/70 bg-[#ddf1ff] p-3 text-left text-sm font-bold text-[#094067] transition hover:border-[#00639d] hover:bg-[#d5ebfb] focus:outline-none focus:ring-4 focus:ring-[#43acff]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={isSending}
-                key={faq}
-                onClick={() => void sendKeybotMessage(faq)}
-                type="button"
-              >
-                {faq}
-              </button>
-            ))}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#c2c7cf]/80 bg-[#f5faff] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[#094067]">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+              Grounded in catalog + rules
+            </span>
+            {contextSummary ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3DA9FC]/40 bg-[#D8EEFE] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[#094067]">
+                <Cpu className="h-3.5 w-3.5" aria-hidden />
+                Active build context
+              </span>
+            ) : null}
           </div>
-          {error ? (
-            <p className="rounded-2xl border border-[#ba1a1a]/20 bg-[#fff5f5] px-3 py-2 text-xs font-semibold text-[#ba1a1a]">
-              {error}
-            </p>
+
+          {contextSummary ? (
+            <div className="mt-3 rounded-2xl border border-[#c2c7cf]/70 bg-[#f5faff] p-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5F6C7B]">
+                {contextSummary.label}
+              </p>
+              <p className="mt-1 truncate text-sm font-bold text-[#071e29]">
+                {contextSummary.title}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {contextSummary.parts.map((part) => (
+                  <span
+                    className="rounded-full border border-[#c2c7cf]/70 bg-[#fffffe] px-2.5 py-1 text-[11px] font-semibold text-[#42474E]"
+                    key={part}
+                  >
+                    {part}
+                  </span>
+                ))}
+              </div>
+            </div>
           ) : null}
         </div>
 
+        <div className="border-b border-[#c2c7cf]/70 px-4 py-3">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#5F6C7B]">
+            Suggested queries
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {keybotQuickActions.map((action) => (
+              <button
+                className="inline-flex items-center rounded-full border border-[#c2c7cf]/80 bg-[#fffffe] px-3 py-2 text-xs font-bold text-[#42474E] transition hover:border-[#3DA9FC] hover:bg-[#D8EEFE] hover:text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#3DA9FC]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isSending}
+                key={action.label}
+                onClick={() => void sendKeybotMessage(action.message)}
+                type="button"
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div
+          aria-live="polite"
+          className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-[#f8fbff] px-4 py-4"
+        >
+          {messages.map((message) => (
+            <KeybotMessageBubble
+              catalogById={catalogById}
+              disabled={isSending}
+              key={message.id}
+              message={message}
+              onSuggestion={(suggestion) => void sendKeybotMessage(suggestion)}
+            />
+          ))}
+          {isSending ? <KeybotLoadingState label={loadingLabel} /> : null}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {error ? (
+          <p className="border-t border-[#ba1a1a]/20 bg-[#fff5f5] px-4 py-2 text-xs font-semibold text-[#ba1a1a]">
+            {error}
+          </p>
+        ) : null}
+
         <form
-          className="flex items-center gap-2 border-t border-[#c2c7cf] p-3"
+          className="border-t border-[#c2c7cf]/70 bg-[#fffffe] p-3"
           onSubmit={(event) => {
             event.preventDefault();
             void sendKeybotMessage(input);
           }}
         >
-          <input
-            aria-label="Keybot question"
-            className="min-w-0 flex-1 rounded-full border border-transparent bg-transparent px-3 py-2 text-sm text-[#071e29] placeholder:text-[#42474e]/60 focus:border-[#00639d] focus:outline-none focus:ring-4 focus:ring-[#43acff]/20"
-            disabled={isSending}
-            onChange={(event) => setInput(event.target.value)}
-            placeholder="Ask about switches, sound, layouts, or your current build..."
-            value={input}
-          />
-          <button
-            aria-label="Send Keybot question"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#43acff] text-[#003e66] transition hover:bg-[#00639d] hover:text-white focus:outline-none focus:ring-4 focus:ring-[#43acff]/30 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isSending || input.trim().length === 0}
-            type="submit"
-          >
-            {isSending ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            ) : (
-              <Send className="h-4 w-4" aria-hidden />
-            )}
-          </button>
+          <div className="flex items-center gap-2 rounded-2xl border border-[#c2c7cf] bg-[#f5faff] p-1.5 focus-within:border-[#3DA9FC] focus-within:ring-4 focus-within:ring-[#3DA9FC]/20">
+            <input
+              aria-label="Keybot question"
+              className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-[#071e29] placeholder:text-[#5F6C7B]/70 focus:outline-none"
+              disabled={isSending}
+              onChange={(event) => setInput(event.target.value)}
+              placeholder={isSending ? "Thinking..." : "Ask about switches, sound..."}
+              value={input}
+            />
+            <button
+              aria-label="Send Keybot question"
+              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-[#3DA9FC] text-[#003e66] transition hover:bg-[#094067] hover:text-white focus:outline-none focus:ring-4 focus:ring-[#3DA9FC]/30 disabled:cursor-not-allowed disabled:bg-[#c2c7cf] disabled:text-white"
+              disabled={isSending || input.trim().length === 0}
+              type="submit"
+            >
+              {isSending ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Send className="h-4 w-4" aria-hidden />
+              )}
+            </button>
+          </div>
         </form>
       </div>
     </section>
+  );
+}
+
+type KeybotContextSummary = {
+  label: string;
+  parts: string[];
+  title: string;
+};
+
+function KeybotAvatar({ small = false }: { small?: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={`relative flex flex-none items-center justify-center rounded-full border border-[#c2c7cf]/80 bg-[#D8EEFE] text-[#094067] ${
+        small ? "h-8 w-8" : "h-11 w-11"
+      }`}
+    >
+      <Bot className={small ? "h-4 w-4" : "h-5 w-5"} />
+      <span className="absolute -right-0.5 top-1 h-2.5 w-2.5 rounded-full border-2 border-[#fffffe] bg-[#3DA9FC]" />
+    </span>
+  );
+}
+
+function KeybotMessageBubble({
+  catalogById,
+  disabled,
+  message,
+  onSuggestion,
+}: {
+  catalogById: Map<string, KeyboardComponent>;
+  disabled: boolean;
+  message: KeybotChatMessage;
+  onSuggestion: (message: string) => void;
+}) {
+  const isAssistant = message.role === "assistant";
+  const isBlocker =
+    isAssistant &&
+    !message.isRouteFailure &&
+    isKeybotBlockerMessage(message.content);
+  const trustLabel = isAssistant ? getKeybotTrustLabel(message) : null;
+
+  return (
+    <div
+      className={`flex gap-2.5 ${
+        isAssistant ? "items-start justify-start" : "justify-end"
+      }`}
+    >
+      {isAssistant ? <KeybotAvatar small /> : null}
+      <div
+        className={`max-w-[86%] ${
+          isAssistant ? "sm:max-w-[82%]" : "sm:max-w-[76%]"
+        }`}
+      >
+        <div
+          className={`rounded-3xl border px-4 py-3 text-sm leading-6 shadow-sm ${
+            isAssistant
+              ? isBlocker
+                ? "rounded-tl-md border-[#3DA9FC]/35 bg-[#fffffe] text-[#071e29]"
+                : "rounded-tl-md border-[#c2c7cf]/70 bg-[#fffffe] text-[#071e29]"
+              : "rounded-tr-md border-[#b9ddf7] bg-[#D8EEFE] text-[#071e29]"
+          }`}
+        >
+          {isBlocker ? (
+            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#D8EEFE] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#094067]">
+              <AlertCircle className="h-3.5 w-3.5" aria-hidden />
+              Build blocker
+            </div>
+          ) : null}
+
+          <div className="space-y-2">
+            {splitKeybotParagraphs(message.content).map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+
+          {trustLabel ? (
+            <div className="mt-3 flex items-center gap-1.5 border-t border-[#c2c7cf]/50 pt-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[#5F6C7B]">
+              {message.isRouteFailure ? (
+                <AlertCircle className="h-3.5 w-3.5" aria-hidden />
+              ) : (
+                <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+              )}
+              {trustLabel}
+            </div>
+          ) : null}
+
+          {message.relatedComponentIds &&
+          message.relatedComponentIds.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {message.relatedComponentIds.slice(0, 4).map((id) => {
+                const component = catalogById.get(id);
+
+                return (
+                  <span
+                    className="inline-flex items-center rounded-full border border-[#c2c7cf]/70 bg-[#D8EEFE]/70 px-2.5 py-1 text-[11px] font-semibold text-[#094067]"
+                    key={id}
+                  >
+                    {component?.name ?? id}
+                  </span>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+
+        {isBlocker ? (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {keybotBlockerActions.map((action) => (
+              <button
+                className="rounded-full border border-[#c2c7cf]/80 bg-[#fffffe] px-3 py-1.5 text-xs font-bold text-[#42474E] transition hover:border-[#3DA9FC] hover:bg-[#D8EEFE] hover:text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#3DA9FC]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={disabled}
+                key={action.label}
+                onClick={() => onSuggestion(action.message)}
+                type="button"
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function KeybotLoadingState({ label }: { label: string }) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <KeybotAvatar small />
+      <div className="inline-flex min-h-12 items-center gap-2 rounded-3xl rounded-tl-md border border-[#c2c7cf]/70 bg-[#fffffe] px-4 py-3 text-sm font-bold text-[#094067] shadow-sm">
+        <span className="relative flex h-3 w-3">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3DA9FC] opacity-40" />
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-[#094067]" />
+        </span>
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function getKeybotContextSummary({
+  catalogById,
+  manualSelection,
+  selectedRecommendation,
+}: {
+  catalogById: Map<string, KeyboardComponent>;
+  manualSelection: ManualSelection;
+  selectedRecommendation: RecommendationBuild | null;
+}): KeybotContextSummary | null {
+  if (selectedRecommendation) {
+    return {
+      label: "Current build",
+      title: selectedRecommendation.title,
+      parts: ["case", "switch", "pcb"]
+        .map((category) => {
+          const component =
+            selectedRecommendation.components[category as ComponentCategory];
+
+          return component ? `${categoryLabels[component.category]}: ${component.name}` : null;
+        })
+        .filter((part): part is string => part !== null),
+    };
+  }
+
+  const manualParts = componentCategories
+    .map((category) => {
+      const componentId = manualSelection[category];
+      const component = componentId ? catalogById.get(componentId) : undefined;
+
+      return component ? `${categoryLabels[category]}: ${component.name}` : null;
+    })
+    .filter((part): part is string => part !== null)
+    .slice(0, 3);
+
+  if (manualParts.length === 0) {
+    return null;
+  }
+
+  return {
+    label: "Current build",
+    title: "Manual selection",
+    parts: manualParts,
+  };
+}
+
+function splitKeybotParagraphs(content: string) {
+  return content
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+}
+
+function getKeybotTrustLabel(message: KeybotChatMessage) {
+  if (message.isRouteFailure) {
+    return "Route unavailable";
+  }
+
+  if (
+    message.source === "fallback_missing_api_key" ||
+    message.source === "fallback_error"
+  ) {
+    return "Using local grounded fallback";
+  }
+
+  if (message.source === "openai") {
+    return "Catalog verified";
+  }
+
+  return "Catalog + rules";
+}
+
+function isKeybotBlockerMessage(content: string) {
+  return /\b(could not find|no validated build|not compatible|not currently compatible|build is blocked|blocked by|unless a future|kit-derived structural parts|locked to their original)\b/i.test(
+    content,
   );
 }
 

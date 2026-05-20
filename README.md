@@ -318,6 +318,12 @@ Keybot can answer keyboard concept questions, explain layouts and switch terms, 
 
 Keybot does not invent products, prices, vendors, availability, stock, or compatibility facts. It does not mutate Supabase, apply migrations, perform purchases, or bypass `validateBuildSelectionFromIds`. Build suggestions remain validated recommendation results only, and kit-derived structural parts continue to obey `metadata.kitId` / `metadata.kitLock` compatibility rules.
 
+## Phase 9D.2 Keybot QA Polish
+
+Phase 9D.2 polishes the Keybot UI into a floating desktop assistant and mobile bottom sheet inspired by the Stitch references. It adds the rounded “Ask Keybot” launcher, grounded trust/context states, quick action chips, calmer local fallback messaging, clearer no-build/blocker presentation, refined loading/error states, and bounded conversational routing for greetings, help, and cheaper-build prompts.
+
+This phase is UI/UX-focused. It does not change the recommendation architecture, deterministic validation gate, Supabase schema, migrations, live data, or OpenAI grounding rules.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
@@ -351,6 +357,8 @@ Phase 9B.2 implements the curated offline catalog records from the research shor
 Phase 9C.1 adds deterministic ranking, grounded recommendation explanations, configurable OpenAI model settings, and safer OpenAI failure fallbacks without changing the validation gate.
 
 Phase 9D.1 adds a grounded Keybot conversational assistant backed by `POST /api/keybot`, catalog context, deterministic validation, and safe OpenAI/fallback behavior.
+
+Phase 9D.2 polishes the Keybot floating assistant, grounded trust states, no-build/fallback presentation, and mobile bottom-sheet behavior without backend architecture changes.
 
 ## Architecture Rule
 
