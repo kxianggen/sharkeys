@@ -2,7 +2,7 @@
 
 sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 9E: Keybot conversation memory and better context.
+This repository is currently in Phase 10A: Visual 2D build preview.
 
 ## Stack
 
@@ -330,6 +330,12 @@ Phase 9E adds short-lived, client-local Keybot conversation continuity so follow
 
 Recent conversation text is only a wording hint. Technical facts still come from catalog records, selected build IDs, recommendation results, and deterministic validation rules.
 
+## Phase 10A Visual 2D Build Preview
+
+Phase 10A adds a reusable data-driven 2D keyboard preview and a dedicated `/configurator` visual builder page. The landing page remains prompt-first, then links selected recommendations or manual selections into the visual builder through component IDs.
+
+The preview is schematic, not photorealistic. It is generated from catalog and selection data with React and CSS only: no product photos, no 3D rendering, and no external visual assets. Deterministic validation remains authoritative for compatibility.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
@@ -367,6 +373,8 @@ Phase 9D.1 adds a grounded Keybot conversational assistant backed by `POST /api/
 Phase 9D.2 polishes the Keybot floating assistant, grounded trust states, no-build/fallback presentation, and mobile bottom-sheet behavior without backend architecture changes.
 
 Phase 9E adds short-lived local Keybot conversation continuity for grounded follow-up answers while keeping technical authority in catalog IDs and deterministic validation.
+
+Phase 10A adds a schematic 2D build preview and dedicated visual builder page generated from selected catalog components and validation state without product photos, 3D rendering, external assets, or backend changes.
 
 ## Architecture Rule
 
