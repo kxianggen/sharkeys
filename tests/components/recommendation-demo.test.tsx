@@ -58,6 +58,29 @@ const emptyRecommendationResult = createRecommendationResult({
   }),
 });
 
+const tklRecommendationResult = createRecommendationResult({
+  source: "fallback_missing_api_key",
+  error:
+    "OPENAI" +
+    "_API_KEY is not configured, so intent extraction used deterministic local keyword extraction.",
+  intent: extractedKeyboardIntentSchema.parse({
+    budget: {
+      amount: 800,
+      currency: "MYR",
+      label: "mid_range",
+    },
+    layout: "tkl",
+    soundProfile: null,
+    useCase: "typing",
+    beginnerFriendly: null,
+    switchTechnology: "mechanical",
+    priorities: ["sound"],
+    constraints: [],
+    clarificationNeeded: false,
+    clarificationQuestion: null,
+  }),
+});
+
 type ApiResponseQueue = RecommendationResult[];
 
 function jsonResponse(body: unknown) {
@@ -733,6 +756,129 @@ describe("RecommendationDemo", () => {
     expect(screen.getByText(/Estimated total/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Keychron V2 Max/i).length).toBeGreaterThan(0);
     expect(screen.getByText("Open vendor page")).toBeInTheDocument();
+  });
+
+  it("shows visual builder links after recommendations load without embedding the full preview", async () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Creamy sound for studying/i,
+      }),
+    );
+
+    expect(await screen.findByText("Visual builder ready")).toBeInTheDocument();
+
+    const builderLinks = screen.getAllByRole("link", {
+      name: /Open visual builder/i,
+    });
+
+    expect(builderLinks.length).toBeGreaterThan(0);
+    expect(builderLinks[0]).toHaveAttribute(
+      "href",
+      expect.stringContaining("/configurator?case=case_keychron_v2_max_65_abs"),
+    );
+    expect(builderLinks[0]).toHaveAttribute(
+      "href",
+      expect.stringContaining("switch=switch_gateron_seasalt_smoothie"),
+    );
+    expect(
+      screen.queryByText("Selected recommendation preview"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("updates the visual builder link when another recommendation is selected", async () => {
+    mockFetch([tklRecommendationResult]);
+    render(<RecommendationDemo />);
+
+    fireEvent.change(screen.getByLabelText("Keyboard request"), {
+      target: { value: "TKL typing keyboard" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Find validated builds/i }));
+
+    expect(await screen.findByText("Visual builder ready")).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("link", { name: /Open visual builder/i })[0],
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining("switch=switch_mmd_holy_panda_v3"),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Build 3/i }));
+
+    expect(
+      screen.getAllByRole("link", { name: /Open visual builder/i })[0],
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining("switch=switch_akko_lavender_purple_v3_pro"),
+    );
+  });
+
+  it("shows manual selection visual builder link and compatible validation status", async () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    await waitFor(() => {
+      expect(getSelect("Case")).toBeEnabled();
+    });
+    fireEvent.change(getSelect("Case"), {
+      target: { value: "case_keychron_v2_max_65_abs" },
+    });
+
+    expect(
+      screen.getByRole("link", { name: /Open visual builder/i }),
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining("/configurator?case=case_keychron_v2_max_65_abs"),
+    );
+
+    fireEvent.change(getSelect("PCB"), {
+      target: { value: "pcb_keychron_v2_max_65_hotswap" },
+    });
+    fireEvent.change(getSelect("Plate"), {
+      target: { value: "plate_keychron_v2_max_65_pc" },
+    });
+    fireEvent.change(getSelect("Switch"), {
+      target: { value: "switch_gateron_seasalt_smoothie" },
+    });
+    fireEvent.change(getSelect("Keycap"), {
+      target: { value: "keycap_unknown_pudding_oem_pbt" },
+    });
+    fireEvent.change(getSelect("Stabilizer"), {
+      target: { value: "stab_keychron_v2_max_screw_in" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /Validate manual build/i }));
+
+    expect(await screen.findByText("Compatible build")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Open visual builder/i }),
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining("switch=switch_gateron_seasalt_smoothie"),
+    );
+  });
+
+  it("does not show a fake selected preview for no-build responses", async () => {
+    mockFetch([emptyRecommendationResult]);
+    render(<RecommendationDemo />);
+
+    fireEvent.change(screen.getByLabelText("Keyboard request"), {
+      target: { value: "75% aluminum keyboard" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Find validated builds/i }));
+
+    expect(
+      await screen.findByText("No validated build found"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Selected recommendation preview"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Visual builder ready")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Open visual builder/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("saves the selected validated recommendation to the local gallery", async () => {

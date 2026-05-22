@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
@@ -436,6 +437,22 @@ function estimateSavedBuildPrice(
 
 function buildSavedBuildTitle(components: CompleteComponentSelection) {
   return `${components.case.name} with ${components.switch.name}`;
+}
+
+function buildConfiguratorHref(selection: ManualSelection) {
+  const params = new URLSearchParams();
+
+  for (const category of componentCategories) {
+    const componentId = selection[category];
+
+    if (componentId) {
+      params.set(category, componentId);
+    }
+  }
+
+  const query = params.toString();
+
+  return query ? `/configurator?${query}` : "/configurator";
 }
 
 export function RecommendationDemo() {
@@ -2056,11 +2073,6 @@ function RecommendationInspector({
   recommendation: RecommendationBuild;
   selectedComponent: KeyboardComponent | undefined;
 }) {
-  const layout =
-    recommendation.validation.selectedComponents.case?.layouts[0] ??
-    recommendation.validation.selectedComponents.pcb?.layouts[0] ??
-    null;
-
   return (
     <div className="overflow-hidden rounded-3xl border border-[#c2c7cf] bg-white shadow-sm">
       <div className="border-b border-[#c2c7cf] p-6">
@@ -2097,13 +2109,39 @@ function RecommendationInspector({
               <BookmarkPlus className="h-4 w-4" aria-hidden />
               Save build
             </button>
+            <Link
+              className="mt-2 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-4 text-sm font-bold text-[#094067] transition hover:border-[#3DA9FC] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
+              href={buildConfiguratorHref(recommendation.componentIds)}
+            >
+              <Eye className="h-4 w-4" aria-hidden />
+              Open visual builder
+            </Link>
           </div>
         </div>
       </div>
 
       <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="border-b border-[#c2c7cf] p-5 lg:border-b-0 lg:border-r">
-          <KeyboardPreview layout={layout} />
+          <div className="rounded-3xl border border-[#c2c7cf] bg-[#f5faff] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-bold text-[#071e29]">
+                  Visual builder ready
+                </p>
+                <p className="mt-1 text-sm leading-6 text-[#42474e]">
+                  Open the dedicated configurator for the larger schematic,
+                  acoustic profile, and compatibility engine.
+                </p>
+              </div>
+              <Link
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#094067] px-4 text-sm font-bold text-white transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
+                href={buildConfiguratorHref(recommendation.componentIds)}
+              >
+                Open visual builder
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
+          </div>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {componentCategories.map((category) => {
@@ -2143,40 +2181,6 @@ function RecommendationInspector({
           category={activeCategory}
           component={selectedComponent}
         />
-      </div>
-    </div>
-  );
-}
-
-function KeyboardPreview({ layout }: { layout: string | null }) {
-  const rows = getLayoutPreviewRows(layout);
-
-  return (
-    <div className="sharkeys-keyboard-preview rounded-3xl border border-[#c2c7cf] p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-bold text-[#071e29]">Layout canvas</p>
-          <p className="text-xs text-[#42474e]">{layout ?? "auto"} layout preview</p>
-        </div>
-        <Keyboard className="h-5 w-5 text-[#094067]" aria-hidden />
-      </div>
-      <div className="grid gap-1.5">
-        {rows.map((row, rowIndex) => (
-          <div
-            className="grid auto-cols-fr grid-flow-col gap-1.5"
-            key={row.join("-")}
-            style={{ paddingLeft: `${rowIndex * 0.35}rem` }}
-          >
-            {row.map((keycap, keyIndex) => (
-              <span
-                className="sharkeys-keycap flex h-8 min-w-0 items-center justify-center rounded-lg border border-[#c2c7cf] bg-white px-1 text-[11px] font-semibold text-[#42474e]"
-                key={`${rowIndex}-${keyIndex}-${keycap}`}
-              >
-                {keycap}
-              </span>
-            ))}
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -2391,6 +2395,16 @@ function ManualSelectionPanel({
         )}
         Validate manual build
       </button>
+
+      {Object.values(manualSelection).some(Boolean) ? (
+        <Link
+          className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-4 text-sm font-bold text-[#094067] transition hover:border-[#3DA9FC] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
+          href={buildConfiguratorHref(manualSelection)}
+        >
+          Open visual builder
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </Link>
+      ) : null}
 
       {manualError ? (
         <Notice
@@ -2634,6 +2648,7 @@ function EmptyWorkspace() {
       </h2>
       <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[#42474e]">
         Recommendations, component inspection, and manual validation appear here.
+        The dedicated visual builder opens after you select a build.
       </p>
     </div>
   );
