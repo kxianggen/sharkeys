@@ -117,10 +117,9 @@ const categorySummaries: Record<ComponentCategory, string> = {
 };
 
 const quickPrompts = [
-  "Quiet keyboard for office",
-  "Creamy sound for studying",
-  "Beginner-friendly gaming build",
-  "Thocky keyboard under RM300",
+  "Quiet office keyboard",
+  "Creamy 65% under RM500",
+  "TKL typing build",
 ] as const;
 
 const smokePromptExamples = [
@@ -244,36 +243,6 @@ function getMountSummary(component: KeyboardComponent) {
     case "keycap":
       return component.keycapProfile;
   }
-}
-
-function getLayoutPreviewRows(layout: string | null | undefined) {
-  if (layout === "tkl") {
-    return [
-      ["Esc", "F1", "F2", "F3", "F4", "F5", "F6", "F7"],
-      ["Tab", "Q", "W", "E", "R", "T", "Y", "U", "Del"],
-      ["Caps", "A", "S", "D", "F", "G", "H", "J", "Enter"],
-      ["Shift", "Z", "X", "C", "V", "B", "N", "M", "Up"],
-      ["Ctrl", "Win", "Alt", "Space", "Alt", "Fn", "Left", "Down", "Right"],
-    ];
-  }
-
-  if (layout === "60") {
-    return [
-      ["Esc", "1", "2", "3", "4", "5", "6"],
-      ["Tab", "Q", "W", "E", "R", "T"],
-      ["Caps", "A", "S", "D", "F", "G"],
-      ["Shift", "Z", "X", "C", "V"],
-      ["Ctrl", "Alt", "Space", "Fn"],
-    ];
-  }
-
-  return [
-    ["Esc", "1", "2", "3", "4", "5", "6", "7"],
-    ["Tab", "Q", "W", "E", "R", "T", "Y"],
-    ["Caps", "A", "S", "D", "F", "G", "Enter"],
-    ["Shift", "Z", "X", "C", "V", "B"],
-    ["Ctrl", "Alt", "Space", "Alt", "Fn"],
-  ];
 }
 
 function createSavedBuildId(source: SavedBuildSource) {
@@ -661,7 +630,7 @@ export function RecommendationDemo() {
 
   function focusPrompt() {
     promptRef.current?.focus();
-    promptRef.current?.scrollIntoView({
+    promptRef.current?.scrollIntoView?.({
       behavior: "smooth",
       block: "center",
     });
@@ -816,43 +785,44 @@ export function RecommendationDemo() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5faff] text-[#071e29]">
+    <div className="min-h-screen overflow-x-hidden bg-[#f4f8fb] text-[#071e29]">
       <LandingNav onStartBuilding={focusPrompt} />
 
       <section
-        className="mx-auto flex w-full max-w-screen-xl flex-col items-center px-4 pb-20 pt-16 text-center sm:px-8 lg:px-16 lg:pb-28 lg:pt-20"
+        className="mx-auto flex w-full max-w-[920px] flex-col items-center px-4 pb-20 pt-20 text-center sm:px-8 lg:pb-24 lg:pt-28"
         id="configurator"
       >
-        <h1 className="max-w-4xl text-[44px] font-bold leading-[1.08] tracking-[-0.02em] text-[#071e29] sm:text-5xl lg:text-[64px] lg:leading-[1.04]">
-          Build your dream keyboard in a few words
+        <h1 className="max-w-4xl text-[42px] font-black leading-[1.08] tracking-[-0.01em] text-[#001d32] sm:text-5xl lg:text-[64px] lg:leading-[1.08]">
+          Build your dream keyboard in words
         </h1>
-        <p className="mt-6 max-w-3xl text-base leading-7 text-[#42474e] sm:text-lg">
-          Describe your preferred sound, feel, layout, or budget, and let the AI
-          guide you toward a compatible custom keyboard build.
+        <p className="mt-6 max-w-2xl text-base leading-7 text-[#093C5D]/70 sm:text-lg">
+          Tell sharkeys your sound, layout, budget, and use case. We’ll turn it
+          into compatible keyboard build options.
         </p>
 
         <form
-          className="sharkeys-soft-shadow mt-12 w-full max-w-3xl rounded-[24px] border border-[#c2c7cf] bg-white p-5 text-left transition focus-within:border-[#00639d] focus-within:ring-4 focus-within:ring-[#43acff]/20"
+          aria-label="AI keyboard prompt form"
+          className="sharkeys-soft-shadow mt-10 w-full max-w-3xl rounded-[28px] border border-white/80 bg-white/80 p-4 text-left backdrop-blur transition focus-within:border-[#6FD1D7] focus-within:ring-4 focus-within:ring-[#6FD1D7]/20 sm:p-5"
           onSubmit={handleSubmit}
         >
           <label className="sr-only" htmlFor="keyboard-request">
             Keyboard request
           </label>
           <textarea
-            className="min-h-[118px] w-full resize-none border-none bg-transparent p-0 text-base leading-7 text-[#071e29] outline-none placeholder:text-[#42474e]/60 focus:ring-0 sm:text-lg"
+            className="min-h-[84px] w-full resize-none border-none bg-transparent p-0 text-base leading-7 text-[#093C5D] outline-none placeholder:text-[#093C5D]/45 focus:ring-0 sm:min-h-[88px]"
             id="keyboard-request"
             maxLength={2000}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="Build me a keyboard under RM300 that is quiet and suitable for office..."
+            placeholder="Build me a keyboard under 300 ringgit that is quiet and suitable for office..."
             ref={promptRef}
             value={message}
           />
 
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <div className="flex gap-2">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex gap-2 text-[#093C5D]/65">
               <button
                 aria-label="Voice input is not available yet"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-[#42474e] transition hover:bg-[#e9f5ff] disabled:cursor-not-allowed disabled:opacity-45"
+                className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-[#e8f7fb] disabled:cursor-not-allowed disabled:opacity-55"
                 disabled
                 type="button"
               >
@@ -860,7 +830,7 @@ export function RecommendationDemo() {
               </button>
               <button
                 aria-label="Image input is not available yet"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-[#42474e] transition hover:bg-[#e9f5ff] disabled:cursor-not-allowed disabled:opacity-45"
+                className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-[#e8f7fb] disabled:cursor-not-allowed disabled:opacity-55"
                 disabled
                 type="button"
               >
@@ -868,30 +838,34 @@ export function RecommendationDemo() {
               </button>
             </div>
             <button
-              aria-label="Find validated builds"
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-[#094067] text-white shadow-sm transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30 disabled:cursor-not-allowed disabled:bg-[#72777f]"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#093C5D] px-6 text-sm font-bold text-white shadow-[0_10px_24px_rgba(9,60,93,0.18)] transition hover:-translate-y-0.5 hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 disabled:cursor-not-allowed disabled:translate-y-0 disabled:bg-[#72777f] sm:px-7"
               disabled={isSubmitDisabled}
               type="submit"
             >
               {isSubmitting ? (
-                <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                  <span>Starting...</span>
+                </>
               ) : (
-                <Send className="h-5 w-5" aria-hidden />
+                <>
+                  <span>Start Building</span>
+                  <Sparkles className="h-4 w-4" aria-hidden />
+                </>
               )}
             </button>
           </div>
         </form>
 
-        <div className="mt-6 flex max-w-4xl flex-wrap justify-center gap-3">
+        <div className="mt-5 flex max-w-4xl flex-wrap justify-center gap-3">
           {quickPrompts.map((prompt) => (
             <button
-              className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#c2c7cf] bg-white px-5 py-2 text-sm font-semibold text-[#42474e] transition hover:border-[#094067] hover:text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#43acff]/20 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-9 items-center rounded-full border border-white/90 bg-white/70 px-5 py-2 text-sm font-bold text-[#093C5D] shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={hasMounted && isSubmitting}
               key={prompt}
               onClick={() => void handleQuickPrompt(prompt)}
               type="button"
             >
-              <Sparkles className="h-4 w-4 text-[#00639d]" aria-hidden />
               {prompt}
             </button>
           ))}
@@ -921,8 +895,12 @@ export function RecommendationDemo() {
         ) : null}
       </section>
 
+      <HowItWorksSection />
+      <FeatureBento />
+      <FinalCta onStartBuilding={focusPrompt} />
+
       <section
-        className="border-y border-[#c2c7cf]/60 bg-[#e9f5ff] px-4 py-16 sm:px-8 lg:px-16"
+        className="px-4 py-20 sm:px-8 lg:px-16"
         id="results"
         ref={resultsRef}
       >
@@ -1009,9 +987,6 @@ export function RecommendationDemo() {
         </div>
       </section>
 
-      <HowItWorksSection />
-      <FeatureBento />
-      <FinalCta onStartBuilding={focusPrompt} />
       <SharkeysFooter />
 
       <FloatingKeybot
@@ -1033,27 +1008,27 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
   ] as const;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-[#c2c7cf] bg-[#f5faff]/95 backdrop-blur">
-      <div className="mx-auto flex h-20 w-full max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-8 lg:px-16">
+    <nav className="sticky top-0 z-50 border-b border-[#dbe5ec] bg-[#f4f9fc]/95 backdrop-blur">
+      <div className="mx-auto flex min-h-16 w-full max-w-[1280px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <a
-          className="flex items-center gap-3 text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
+          className="flex items-center gap-3 text-[#093C5D] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30"
           href="#configurator"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ddf1ff] text-[#094067]">
-            <Keyboard className="h-6 w-6" aria-hidden />
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#e1f3fe] text-[#093C5D]">
+            <Keyboard className="h-5 w-5" aria-hidden />
           </span>
-          <span className="text-2xl font-bold tracking-[-0.01em]">
-            sharkeys
+          <span className="text-base font-black tracking-[-0.01em]">
+            sharkeys.
           </span>
         </a>
 
-        <div className="hidden h-full items-center gap-10 md:flex">
+        <div className="hidden min-h-16 items-center gap-7 md:flex lg:gap-9">
           {navLinks.map(([label, href], index) => (
             <a
-              className={`flex h-full items-center border-b-2 text-sm font-semibold transition ${
+              className={`flex min-h-16 items-center border-b-2 text-xs font-bold transition lg:text-sm ${
                 index === 0
-                  ? "border-[#094067] text-[#094067]"
-                  : "border-transparent text-[#42474e] hover:text-[#094067]"
+                  ? "border-[#093C5D] text-[#093C5D]"
+                  : "border-transparent text-[#42474e] hover:text-[#093C5D]"
               }`}
               href={href}
               key={label}
@@ -1064,7 +1039,7 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
         </div>
 
         <button
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#094067] px-5 text-sm font-bold text-white transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#093C5D] px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 sm:px-6"
           onClick={onStartBuilding}
           type="button"
         >
@@ -1655,54 +1630,68 @@ function HowItWorksSection() {
   const steps = [
     {
       title: "Describe",
-      body: "Tell us what you want in plain English.",
+      body: "Type your requirements just like you’re talking to a friend.",
       icon: MessageCircle,
     },
     {
       title: "Generate",
-      body: "Get curated, compatible component lists.",
+      body: "Our AI curates specific builds tailored to your prompt.",
       icon: WandSparkles,
     },
     {
       title: "Validate",
-      body: "Automatic checks ensure everything fits.",
+      body: "Keybot checks every switch, plate, and PCB for compatibility.",
       icon: CheckCircle,
     },
     {
       title: "Preview",
-      body: "See the look and review the recommended build before choosing parts.",
+      body: "See a high-fidelity visual of your build before you buy.",
       icon: Eye,
     },
   ] as const;
 
   return (
-    <section className="bg-[#e9f5ff] px-4 py-20 sm:px-8 lg:px-16">
-      <div className="mx-auto max-w-screen-xl">
-        <div className="mb-14 text-center">
-          <h2 className="text-3xl font-bold tracking-[-0.01em] text-[#071e29] sm:text-4xl">
-            The intelligent way to build
+    <section className="px-4 py-20 sm:px-8 lg:px-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-16 text-center">
+          <h2 className="text-3xl font-bold tracking-[-0.01em] text-[#001d32] sm:text-4xl">
+            How it works
           </h2>
-          <p className="mt-3 text-lg text-[#42474e]">
-            From concept to compatibility check, handled by AI.
+          <p className="mt-3 text-base leading-7 text-[#093C5D]/70">
+            Your journey from thought to thock in four simple steps.
           </p>
         </div>
 
-        <div className="relative grid gap-6 md:grid-cols-4">
-          <div className="absolute left-[10%] right-[10%] top-10 hidden h-px bg-[#c2c7cf] md:block" />
+        <div className="relative mx-auto max-w-2xl pl-12">
+          <div className="absolute bottom-8 left-[31px] top-8 w-0.5 rounded-full bg-gradient-to-b from-[#6FD1D7] via-[#5DF8D8] to-[#6FD1D7]/20" />
           {steps.map((step, index) => (
             <article
-              className="relative z-10 flex flex-col items-center text-center"
+              className="relative z-10 mb-10 pl-8 last:mb-0"
               key={step.title}
             >
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-[#c2c7cf] bg-white shadow-sm">
-                <step.icon className="h-8 w-8 text-[#094067]" aria-hidden />
+              <div
+                className={`absolute left-[-24px] top-0 flex h-14 w-14 items-center justify-center rounded-full border-4 bg-white text-lg font-black text-[#093C5D] shadow-lg ${
+                  index % 2 === 0 ? "border-[#6FD1D7]" : "border-[#5DF8D8]"
+                }`}
+              >
+                {index + 1}
               </div>
-              <h3 className="text-2xl font-semibold text-[#071e29]">
-                {index + 1}. {step.title}
-              </h3>
-              <p className="mt-2 text-base leading-6 text-[#42474e]">
-                {step.body}
-              </p>
+              <div className="rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+                <div className="mb-2 flex items-center gap-2">
+                  <step.icon
+                    className={`h-4 w-4 ${
+                      index % 2 === 0 ? "text-[#6FD1D7]" : "text-[#12bfae]"
+                    }`}
+                    aria-hidden
+                  />
+                  <h3 className="text-lg font-bold text-[#093C5D]">
+                    {step.title}
+                  </h3>
+                </div>
+                <p className="text-sm leading-6 text-[#093C5D]/70">
+                  {step.body}
+                </p>
+              </div>
             </article>
           ))}
         </div>
@@ -1714,115 +1703,149 @@ function HowItWorksSection() {
 function FeatureBento() {
   return (
     <section
-      className="mx-auto max-w-screen-xl px-4 py-24 sm:px-8 lg:px-16"
+      className="mx-auto max-w-[1280px] px-4 py-20 sm:px-8 lg:px-6"
       id="features"
     >
-      <div className="mb-12 text-center">
-        <h2 className="text-3xl font-bold tracking-[-0.01em] text-[#071e29] sm:text-4xl">
-          Precision tools, simplified
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl font-bold tracking-[-0.01em] text-[#001d32] sm:text-4xl">
+          Engineered for precision
         </h2>
+        <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-[#093C5D]/70">
+          High-end tools to visualize, test, and perfect your custom build
+          before ordering.
+        </p>
       </div>
 
-      <div className="grid auto-rows-[minmax(260px,auto)] gap-6 md:grid-cols-3">
-        <article className="sharkeys-soft-shadow overflow-hidden rounded-3xl border border-[#c2c7cf] bg-white md:col-span-2 md:row-span-2">
-          <div className="p-8">
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-[#ddf1ff] text-[#094067]">
-              <Eye className="h-5 w-5" aria-hidden />
-            </div>
-            <h3 className="text-2xl font-semibold text-[#071e29]">
-              Visual Build Preview
-            </h3>
-            <p className="mt-3 max-w-xl text-lg leading-7 text-[#42474e]">
-              Review the recommended build structure with a clean keyboard
-              preview before inspecting individual parts.
-            </p>
-          </div>
-          <BentoKeyboardPreview />
-        </article>
-
-        <article className="sharkeys-soft-shadow flex flex-col justify-between rounded-3xl border border-[#c2c7cf] bg-white p-8">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <article className="flex min-h-[220px] flex-col justify-between rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur md:col-span-2">
           <div>
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-[#d0e6f5] text-[#00639d]">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#093C5D]/10 text-[#093C5D]">
               <Cpu className="h-5 w-5" aria-hidden />
             </div>
-            <h3 className="text-2xl font-semibold text-[#071e29]">
-              Smart Compatibility
+            <h3 className="text-lg font-bold text-[#093C5D]">
+              AI Part Compatibility
             </h3>
-            <p className="mt-3 text-base leading-6 text-[#42474e]">
-              Deterministic checks compare layouts, mounts, switch technology,
-              keycaps, and stabilizers before a build is shown.
+            <p className="mt-2 max-w-xl text-sm leading-6 text-[#093C5D]/70">
+              Real-time validation ensures your chosen switches, PCB, and
+              keycaps fit perfectly. No more costly mismatch errors.
             </p>
           </div>
-          <div className="mt-8 flex items-center gap-3 rounded-2xl border border-[#c2c7cf]/70 bg-[#ddf1ff] p-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#094067]">
-              <CheckCircle2 className="h-5 w-5" aria-hidden />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[#071e29]">
-                PCB &amp; Switches matched
-              </p>
-              <p className="text-xs text-[#42474e]">
-                Technology and layout verified
-              </p>
-            </div>
+          <div className="mt-6 flex items-center justify-between rounded-xl border border-white/70 bg-white/45 p-3">
+            <span className="text-xs font-bold text-[#093C5D]/80">
+              Compatibility Status
+            </span>
+            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#093C5D]/60">
+              <span className="h-2 w-2 rounded-full bg-[#6FD1D7]" />
+              Live check
+            </span>
           </div>
         </article>
 
-        <article className="sharkeys-soft-shadow flex flex-col justify-between overflow-hidden rounded-3xl border border-[#c2c7cf] bg-white p-8">
+        <article className="flex min-h-[220px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
           <div>
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-[#ddf1ff] text-[#094067]">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#093C5D]/10 text-[#093C5D]">
+              <Eye className="h-5 w-5" aria-hidden />
+            </div>
+            <h3 className="text-lg font-bold text-[#093C5D]">
+              Visual Preview
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-[#093C5D]/70">
+              See exactly how your components look together before you buy.
+            </p>
+          </div>
+          <FeatureKeyboardMini />
+        </article>
+
+        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+          <div>
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#093C5D]/10 text-[#093C5D]">
               <Volume2 className="h-5 w-5" aria-hidden />
             </div>
-            <h3 className="text-2xl font-semibold text-[#071e29]">
-              Sound Profile Guidance
+            <h3 className="text-lg font-bold text-[#093C5D]">
+              Typing Sound Preview
             </h3>
-            <p className="mt-3 text-base leading-6 text-[#42474e]">
-              Match preferences like thocky, creamy, clacky, or silent using
-              catalog metadata. No simulated audio is claimed yet.
+            <p className="mt-2 text-sm leading-6 text-[#093C5D]/70">
+              Estimate acoustic profiles from switch, plate, and case metadata.
             </p>
           </div>
           <SoundWave />
+        </article>
+
+        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+          <div>
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#093C5D]/10 text-[#093C5D]">
+              <Bot className="h-5 w-5" aria-hidden />
+            </div>
+            <h3 className="text-lg font-bold text-[#093C5D]">
+              Knowledge Assistant
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-[#093C5D]/70">
+              Ask Keybot anything from switch feel to layout tradeoffs.
+            </p>
+          </div>
+          <div className="mt-5 flex items-center gap-2 rounded-xl border border-white/70 bg-white/45 p-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#093C5D] text-white">
+              <Bot className="h-3.5 w-3.5" aria-hidden />
+            </span>
+            <span className="text-xs font-bold text-[#093C5D]/60">
+              “What’s a thock?”
+            </span>
+          </div>
+        </article>
+
+        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+          <div>
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#093C5D]/10 text-[#093C5D]">
+              <MessageCircle className="h-5 w-5" aria-hidden />
+            </div>
+            <h3 className="text-lg font-bold text-[#093C5D]">
+              Community Builds
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-[#093C5D]/70">
+              Explore shared builds and remix ideas in future phases.
+            </p>
+          </div>
+          <div className="mt-5 flex items-center -space-x-2">
+            {["A", "B", "C"].map((label, index) => (
+              <span
+                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-black text-[#093C5D] ${
+                  index === 0
+                    ? "bg-[#6FD1D7]/30"
+                    : index === 1
+                      ? "bg-[#5DF8D8]/30"
+                      : "bg-[#093C5D]/15"
+                }`}
+                key={label}
+              >
+                {label}
+              </span>
+            ))}
+            <span className="pl-4 text-xs font-bold text-[#093C5D]/45">
+              +1k
+            </span>
+          </div>
         </article>
       </div>
     </section>
   );
 }
 
-function BentoKeyboardPreview() {
+function FeatureKeyboardMini() {
   return (
-    <div className="sharkeys-keyboard-preview border-t border-[#c2c7cf] p-8">
-      <div className="mx-auto max-w-2xl rounded-[28px] border border-[#c2c7cf] bg-[#d5ebfb] p-5 shadow-sm">
-        <div className="grid gap-2">
-          {getLayoutPreviewRows("65").map((row, rowIndex) => (
-            <div
-              className="grid auto-cols-fr grid-flow-col gap-2"
-              key={row.join("-")}
-              style={{ paddingLeft: `${rowIndex * 0.5}rem` }}
-            >
-              {row.map((keycap, keyIndex) => (
-                <span
-                  className="sharkeys-keycap flex h-10 min-w-0 items-center justify-center rounded-lg border border-[#c2c7cf] bg-white px-2 text-[11px] font-semibold text-[#42474e]"
-                  key={`${rowIndex}-${keyIndex}-${keycap}`}
-                >
-                  {keycap}
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="mt-auto flex h-16 items-center justify-center rounded-xl border border-white/70 bg-white/45">
+      <Keyboard className="h-7 w-7 text-[#093C5D]/25" aria-hidden />
     </div>
   );
 }
 
 function SoundWave() {
-  const heights = [24, 42, 78, 100, 62, 34, 90, 52, 70, 44, 24];
+  const heights = [30, 58, 100, 44, 24, 82];
 
   return (
-    <div className="mt-8 flex h-20 items-end gap-1.5">
+    <div className="mt-5 flex h-10 items-end justify-center gap-1.5">
       {heights.map((height, index) => (
         <span
-          className="w-3 rounded-t-full bg-[#094067]/70"
+          className="w-3 rounded-t-sm bg-[#6FD1D7]/70"
           key={`${height}-${index}`}
           style={{ height: `${height}%` }}
         />
@@ -1833,51 +1856,43 @@ function SoundWave() {
 
 function FinalCta({ onStartBuilding }: { onStartBuilding: () => void }) {
   return (
-    <section className="border-y border-[#c2c7cf]/70 bg-[#e9f5ff] px-4 py-24 text-center sm:px-8 lg:px-16">
-      <h2 className="text-4xl font-bold tracking-[-0.02em] text-[#071e29] sm:text-5xl">
-        Ready to curate your keystrokes?
-      </h2>
-      <p className="mx-auto mt-6 max-w-2xl text-lg leading-7 text-[#42474e]">
-        Stop endlessly researching compatibility. Let sharkeys guide you to the
-        perfect build in minutes.
-      </p>
-      <button
-        className="mt-10 inline-flex h-14 items-center justify-center gap-3 rounded-full bg-[#094067] px-8 text-lg font-bold text-white transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
-        onClick={onStartBuilding}
-        type="button"
-      >
-        Start Building Now
-        <ArrowRight className="h-5 w-5" aria-hidden />
-      </button>
+    <section className="px-4 py-24 text-center sm:px-8 lg:px-6">
+      <div className="mx-auto max-w-[1280px] rounded-[40px] border border-[#6FD1D7]/30 bg-white/55 px-6 py-16 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur sm:px-10 lg:py-20">
+        <h2 className="text-4xl font-black tracking-[-0.01em] text-[#001d32] sm:text-5xl">
+          Ready to hear the perfect click?
+        </h2>
+        <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-[#093C5D]/70">
+          Start your journey with sharkeys today and join thousands of
+          enthusiasts building better boards.
+        </p>
+        <button
+          className="mt-9 inline-flex min-h-14 items-center justify-center rounded-full bg-[#093C5D] px-8 text-sm font-black text-white shadow-[0_14px_28px_rgba(9,60,93,0.22)] transition hover:-translate-y-0.5 hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 sm:px-12"
+          onClick={onStartBuilding}
+          type="button"
+        >
+          Create your keyboard now
+        </button>
+      </div>
     </section>
   );
 }
 
 function SharkeysFooter() {
-  const links = [
-    "Design Guide",
-    "Switch Library",
-    "Keycap Compatibility",
-    "Discord Community",
-    "Support",
-  ];
+  const links = ["About", "Privacy", "Terms"];
 
   return (
-    <footer className="border-t border-[#c2c7cf] bg-[#d0e6f5] px-4 py-16 sm:px-8 lg:px-16">
-      <div className="mx-auto grid max-w-screen-2xl gap-8 md:grid-cols-[280px_minmax(0,1fr)]">
+    <footer className="border-t border-white/60 bg-white/40 px-4 py-12 backdrop-blur sm:px-8 lg:px-6">
+      <div className="mx-auto flex max-w-[1280px] flex-col justify-between gap-8 md:flex-row md:items-center">
         <div>
-          <div className="flex items-center gap-2 text-2xl font-bold text-[#071e29]">
-            <Keyboard className="h-6 w-6 text-[#094067]" aria-hidden />
-            sharkeys
-          </div>
-          <p className="mt-4 max-w-xs text-base leading-6 text-[#42474e]">
-            Precision-engineered guidance for custom mechanical keyboard builds.
+          <div className="text-base font-black text-[#001d32]">sharkeys.</div>
+          <p className="mt-3 text-sm text-[#093C5D]/60">
+            © 2024 sharkeys. build your sound.
           </p>
         </div>
-        <div className="flex flex-wrap gap-6 md:justify-end">
+        <div className="flex flex-wrap gap-8 md:justify-end">
           {links.map((link) => (
             <a
-              className="text-base text-[#42474e] transition hover:text-[#094067] hover:underline focus:outline-none focus:ring-4 focus:ring-[#43acff]/20"
+              className="text-sm font-bold text-[#093C5D]/70 transition hover:text-[#093C5D] hover:underline focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20"
               href="#configurator"
               key={link}
             >
@@ -1897,43 +1912,33 @@ function WorkspaceHeader({
   result: RecommendationResult | null;
   selected: RecommendationBuild | null;
 }) {
-  const price =
-    selected?.estimatedPrice !== null && selected?.estimatedPrice !== undefined
-      ? formatMoney(selected.estimatedPrice, selected.estimatedPriceCurrency ?? "MYR")
-      : "No estimate";
-
   return (
-    <div className="sharkeys-soft-shadow rounded-3xl border border-[#c2c7cf] bg-white p-6">
+    <div className="rounded-[28px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#00639d]">
-            sharkeys configurator
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#3B7597]">
+            Build output
           </p>
-          <h2 className="mt-2 text-3xl font-bold tracking-[-0.01em] text-[#071e29]">
-            Validated keyboard workspace
+          <h2 className="mt-2 text-3xl font-black tracking-[-0.01em] text-[#001d32]">
+            {result ? "Your validated build options" : "Your build results appear here"}
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#42474e]">
-            Review generated builds, inspect catalog parts, save compatible
-            builds, or run your own manual validation check.
+            {result
+              ? "Review recommendations, inspect grounded catalog parts, save compatible builds, or open the visual builder."
+              : "Submit a prompt above and sharkeys will show the validated recommendations in this lower workspace."}
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-2 text-right sm:grid-cols-3">
-          <Metric label="Validated builds" value={`${result?.recommendations.length ?? 0}`} />
-          <Metric label="Candidate groups" value={result ? "6" : "0"} />
-          <Metric label="Selected total" value={price} />
-        </div>
+        {selected ? (
+          <div className="rounded-full border border-[#6FD1D7]/40 bg-[#eafafd] px-4 py-2 text-sm font-bold text-[#093C5D]">
+            {selected.estimatedPrice === null
+              ? "Estimate unavailable"
+              : formatMoney(
+                  selected.estimatedPrice,
+                  selected.estimatedPriceCurrency ?? "MYR",
+                )}
+          </div>
+        ) : null}
       </div>
-    </div>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-28 rounded-2xl border border-[#c2c7cf] bg-[#e9f5ff] px-3 py-2">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#42474e]">
-        {label}
-      </p>
-      <p className="mt-1 text-sm font-bold text-[#071e29]">{value}</p>
     </div>
   );
 }
@@ -1942,9 +1947,9 @@ function IntentPanel({ result }: { result: RecommendationResult | null }) {
   if (!result) {
     return (
       <div className="rounded-3xl border border-[#c2c7cf] bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-[#071e29]">Extracted preferences</h2>
+        <h2 className="text-sm font-bold text-[#071e29]">Request summary</h2>
         <p className="mt-2 text-sm leading-6 text-[#42474e]">
-          Submit a request to see extracted build criteria.
+          Submit a request to see grounded build criteria.
         </p>
       </div>
     );
@@ -1974,7 +1979,7 @@ function IntentPanel({ result }: { result: RecommendationResult | null }) {
   return (
     <div className="rounded-3xl border border-[#c2c7cf] bg-white p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-bold text-[#071e29]">Extracted preferences</h2>
+        <h2 className="text-sm font-bold text-[#071e29]">Request summary</h2>
         <span className="rounded-full border border-[#c2c7cf] bg-[#e9f5ff] px-2.5 py-1 text-xs font-semibold text-[#094067]">
           {result.source.replaceAll("_", " ")}
         </span>

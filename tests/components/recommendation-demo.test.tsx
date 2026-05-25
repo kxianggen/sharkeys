@@ -224,8 +224,27 @@ function getLastKeybotRequestBody() {
   return body;
 }
 
+function getRecommendationRequestBodies() {
+  return vi
+    .mocked(fetch)
+    .mock.calls.filter(([input]) => input.toString() === "/api/recommendations")
+    .map(([, init]) => {
+      if (typeof init?.body !== "string") {
+        throw new Error("Expected recommendation request body to be JSON.");
+      }
+
+      return JSON.parse(init.body) as { message: string };
+    });
+}
+
 function getSelect(label: string) {
   return screen.getByLabelText(label) as HTMLSelectElement;
+}
+
+function getPromptSubmitButton() {
+  return within(
+    screen.getByRole("form", { name: /AI keyboard prompt form/i }),
+  ).getByRole("button", { name: /Start Building/i });
 }
 
 function getSavedGallery() {
@@ -310,19 +329,21 @@ describe("RecommendationDemo", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /Build your dream keyboard in a few words/i,
+        name: /Build your dream keyboard in words/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.getAllByText("sharkeys").length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/sharkeys\./i).length).toBeGreaterThan(0);
     expect(screen.queryByText("Sharkeys")).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Open Keybot assistant/i }),
     ).toHaveTextContent(/Ask Keybot/i);
-    expect(screen.getByText(/The intelligent way to build/i)).toBeInTheDocument();
+    expect(screen.getByText(/How it works/i)).toBeInTheDocument();
+    expect(screen.getByText(/Engineered for precision/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Validated keyboard workspace/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Candidate groups/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Extracted preferences/i)).not.toBeInTheDocument();
     expect(screen.getByText("Manual build check")).toBeInTheDocument();
-    const submitButton = screen.getByRole("button", {
-      name: /Find validated builds/i,
-    });
+    const submitButton = getPromptSubmitButton();
 
     await waitFor(() => {
       expect(submitButton).toBeDisabled();
@@ -330,12 +351,12 @@ describe("RecommendationDemo", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     ).toBeEnabled();
 
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
-      target: { value: "Creamy sound for studying" },
+      target: { value: "Creamy 65% under RM500" },
     });
 
     await waitFor(() => {
@@ -345,6 +366,50 @@ describe("RecommendationDemo", () => {
     await waitFor(() => {
       expect(getSelect("Case")).toBeEnabled();
     });
+  });
+
+  it("keeps the final CTA wired back to the prompt", () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Create your keyboard now/i }),
+    );
+
+    expect(screen.getByLabelText("Keyboard request")).toHaveFocus();
+  });
+
+  it("submits typed prompts through the recommendations API", async () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    fireEvent.change(screen.getByLabelText("Keyboard request"), {
+      target: { value: "quiet office keyboard under RM500" },
+    });
+    fireEvent.click(getPromptSubmitButton());
+
+    expect(
+      await screen.findByText("Rule-engine validated"),
+    ).toBeInTheDocument();
+    expect(getRecommendationRequestBodies().at(-1)?.message).toBe(
+      "quiet office keyboard under RM500",
+    );
+  });
+
+  it("submits prompt chips through the same recommendation flow", async () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Quiet office keyboard/i }),
+    );
+
+    expect(
+      await screen.findByText("Rule-engine validated"),
+    ).toBeInTheDocument();
+    expect(getRecommendationRequestBodies().at(-1)?.message).toBe(
+      "Quiet office keyboard",
+    );
   });
 
   it("opens and closes the floating Keybot assistant", async () => {
@@ -562,7 +627,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     );
 
@@ -607,7 +672,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     );
 
@@ -688,7 +753,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     );
 
@@ -712,7 +777,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     );
 
@@ -724,7 +789,7 @@ describe("RecommendationDemo", () => {
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
       target: { value: "beginner friendly creamy 65% keyboard under $50" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Find validated builds/i }));
+    fireEvent.click(getPromptSubmitButton());
 
     expect(
       await screen.findByText("No validated build found"),
@@ -746,7 +811,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     );
 
@@ -764,7 +829,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     );
 
@@ -795,7 +860,7 @@ describe("RecommendationDemo", () => {
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
       target: { value: "TKL typing keyboard" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Find validated builds/i }));
+    fireEvent.click(getPromptSubmitButton());
 
     expect(await screen.findByText("Visual builder ready")).toBeInTheDocument();
     expect(
@@ -867,7 +932,7 @@ describe("RecommendationDemo", () => {
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
       target: { value: "75% aluminum keyboard" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Find validated builds/i }));
+    fireEvent.click(getPromptSubmitButton());
 
     expect(
       await screen.findByText("No validated build found"),
@@ -887,7 +952,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     );
 
@@ -917,7 +982,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     );
     expect(
@@ -931,7 +996,7 @@ describe("RecommendationDemo", () => {
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
       target: { value: "beginner friendly creamy 65% keyboard under $50" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Find validated builds/i }));
+    fireEvent.click(getPromptSubmitButton());
     expect(
       await screen.findByText("No validated build found"),
     ).toBeInTheDocument();
@@ -958,7 +1023,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     );
     expect(
@@ -987,7 +1052,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Creamy sound for studying/i,
+        name: /Creamy 65% under RM500/i,
       }),
     );
     expect(

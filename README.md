@@ -2,7 +2,7 @@
 
 sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 10A: Visual 2D build preview.
+This repository is currently in Phase 10B.1: Stitch landing page redesign.
 
 ## Stack
 
@@ -336,6 +336,12 @@ Phase 10A adds a reusable data-driven 2D keyboard preview and a dedicated `/conf
 
 The preview is schematic, not photorealistic. It is generated from catalog and selection data with React and CSS only: no product photos, no 3D rendering, and no external visual assets. Deterministic validation remains authoritative for compatibility.
 
+## Phase 10B.1 Stitch Landing Page Redesign
+
+Phase 10B.1 replaces the landing page visual design with the Stitch-inspired AI keyboard experience: compact top navigation, centered prompt-first hero, four-step timeline, precision feature bento, final CTA, and simplified footer.
+
+This phase is landing-page-only. Recommendation submission, Keybot, saved builds, manual validation, visual builder links, API contracts, Supabase schema, and deterministic recommendation logic remain unchanged.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.
@@ -375,6 +381,8 @@ Phase 9D.2 polishes the Keybot floating assistant, grounded trust states, no-bui
 Phase 9E adds short-lived local Keybot conversation continuity for grounded follow-up answers while keeping technical authority in catalog IDs and deterministic validation.
 
 Phase 10A adds a schematic 2D build preview and dedicated visual builder page generated from selected catalog components and validation state without product photos, 3D rendering, external assets, or backend changes.
+
+Phase 10B.1 refreshes the landing page to match the Stitch AI experience while preserving the existing prompt flow, grounded Keybot assistant, saved builds, manual validation, and backend behavior.
 
 ## Architecture Rule
 
