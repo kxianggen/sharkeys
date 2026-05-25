@@ -5,7 +5,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { keyboardComponents } from "@/data";
-import { RecommendationDemo } from "@/components/recommendation-demo";
+import { MyBuildsPage, RecommendationDemo } from "@/components/recommendation-demo";
 import {
   createRecommendationResult,
   recommendationsApiResponseSchema,
@@ -13,6 +13,16 @@ import {
 } from "@/lib/recommendations";
 import { extractedKeyboardIntentSchema } from "@/lib/ai";
 import { keybotApiResponseSchema, type KeybotApiResponse } from "@/lib/keybot";
+
+const navigationMocks = vi.hoisted(() => ({
+  push: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: navigationMocks.push,
+  }),
+}));
 
 const recommendationResult = createRecommendationResult({
   source: "fallback_missing_api_key",
@@ -278,6 +288,7 @@ function createLocalStorageMock() {
 
 describe("RecommendationDemo", () => {
   beforeEach(() => {
+    navigationMocks.push.mockReset();
     Object.defineProperty(window, "localStorage", {
       configurable: true,
       value: createLocalStorageMock(),
@@ -292,7 +303,7 @@ describe("RecommendationDemo", () => {
   it("hydrates without disabled-control mismatch warnings", async () => {
     mockFetch();
     const container = document.createElement("div");
-    container.innerHTML = renderToString(<RecommendationDemo />);
+    container.innerHTML = renderToString(<RecommendationDemo mode="configurator" />);
     document.body.appendChild(container);
     const consoleErrorSpy = vi
       .spyOn(console, "error")
@@ -300,7 +311,7 @@ describe("RecommendationDemo", () => {
     let root: ReturnType<typeof hydrateRoot> | undefined;
 
     await act(async () => {
-      root = hydrateRoot(container, <RecommendationDemo />);
+      root = hydrateRoot(container, <RecommendationDemo mode="configurator" />);
     });
 
     await waitFor(() => {
@@ -323,7 +334,7 @@ describe("RecommendationDemo", () => {
     container.remove();
   });
 
-  it("renders controls without hydration-sensitive disabled gating", async () => {
+  it("renders the landing route without workspace clutter", async () => {
     mockFetch();
     render(<RecommendationDemo />);
 
@@ -339,10 +350,29 @@ describe("RecommendationDemo", () => {
     ).toHaveTextContent(/Ask Keybot/i);
     expect(screen.getByText(/How it works/i)).toBeInTheDocument();
     expect(screen.getByText(/Engineered for precision/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Configurator/i })).toHaveAttribute(
+      "href",
+      "/configurator",
+    );
+    expect(screen.getByRole("link", { name: /Browse/i })).toHaveAttribute(
+      "href",
+      "/browse",
+    );
+    expect(screen.getByRole("link", { name: /Community Gallery/i })).toHaveAttribute(
+      "href",
+      "/community-gallery",
+    );
+    expect(screen.getByRole("link", { name: /My Builds/i })).toHaveAttribute(
+      "href",
+      "/my-builds",
+    );
     expect(screen.queryByText(/Validated keyboard workspace/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Candidate groups/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Extracted preferences/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Manual build check")).toBeInTheDocument();
+    expect(screen.queryByText("Manual build check")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: /Saved builds gallery/i }),
+    ).not.toBeInTheDocument();
     const submitButton = getPromptSubmitButton();
 
     await waitFor(() => {
@@ -364,24 +394,67 @@ describe("RecommendationDemo", () => {
     });
 
     await waitFor(() => {
-      expect(getSelect("Case")).toBeEnabled();
+      expect(submitButton).toBeEnabled();
     });
   });
 
-  it("keeps the final CTA wired back to the prompt", () => {
+  it("navigates from landing prompt and final CTA to configurator", () => {
     mockFetch();
     render(<RecommendationDemo />);
+
+    fireEvent.change(screen.getByLabelText("Keyboard request"), {
+      target: { value: "quiet office keyboard under RM500" },
+    });
+    fireEvent.click(getPromptSubmitButton());
+
+    expect(navigationMocks.push).toHaveBeenCalledWith(
+      "/configurator?prompt=quiet+office+keyboard+under+RM500",
+    );
 
     fireEvent.click(
       screen.getByRole("button", { name: /Create your keyboard now/i }),
     );
 
-    expect(screen.getByLabelText("Keyboard request")).toHaveFocus();
+    expect(navigationMocks.push).toHaveBeenLastCalledWith(
+      "/configurator?prompt=quiet+office+keyboard+under+RM500",
+    );
+  });
+
+  it("navigates landing prompt chips to configurator with prompt context", () => {
+    mockFetch();
+    render(<RecommendationDemo />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Quiet office keyboard/i }),
+    );
+
+    expect(navigationMocks.push).toHaveBeenCalledWith(
+      "/configurator?prompt=Quiet+office+keyboard",
+    );
+    expect(getRecommendationRequestBodies()).toHaveLength(0);
+  });
+
+  it("renders the configurator workspace with manual validation controls", async () => {
+    mockFetch();
+    render(<RecommendationDemo mode="configurator" />);
+
+    expect(
+      screen.getByRole("heading", { name: /Configurator workspace/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Manual build check")).toBeInTheDocument();
+    expect(screen.queryByText(/How it works/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: /Saved builds gallery/i }),
+    ).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getSelect("Case")).toBeEnabled();
+    });
   });
 
   it("submits typed prompts through the recommendations API", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
       target: { value: "quiet office keyboard under RM500" },
@@ -398,7 +471,7 @@ describe("RecommendationDemo", () => {
 
   it("submits prompt chips through the same recommendation flow", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", { name: /Quiet office keyboard/i }),
@@ -414,7 +487,7 @@ describe("RecommendationDemo", () => {
 
   it("opens and closes the floating Keybot assistant", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     const openButton = screen.getByRole("button", {
       name: /Open Keybot assistant/i,
@@ -448,7 +521,7 @@ describe("RecommendationDemo", () => {
 
   it("sends quick action chips as real Keybot messages", async () => {
     mockFetch([recommendationResult], { keybotDelayMs: 20 });
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -469,7 +542,7 @@ describe("RecommendationDemo", () => {
 
   it("sends Keybot questions and renders grounded assistant responses", async () => {
     mockFetch([recommendationResult], { keybotDelayMs: 20 });
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -504,7 +577,7 @@ describe("RecommendationDemo", () => {
 
   it("sends recent Keybot messages after a chat turn", async () => {
     mockFetch([recommendationResult], { keybotDelayMs: 20 });
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -564,7 +637,7 @@ describe("RecommendationDemo", () => {
         usedRecommendationEngine: true,
       },
     });
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -593,7 +666,7 @@ describe("RecommendationDemo", () => {
 
   it("shows a Keybot error fallback when the assistant route fails", async () => {
     mockFetch([recommendationResult], { keybotShouldFail: true });
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -623,7 +696,7 @@ describe("RecommendationDemo", () => {
 
   it("passes selected recommendation context to Keybot", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -668,7 +741,7 @@ describe("RecommendationDemo", () => {
 
   it("sends follow-up payload with selected recommendation and recent context", async () => {
     mockFetch([recommendationResult], { keybotDelayMs: 20 });
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -714,7 +787,7 @@ describe("RecommendationDemo", () => {
 
   it("passes manual selection context to Keybot before recommendations exist", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     await waitFor(() => {
       expect(getSelect("Case")).toBeEnabled();
@@ -749,7 +822,7 @@ describe("RecommendationDemo", () => {
 
   it("loads recommendation component IDs into the manual panel", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -773,7 +846,7 @@ describe("RecommendationDemo", () => {
 
   it("clears manual selections after a subsequent zero-recommendation response", async () => {
     mockFetch([recommendationResult, emptyRecommendationResult]);
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -807,7 +880,7 @@ describe("RecommendationDemo", () => {
 
   it("shows validated recommendation details and vendor-link behavior", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -825,7 +898,7 @@ describe("RecommendationDemo", () => {
 
   it("shows visual builder links after recommendations load without embedding the full preview", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -842,7 +915,7 @@ describe("RecommendationDemo", () => {
     expect(builderLinks.length).toBeGreaterThan(0);
     expect(builderLinks[0]).toHaveAttribute(
       "href",
-      expect.stringContaining("/configurator?case=case_keychron_v2_max_65_abs"),
+      expect.stringContaining("/visual-builder?case=case_keychron_v2_max_65_abs"),
     );
     expect(builderLinks[0]).toHaveAttribute(
       "href",
@@ -855,7 +928,7 @@ describe("RecommendationDemo", () => {
 
   it("updates the visual builder link when another recommendation is selected", async () => {
     mockFetch([tklRecommendationResult]);
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
       target: { value: "TKL typing keyboard" },
@@ -882,7 +955,7 @@ describe("RecommendationDemo", () => {
 
   it("shows manual selection visual builder link and compatible validation status", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     await waitFor(() => {
       expect(getSelect("Case")).toBeEnabled();
@@ -895,7 +968,7 @@ describe("RecommendationDemo", () => {
       screen.getByRole("link", { name: /Open visual builder/i }),
     ).toHaveAttribute(
       "href",
-      expect.stringContaining("/configurator?case=case_keychron_v2_max_65_abs"),
+      expect.stringContaining("/visual-builder?case=case_keychron_v2_max_65_abs"),
     );
 
     fireEvent.change(getSelect("PCB"), {
@@ -927,7 +1000,7 @@ describe("RecommendationDemo", () => {
 
   it("does not show a fake selected preview for no-build responses", async () => {
     mockFetch([emptyRecommendationResult]);
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
       target: { value: "75% aluminum keyboard" },
@@ -946,9 +1019,9 @@ describe("RecommendationDemo", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("saves the selected validated recommendation to the local gallery", async () => {
+  it("saves the selected validated recommendation to local storage", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -961,13 +1034,10 @@ describe("RecommendationDemo", () => {
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /^Save build$/i }));
 
-    const gallery = getSavedGallery();
-
     expect(
-      await within(gallery).findByText(/Saved recommendation/i),
+      await screen.findByText(/saved locally/i),
     ).toBeInTheDocument();
-    expect(within(gallery).getByText(/RM\s*455/i)).toBeInTheDocument();
-    expect(within(gallery).getAllByText("Vendor").length).toBeGreaterThan(0);
+    expect(screen.getByText(/My Builds page/i)).toBeInTheDocument();
 
     await waitFor(() => {
       expect(
@@ -976,50 +1046,55 @@ describe("RecommendationDemo", () => {
     });
   });
 
-  it("loads a saved build into the manual panel and validates it", async () => {
-    mockFetch([recommendationResult, emptyRecommendationResult]);
-    render(<RecommendationDemo />);
+  it("renders the My Builds empty state", async () => {
+    mockFetch();
+    render(<MyBuildsPage />);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
-      }),
-    );
     expect(
-      await screen.findByText("Rule-engine validated"),
+      await screen.findByText(/No saved builds yet/i),
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /^Save build$/i }));
-    expect(
-      await within(getSavedGallery()).findByText(/Saved recommendation/i),
-    ).toBeInTheDocument();
-
-    fireEvent.change(screen.getByLabelText("Keyboard request"), {
-      target: { value: "beginner friendly creamy 65% keyboard under $50" },
-    });
-    fireEvent.click(getPromptSubmitButton());
-    expect(
-      await screen.findByText("No validated build found"),
-    ).toBeInTheDocument();
-    expect(getSelect("Case").value).toBe("");
-
-    fireEvent.click(within(getSavedGallery()).getByRole("button", {
-      name: /Load build/i,
-    }));
-
-    expect(getSelect("Case").value).toBe("case_keychron_v2_max_65_abs");
-    expect(getSelect("PCB").value).toBe("pcb_keychron_v2_max_65_hotswap");
-    expect(getSelect("Plate").value).toBe("plate_keychron_v2_max_65_pc");
-    expect(getSelect("Switch").value).toBe("switch_gateron_seasalt_smoothie");
-    expect(getSelect("Keycap").value).toBe("keycap_unknown_pudding_oem_pbt");
-    expect(getSelect("Stabilizer").value).toBe("stab_keychron_v2_max_screw_in");
-
-    fireEvent.click(screen.getByRole("button", { name: /Validate manual build/i }));
-    expect(await screen.findByText("Compatible build")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /My Builds/i })).toBeInTheDocument();
   });
 
-  it("saves a manually validated compatible build", async () => {
+  it("opens a saved build from My Builds in the visual builder", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    const recommendation = recommendationResult.recommendations[0];
+
+    window.localStorage.setItem(
+      "sharkeys.savedBuilds.v1",
+      JSON.stringify([
+        {
+          id: "saved_recommendation_test",
+          title: recommendation.title,
+          createdAt: "2026-05-25T00:00:00.000Z",
+          source: "recommendation",
+          componentIds: recommendation.componentIds,
+          estimatedPrice: recommendation.estimatedPrice,
+          estimatedPriceCurrency: recommendation.estimatedPriceCurrency,
+          validation: recommendation.validation,
+        },
+      ]),
+    );
+
+    render(<MyBuildsPage />);
+
+    const gallery = getSavedGallery();
+
+    expect(
+      await within(gallery).findByText(recommendation.title),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      within(gallery).getByRole("button", { name: /Open visual builder/i }),
+    );
+
+    expect(navigationMocks.push).toHaveBeenCalledWith(
+      expect.stringContaining("/visual-builder?case=case_keychron_v2_max_65_abs"),
+    );
+  });
+
+  it("saves a manually validated compatible build to local storage", async () => {
+    mockFetch();
+    render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -1036,34 +1111,40 @@ describe("RecommendationDemo", () => {
       screen.getByRole("button", { name: /Save compatible build/i }),
     );
 
-    const gallery = getSavedGallery();
-
     expect(
-      await within(gallery).findByText(/Saved manual/i),
+      await screen.findByText(/Manual build: Keychron V2 Max/i),
     ).toBeInTheDocument();
-    expect(
-      within(gallery).getAllByText(/Manual build: Keychron V2 Max/i).length,
-    ).toBeGreaterThan(0);
+    expect(window.localStorage.getItem("sharkeys.savedBuilds.v1")).toContain(
+      "Manual build: Keychron V2 Max",
+    );
   });
 
-  it("deletes saved builds from the local gallery", async () => {
+  it("deletes saved builds from My Builds", async () => {
     mockFetch();
-    render(<RecommendationDemo />);
+    const recommendation = recommendationResult.recommendations[0];
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
-      }),
+    window.localStorage.setItem(
+      "sharkeys.savedBuilds.v1",
+      JSON.stringify([
+        {
+          id: "saved_recommendation_test",
+          title: recommendation.title,
+          createdAt: "2026-05-25T00:00:00.000Z",
+          source: "recommendation",
+          componentIds: recommendation.componentIds,
+          estimatedPrice: recommendation.estimatedPrice,
+          estimatedPriceCurrency: recommendation.estimatedPriceCurrency,
+          validation: recommendation.validation,
+        },
+      ]),
     );
-    expect(
-      await screen.findByText("Rule-engine validated"),
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /^Save build$/i }));
+
+    render(<MyBuildsPage />);
 
     const gallery = getSavedGallery();
 
     expect(
-      await within(gallery).findByText(/Saved recommendation/i),
+      await within(gallery).findByText(recommendation.title),
     ).toBeInTheDocument();
     fireEvent.click(within(gallery).getByRole("button", { name: /Delete/i }));
 

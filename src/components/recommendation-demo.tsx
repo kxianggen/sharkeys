@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
@@ -408,7 +409,14 @@ function buildSavedBuildTitle(components: CompleteComponentSelection) {
   return `${components.case.name} with ${components.switch.name}`;
 }
 
-function buildConfiguratorHref(selection: ManualSelection) {
+type RecommendationDemoMode = "configurator" | "landing";
+
+type RecommendationDemoProps = {
+  initialPrompt?: string | null;
+  mode?: RecommendationDemoMode;
+};
+
+function buildVisualBuilderHref(selection: ManualSelection) {
   const params = new URLSearchParams();
 
   for (const category of componentCategories) {
@@ -421,13 +429,32 @@ function buildConfiguratorHref(selection: ManualSelection) {
 
   const query = params.toString();
 
-  return query ? `/configurator?${query}` : "/configurator";
+  return query ? `/visual-builder?${query}` : "/visual-builder";
 }
 
-export function RecommendationDemo() {
+function buildConfiguratorPromptHref(prompt: string) {
+  const trimmedPrompt = prompt.trim();
+
+  if (!trimmedPrompt) {
+    return "/configurator";
+  }
+
+  const params = new URLSearchParams({ prompt: trimmedPrompt });
+
+  return `/configurator?${params.toString()}`;
+}
+
+export function RecommendationDemo({
+  initialPrompt = null,
+  mode = "landing",
+}: RecommendationDemoProps = {}) {
+  const router = useRouter();
   const promptRef = useRef<HTMLTextAreaElement | null>(null);
   const resultsRef = useRef<HTMLElement | null>(null);
-  const [message, setMessage] = useState("");
+  const initialPromptSubmittedRef = useRef(false);
+  const isLanding = mode === "landing";
+  const isConfigurator = mode === "configurator";
+  const [message, setMessage] = useState(initialPrompt ?? "");
   const [result, setResult] = useState<RecommendationResult | null>(null);
   const [selectedRecommendationId, setSelectedRecommendationId] = useState<
     string | null
@@ -550,6 +577,24 @@ export function RecommendationDemo() {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    const trimmedInitialPrompt = initialPrompt?.trim();
+
+    if (
+      !isConfigurator ||
+      !trimmedInitialPrompt ||
+      initialPromptSubmittedRef.current
+    ) {
+      return;
+    }
+
+    initialPromptSubmittedRef.current = true;
+    setMessage(trimmedInitialPrompt);
+    void runRecommendationRequest(trimmedInitialPrompt);
+    // The prompt query is a one-time route handoff into the configurator workspace.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPrompt, isConfigurator]);
+
   async function runRecommendationRequest(nextMessage = message) {
     setError(null);
     setManualError(null);
@@ -616,6 +661,11 @@ export function RecommendationDemo() {
       return;
     }
 
+    if (isLanding) {
+      router.push(buildConfiguratorPromptHref(message));
+      return;
+    }
+
     await runRecommendationRequest();
   }
 
@@ -624,11 +674,21 @@ export function RecommendationDemo() {
       return;
     }
 
+    if (isLanding) {
+      router.push(buildConfiguratorPromptHref(prompt));
+      return;
+    }
+
     setMessage(prompt);
     await runRecommendationRequest(prompt);
   }
 
   function focusPrompt() {
+    if (isLanding) {
+      router.push(buildConfiguratorPromptHref(message));
+      return;
+    }
+
     promptRef.current?.focus();
     promptRef.current?.scrollIntoView?.({
       behavior: "smooth",
@@ -760,44 +820,33 @@ export function RecommendationDemo() {
     });
   }
 
-  function loadSavedBuild(savedBuild: SavedBuild) {
-    setManualSelection(savedBuild.componentIds);
-    setManualValidation(null);
-    setManualError(null);
-    setActiveCategory("case");
-    setSavedBuildMessage(`${savedBuild.title} loaded into the manual panel.`);
-  }
-
-  function deleteSavedBuild(savedBuildId: string) {
-    const deletedBuild = savedBuilds.find((build) => build.id === savedBuildId);
-
-    setSavedBuilds((current) =>
-      current.filter((build) => build.id !== savedBuildId),
-    );
-    setSavedBuildMessage(
-      deletedBuild ? `${deletedBuild.title} removed from saved builds.` : null,
-    );
-  }
-
-  function clearSavedBuilds() {
-    setSavedBuilds([]);
-    setSavedBuildMessage("Saved builds cleared.");
-  }
-
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#f4f8fb] text-[#071e29]">
       <LandingNav onStartBuilding={focusPrompt} />
 
       <section
-        className="mx-auto flex w-full max-w-[920px] flex-col items-center px-4 pb-20 pt-20 text-center sm:px-8 lg:pb-24 lg:pt-28"
+        className={`mx-auto flex w-full flex-col items-center px-4 text-center sm:px-8 ${
+          isLanding
+            ? "max-w-[920px] pb-20 pt-20 lg:pb-24 lg:pt-28"
+            : "max-w-screen-xl pb-10 pt-12 lg:pb-14 lg:pt-16"
+        }`}
         id="configurator"
       >
-        <h1 className="max-w-4xl text-[42px] font-black leading-[1.08] tracking-[-0.01em] text-[#001d32] sm:text-5xl lg:text-[64px] lg:leading-[1.08]">
-          Build your dream keyboard in words
+        <h1
+          className={`max-w-4xl font-black leading-[1.08] tracking-[-0.01em] text-[#001d32] ${
+            isLanding
+              ? "text-[42px] sm:text-5xl lg:text-[64px] lg:leading-[1.08]"
+              : "text-4xl sm:text-5xl"
+          }`}
+        >
+          {isLanding
+            ? "Build your dream keyboard in words"
+            : "Configurator workspace"}
         </h1>
         <p className="mt-6 max-w-2xl text-base leading-7 text-[#093C5D]/70 sm:text-lg">
-          Tell sharkeys your sound, layout, budget, and use case. We’ll turn it
-          into compatible keyboard build options.
+          {isLanding
+            ? "Tell sharkeys your sound, layout, budget, and use case. We’ll turn it into compatible keyboard build options."
+            : "Generate validated recommendations, compare builds, inspect grounded catalog parts, and open the visual builder."}
         </p>
 
         <form
@@ -895,17 +944,31 @@ export function RecommendationDemo() {
         ) : null}
       </section>
 
-      <HowItWorksSection />
-      <FeatureBento />
-      <FinalCta onStartBuilding={focusPrompt} />
+      {isLanding ? (
+        <>
+          <HowItWorksSection />
+          <FeatureBento />
+          <FinalCta onStartBuilding={focusPrompt} />
+        </>
+      ) : null}
 
-      <section
-        className="px-4 py-20 sm:px-8 lg:px-16"
-        id="results"
-        ref={resultsRef}
-      >
+      {isConfigurator ? (
+        <section
+          className="px-4 py-12 sm:px-8 lg:px-16"
+          id="results"
+          ref={resultsRef}
+        >
         <div className="mx-auto w-full max-w-screen-xl">
           <WorkspaceHeader result={result} selected={selectedRecommendation} />
+
+          {savedBuildMessage ? (
+            <Notice
+              className="mt-5"
+              icon={Info}
+              message={`${savedBuildMessage} View saved builds on the My Builds page.`}
+              tone="sky"
+            />
+          ) : null}
 
           {result?.source === "fallback_missing_api_key" ? (
             <Notice
@@ -946,16 +1009,6 @@ export function RecommendationDemo() {
               ) : null}
 
               {!result ? <EmptyWorkspace /> : null}
-
-              <SavedBuildsGallery
-                catalogById={catalogById}
-                message={savedBuildMessage}
-                onClear={clearSavedBuilds}
-                onDelete={deleteSavedBuild}
-                onLoad={loadSavedBuild}
-                savedBuilds={savedBuilds}
-                savedBuildsLoaded={savedBuildsLoaded}
-              />
             </div>
 
             <aside className="space-y-6">
@@ -985,7 +1038,8 @@ export function RecommendationDemo() {
             </aside>
           </div>
         </div>
-      </section>
+        </section>
+      ) : null}
 
       <SharkeysFooter />
 
@@ -999,20 +1053,165 @@ export function RecommendationDemo() {
   );
 }
 
+export function MyBuildsPage() {
+  const router = useRouter();
+  const [catalog, setCatalog] = useState<KeyboardComponent[]>([]);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([]);
+  const [savedBuildsLoaded, setSavedBuildsLoaded] = useState(false);
+  const [savedBuildMessage, setSavedBuildMessage] = useState<string | null>(
+    null,
+  );
+
+  const catalogById = useMemo(() => {
+    return new Map(catalog.map((component) => [component.id, component]));
+  }, [catalog]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setSavedBuilds(readSavedBuildsFromStorage());
+      setSavedBuildsLoaded(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    if (!savedBuildsLoaded) {
+      return;
+    }
+
+    try {
+      persistSavedBuilds(savedBuilds);
+    } catch {
+      // Local persistence is a prototype convenience; saved-build browsing should stay usable.
+    }
+  }, [savedBuilds, savedBuildsLoaded]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadCatalog() {
+      try {
+        setCatalogError(null);
+        const response = await fetch("/api/components", {
+          signal: controller.signal,
+        });
+        const body = (await response.json()) as
+          | ComponentsApiResponse
+          | ApiErrorResponse;
+
+        if (!response.ok || !body.success) {
+          throw new Error(
+            body.success ? "Component catalog failed to load." : body.error.message,
+          );
+        }
+
+        setCatalog(body.data.components);
+      } catch (caughtError) {
+        if (caughtError instanceof DOMException && caughtError.name === "AbortError") {
+          return;
+        }
+
+        setCatalogError(
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Component catalog failed to load.",
+        );
+      }
+    }
+
+    void loadCatalog();
+
+    return () => controller.abort();
+  }, []);
+
+  function openSavedBuild(savedBuild: SavedBuild) {
+    router.push(buildVisualBuilderHref(savedBuild.componentIds));
+  }
+
+  function deleteSavedBuild(savedBuildId: string) {
+    const deletedBuild = savedBuilds.find((build) => build.id === savedBuildId);
+
+    setSavedBuilds((current) =>
+      current.filter((build) => build.id !== savedBuildId),
+    );
+    setSavedBuildMessage(
+      deletedBuild ? `${deletedBuild.title} removed from saved builds.` : null,
+    );
+  }
+
+  function clearSavedBuilds() {
+    setSavedBuilds([]);
+    setSavedBuildMessage("Saved builds cleared.");
+  }
+
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-[#f4f8fb] text-[#071e29]">
+      <LandingNav onStartBuilding={() => router.push("/configurator")} />
+
+      <main className="mx-auto w-full max-w-screen-xl px-4 py-12 sm:px-8 lg:px-16">
+        <div className="rounded-[32px] border border-white/80 bg-white/70 p-8 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#3B7597]">
+            Local builds
+          </p>
+          <h1 className="mt-3 text-4xl font-black tracking-[-0.01em] text-[#001d32] sm:text-5xl">
+            My Builds
+          </h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-[#42474e]">
+            Saved recommendations and compatible manual builds live in this
+            browser. Open a build in the visual builder or remove old drafts.
+          </p>
+        </div>
+
+        {catalogError ? (
+          <Notice
+            className="mt-6"
+            icon={AlertCircle}
+            message={catalogError}
+            tone="red"
+          />
+        ) : null}
+
+        <div className="mt-8">
+          <SavedBuildsGallery
+            catalogById={catalogById}
+            loadLabel="Open visual builder"
+            message={savedBuildMessage}
+            onClear={clearSavedBuilds}
+            onDelete={deleteSavedBuild}
+            onLoad={openSavedBuild}
+            savedBuilds={savedBuilds}
+            savedBuildsLoaded={savedBuildsLoaded}
+          />
+        </div>
+      </main>
+
+      <SharkeysFooter />
+      <FloatingKeybot
+        catalogById={catalogById}
+        manualSelection={{}}
+        result={null}
+        selectedRecommendation={null}
+      />
+    </div>
+  );
+}
+
 function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
   const navLinks = [
-    ["Configurator", "#configurator"],
-    ["Browse", "#features"],
-    ["Community Gallery", "#saved-builds-gallery"],
-    ["My Builds", "#saved-builds-gallery"],
+    ["Configurator", "/configurator"],
+    ["Browse", "/browse"],
+    ["Community Gallery", "/community-gallery"],
+    ["My Builds", "/my-builds"],
   ] as const;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-[#dbe5ec] bg-[#f4f9fc]/95 backdrop-blur">
       <div className="mx-auto flex min-h-16 w-full max-w-[1280px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <a
+        <Link
           className="flex items-center gap-3 text-[#093C5D] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30"
-          href="#configurator"
+          href="/"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#e1f3fe] text-[#093C5D]">
             <Keyboard className="h-5 w-5" aria-hidden />
@@ -1020,11 +1219,11 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
           <span className="text-base font-black tracking-[-0.01em]">
             sharkeys.
           </span>
-        </a>
+        </Link>
 
         <div className="hidden min-h-16 items-center gap-7 md:flex lg:gap-9">
           {navLinks.map(([label, href], index) => (
-            <a
+            <Link
               className={`flex min-h-16 items-center border-b-2 text-xs font-bold transition lg:text-sm ${
                 index === 0
                   ? "border-[#093C5D] text-[#093C5D]"
@@ -1034,7 +1233,7 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
               key={label}
             >
               {label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -2116,7 +2315,7 @@ function RecommendationInspector({
             </button>
             <Link
               className="mt-2 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-4 text-sm font-bold text-[#094067] transition hover:border-[#3DA9FC] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
-              href={buildConfiguratorHref(recommendation.componentIds)}
+              href={buildVisualBuilderHref(recommendation.componentIds)}
             >
               <Eye className="h-4 w-4" aria-hidden />
               Open visual builder
@@ -2134,13 +2333,13 @@ function RecommendationInspector({
                   Visual builder ready
                 </p>
                 <p className="mt-1 text-sm leading-6 text-[#42474e]">
-                  Open the dedicated configurator for the larger schematic,
+                  Open the dedicated visual builder for the larger schematic,
                   acoustic profile, and compatibility engine.
                 </p>
               </div>
               <Link
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#094067] px-4 text-sm font-bold text-white transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
-                href={buildConfiguratorHref(recommendation.componentIds)}
+                href={buildVisualBuilderHref(recommendation.componentIds)}
               >
                 Open visual builder
                 <ArrowRight className="h-4 w-4" aria-hidden />
@@ -2404,7 +2603,7 @@ function ManualSelectionPanel({
       {Object.values(manualSelection).some(Boolean) ? (
         <Link
           className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-4 text-sm font-bold text-[#094067] transition hover:border-[#3DA9FC] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
-          href={buildConfiguratorHref(manualSelection)}
+          href={buildVisualBuilderHref(manualSelection)}
         >
           Open visual builder
           <ArrowRight className="h-4 w-4" aria-hidden />
@@ -2465,6 +2664,7 @@ function ManualSelectionPanel({
 
 function SavedBuildsGallery({
   catalogById,
+  loadLabel = "Load build",
   message,
   onClear,
   onDelete,
@@ -2473,6 +2673,7 @@ function SavedBuildsGallery({
   savedBuildsLoaded,
 }: {
   catalogById: Map<string, KeyboardComponent>;
+  loadLabel?: string;
   message: string | null;
   onClear: () => void;
   onDelete: (savedBuildId: string) => void;
@@ -2537,6 +2738,7 @@ function SavedBuildsGallery({
             <SavedBuildCard
               catalogById={catalogById}
               key={savedBuild.id}
+              loadLabel={loadLabel}
               onDelete={onDelete}
               onLoad={onLoad}
               savedBuild={savedBuild}
@@ -2550,11 +2752,13 @@ function SavedBuildsGallery({
 
 function SavedBuildCard({
   catalogById,
+  loadLabel,
   onDelete,
   onLoad,
   savedBuild,
 }: {
   catalogById: Map<string, KeyboardComponent>;
+  loadLabel: string;
   onDelete: (savedBuildId: string) => void;
   onLoad: (savedBuild: SavedBuild) => void;
   savedBuild: SavedBuild;
@@ -2629,7 +2833,7 @@ function SavedBuildCard({
           type="button"
         >
           <CopyPlus className="h-4 w-4" aria-hidden />
-          Load build
+          {loadLabel}
         </button>
         <button
           className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-3 text-sm font-semibold text-[#42474e] transition hover:bg-[#e9f5ff]"

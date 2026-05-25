@@ -2,7 +2,7 @@
 
 sharkeys is an AI-assisted custom mechanical keyboard configuration platform. It will help beginners and enthusiasts select compatible keyboard parts by combining grounded component data, deterministic compatibility rules, and structured AI intent extraction.
 
-This repository is currently in Phase 10B.1: Stitch landing page redesign.
+This repository is currently in Phase 10B.2A: Route separation and product IA cleanup.
 
 ## Stack
 
@@ -332,7 +332,7 @@ Recent conversation text is only a wording hint. Technical facts still come from
 
 ## Phase 10A Visual 2D Build Preview
 
-Phase 10A adds a reusable data-driven 2D keyboard preview and a dedicated `/configurator` visual builder page. The landing page remains prompt-first, then links selected recommendations or manual selections into the visual builder through component IDs.
+Phase 10A adds a reusable data-driven 2D keyboard preview and a dedicated visual builder page. The landing page remains prompt-first, then links selected recommendations or manual selections into the visual builder through component IDs.
 
 The preview is schematic, not photorealistic. It is generated from catalog and selection data with React and CSS only: no product photos, no 3D rendering, and no external visual assets. Deterministic validation remains authoritative for compatibility.
 
@@ -341,6 +341,12 @@ The preview is schematic, not photorealistic. It is generated from catalog and s
 Phase 10B.1 replaces the landing page visual design with the Stitch-inspired AI keyboard experience: compact top navigation, centered prompt-first hero, four-step timeline, precision feature bento, final CTA, and simplified footer.
 
 This phase is landing-page-only. Recommendation submission, Keybot, saved builds, manual validation, visual builder links, API contracts, Supabase schema, and deterministic recommendation logic remain unchanged.
+
+## Phase 10B.2A Route Separation
+
+Phase 10B.2A separates the product information architecture into focused routes: `/` for the prompt-first landing page, `/configurator` for recommendation generation and manual validation, `/visual-builder` for the 2D schematic preview, `/my-builds` for local saved builds, and placeholders for `/browse` and `/community-gallery`.
+
+This phase moves visible workspace density out of the landing page without changing recommendation ranking, Keybot service behavior, Supabase schema, catalog data, or deterministic validation authority.
 
 ## Development Phases
 
@@ -383,6 +389,8 @@ Phase 9E adds short-lived local Keybot conversation continuity for grounded foll
 Phase 10A adds a schematic 2D build preview and dedicated visual builder page generated from selected catalog components and validation state without product photos, 3D rendering, external assets, or backend changes.
 
 Phase 10B.1 refreshes the landing page to match the Stitch AI experience while preserving the existing prompt flow, grounded Keybot assistant, saved builds, manual validation, and backend behavior.
+
+Phase 10B.2A creates route boundaries for the landing page, configurator workspace, visual builder, local saved builds, browse placeholder, and community-gallery placeholder without adding backend storage or new product features.
 
 ## Architecture Rule
 

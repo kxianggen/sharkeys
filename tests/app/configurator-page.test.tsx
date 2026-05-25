@@ -1,60 +1,46 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import ConfiguratorPage from "@/app/configurator/page";
 
+const navigationMocks = vi.hoisted(() => ({
+  push: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: navigationMocks.push,
+  }),
+}));
+
 describe("ConfiguratorPage", () => {
-  it("renders the dedicated visual builder layout with grounded default parts", async () => {
+  it("renders the dedicated recommendation workspace", async () => {
     render(await ConfiguratorPage({ searchParams: Promise.resolve({}) }));
 
     expect(
-      screen.getByRole("heading", { name: "Build Assistant" }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Live Preview")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Acoustic Profile" }),
+      screen.getByRole("heading", { name: /Configurator workspace/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Build Configuration" }),
+      screen.getByRole("form", { name: /AI keyboard prompt form/i }),
     ).toBeInTheDocument();
+    expect(screen.getByText("Manual build check")).toBeInTheDocument();
+    expect(screen.queryByText("How it works")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Compatibility Engine" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("region", { name: /2D build preview/i }),
-    ).toBeInTheDocument();
-    expect(screen.getAllByText("Keychron V2 Max 65% ABS Case").length).toBeGreaterThan(
-      0,
-    );
-    expect(
-      screen.getAllByText("Gateron Sea Salt Smoothie Linear Switch").length,
-    ).toBeGreaterThan(0);
-    expect(screen.getAllByText("Validated").length).toBeGreaterThan(0);
-    expect(screen.getByText("Layout Match")).toBeInTheDocument();
-    expect(screen.queryByText(/Aero-75|GMK Minimal/i)).not.toBeInTheDocument();
+      screen.queryByRole("region", { name: /Saved builds gallery/i }),
+    ).not.toBeInTheDocument();
   });
 
-  it("uses catalog component query params for the visual builder state", async () => {
+  it("hydrates prompt query text into the workspace input", async () => {
     render(
       await ConfiguratorPage({
         searchParams: Promise.resolve({
-          case: "case_weikav_star80_tkl_aluminum",
-          keycap: "keycap_unknown_standard_white_jp_cherry",
-          pcb: "pcb_weikav_star80_tkl_hotswap",
-          plate: "plate_weikav_star80_tkl_fr4",
-          stabilizer: "stab_weikav_star80_pcb_mount",
-          switch: "switch_mmd_holy_panda_v3",
+          prompt: "quiet office keyboard under RM500",
         }),
       }),
     );
 
-    expect(
-      screen.getAllByText("Weikav Star 80 CNC Aluminum TKL Case").length,
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText("MMD Holy Panda V3 Tactile Switch").length,
-    ).toBeGreaterThan(0);
-    expect(screen.getAllByText("TKL layout").length).toBeGreaterThan(0);
-    expect(screen.queryByText(/Aero-75|GMK Minimal/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Keyboard request")).toHaveValue(
+      "quiet office keyboard under RM500",
+    );
   });
 });
