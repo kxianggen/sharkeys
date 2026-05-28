@@ -123,6 +123,21 @@ const quickPrompts = [
   "TKL typing build",
 ] as const;
 
+const configuratorQuickPrompts = [
+  {
+    label: "Thocky",
+    prompt: "A deep thocky build for coding in a quiet office",
+  },
+  {
+    label: "Quiet Office",
+    prompt: "Quiet office keyboard under RM500",
+  },
+  {
+    label: "65% Layout",
+    prompt: "Beginner friendly 65% keyboard under RM500",
+  },
+] as const;
+
 const smokePromptExamples = [
   "creamy 65% beginner keyboard under RM500",
   "optical 60% clacky gaming build",
@@ -455,6 +470,8 @@ export function RecommendationDemo({
   const isLanding = mode === "landing";
   const isConfigurator = mode === "configurator";
   const [message, setMessage] = useState(initialPrompt ?? "");
+  const [isManualCheckOpen, setIsManualCheckOpen] = useState(false);
+  const [keybotOpenSignal, setKeybotOpenSignal] = useState(0);
   const [result, setResult] = useState<RecommendationResult | null>(null);
   const [selectedRecommendationId, setSelectedRecommendationId] = useState<
     string | null
@@ -818,6 +835,209 @@ export function RecommendationDemo({
       estimatedPriceCurrency: priceEstimate?.currency ?? null,
       validation: manualValidation,
     });
+  }
+
+  if (isConfigurator) {
+    return (
+      <div className="min-h-screen overflow-x-hidden bg-[#f8f8fb] text-[#071e29]">
+        <LandingNav onStartBuilding={focusPrompt} />
+
+        <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[272px_minmax(0,1fr)]">
+          <ConfiguratorSidebar
+            onAskKeybot={() => setKeybotOpenSignal((current) => current + 1)}
+          />
+
+          <main className="min-w-0">
+            <section
+              className="mx-auto flex min-h-[34rem] w-full max-w-5xl flex-col items-center justify-center px-4 py-16 text-center sm:px-8 lg:py-24"
+              id="configurator"
+            >
+              <h1 className="text-4xl font-black tracking-[-0.01em] text-[#093C5D] sm:text-5xl">
+                What&apos;s your dream sound?
+              </h1>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-[#42474e]">
+                Tell Keybot what you want to feel and hear. sharkeys will return
+                compatible build paths from the grounded catalog.
+              </p>
+
+              <form
+                aria-label="AI keyboard prompt form"
+                className="mt-8 flex w-full max-w-4xl flex-col gap-3 rounded-2xl border border-[#e1e7ed] bg-white p-4 text-left shadow-[0_8px_24px_rgba(9,60,93,0.07)] transition focus-within:border-[#6FD1D7] focus-within:ring-4 focus-within:ring-[#6FD1D7]/20 sm:flex-row sm:items-center"
+                onSubmit={handleSubmit}
+              >
+                <label className="sr-only" htmlFor="keyboard-request">
+                  Keyboard request
+                </label>
+                <textarea
+                  className="min-h-[72px] min-w-0 flex-1 resize-none border-none bg-transparent p-0 text-base leading-7 text-[#071e29] outline-none placeholder:text-[#42474e]/70 focus:ring-0 sm:min-h-16"
+                  id="keyboard-request"
+                  maxLength={2000}
+                  onChange={(event) => setMessage(event.target.value)}
+                  placeholder="Describe your typing style... e.g., 'A deep thocky build for coding in a quiet office'"
+                  ref={promptRef}
+                  value={message}
+                />
+                <button
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#093C5D] px-5 text-sm font-black text-white shadow-sm transition hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 disabled:cursor-not-allowed disabled:bg-[#72777f]"
+                  disabled={isSubmitDisabled}
+                  type="submit"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                      <span>Starting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Start</span>
+                      <Sparkles className="h-4 w-4" aria-hidden />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="mt-5 flex max-w-3xl flex-wrap justify-center gap-3">
+                {configuratorQuickPrompts.map((prompt) => (
+                  <button
+                    className="inline-flex min-h-11 items-center rounded-xl border border-[#e1e7ed] bg-white px-5 py-2 text-sm font-bold text-[#42474e] shadow-sm transition hover:border-[#6FD1D7] hover:text-[#093C5D] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={hasMounted && isSubmitting}
+                    key={prompt.label}
+                    onClick={() => void handleQuickPrompt(prompt.prompt)}
+                    type="button"
+                  >
+                    {prompt.label}
+                  </button>
+                ))}
+              </div>
+
+              {error ? (
+                <Notice
+                  className="mt-6 w-full max-w-4xl"
+                  icon={AlertCircle}
+                  message={error}
+                  tone="red"
+                />
+              ) : null}
+            </section>
+
+            <section
+              className="mx-auto w-full max-w-5xl px-4 pb-10 sm:px-8"
+              id="results"
+              ref={resultsRef}
+            >
+              {savedBuildMessage ? (
+                <Notice
+                  className="mb-5"
+                  icon={Info}
+                  message={`${savedBuildMessage} View saved builds on the My Builds page.`}
+                  tone="sky"
+                />
+              ) : null}
+
+              {result?.source === "fallback_missing_api_key" ? (
+                <Notice
+                  className="mb-5"
+                  icon={Info}
+                  message="OpenAI key is not configured, so this demo is using local keyword extraction."
+                  tone="sky"
+                />
+              ) : null}
+
+              {result && result.recommendations.length > 0 ? (
+                <CompactRecommendationGrid
+                  onSaveRecommendation={saveRecommendationBuild}
+                  onSelect={(recommendation) => {
+                    setSelectedRecommendationId(recommendation.id);
+                    loadRecommendationIntoManualPanel(recommendation);
+                  }}
+                  recommendations={result.recommendations}
+                  selectedId={selectedRecommendation?.id ?? null}
+                />
+              ) : null}
+
+              {result && result.recommendations.length === 0 ? (
+                <EmptyRecommendationState result={result} />
+              ) : null}
+
+              {selectedRecommendation ? (
+                <details className="mt-6 rounded-3xl border border-[#dbe5ec] bg-white p-4 shadow-sm">
+                  <summary className="cursor-pointer text-sm font-black text-[#093C5D] outline-none focus:ring-4 focus:ring-[#6FD1D7]/20">
+                    Technical details
+                  </summary>
+                  <div className="mt-4">
+                    <RecommendationInspector
+                      activeCategory={activeCategory}
+                      onActiveCategoryChange={setActiveCategory}
+                      onSaveRecommendation={saveRecommendationBuild}
+                      recommendation={selectedRecommendation}
+                      selectedComponent={selectedComponent}
+                    />
+                  </div>
+                </details>
+              ) : null}
+
+              <section className="mt-6 rounded-3xl border border-dashed border-[#c2c7cf] bg-white/70 p-5 shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-base font-black text-[#071e29]">
+                      Manual check
+                    </h2>
+                    <p className="mt-1 text-sm leading-6 text-[#42474e]">
+                      Prefer hands-on validation? Open the compatibility controls
+                      when you need them.
+                    </p>
+                  </div>
+                  <button
+                    aria-expanded={isManualCheckOpen}
+                    className="inline-flex h-10 items-center justify-center rounded-xl border border-[#c2c7cf] bg-white px-4 text-sm font-bold text-[#093C5D] transition hover:border-[#6FD1D7] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20"
+                    onClick={() => setIsManualCheckOpen((current) => !current)}
+                    type="button"
+                  >
+                    {isManualCheckOpen ? "Hide manual check" : "Open manual check"}
+                  </button>
+                </div>
+
+                {isManualCheckOpen ? (
+                  <div className="mt-5">
+                    <ManualSelectionPanel
+                      catalogByCategory={catalogByCategory}
+                      catalogError={catalogError}
+                      hasMounted={hasMounted}
+                      isCatalogLoading={isCatalogLoading}
+                      isManualValidating={isManualValidating}
+                      manualError={manualError}
+                      manualSelection={manualSelection}
+                      manualSelectionComplete={manualSelectionComplete}
+                      manualValidation={manualValidation}
+                      onSelect={(category, componentId) => {
+                        setManualSelection((current) => ({
+                          ...current,
+                          [category]: componentId || undefined,
+                        }));
+                        setManualValidation(null);
+                        setSavedBuildMessage(null);
+                      }}
+                      onSaveValidatedManualBuild={saveValidatedManualBuild}
+                      onValidate={() => void validateManualSelection()}
+                    />
+                  </div>
+                ) : null}
+              </section>
+            </section>
+          </main>
+        </div>
+
+        <SharkeysFooter />
+
+        <FloatingKeybot
+          catalogById={catalogById}
+          manualSelection={manualSelection}
+          openSignal={keybotOpenSignal}
+          result={result}
+          selectedRecommendation={selectedRecommendation}
+        />
+      </div>
+    );
   }
 
   return (
@@ -1198,6 +1418,314 @@ export function MyBuildsPage() {
   );
 }
 
+function ConfiguratorSidebar({ onAskKeybot }: { onAskKeybot: () => void }) {
+  const menuItems = [
+    {
+      icon: Bot,
+      label: "AI Assistant",
+      state: "active",
+    },
+    {
+      icon: SlidersHorizontal,
+      label: "Custom Studio",
+      state: "future",
+    },
+    {
+      icon: CheckCircle,
+      label: "Compatibility",
+      state: "future",
+    },
+    {
+      icon: Cpu,
+      label: "Specs",
+      state: "future",
+    },
+    {
+      icon: Info,
+      label: "Help",
+      state: "future",
+    },
+  ] as const;
+
+  return (
+    <aside className="border-b border-[#e1e7ed] bg-[#f0f1f4] px-4 py-6 lg:min-h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r">
+      <div className="flex items-center gap-3">
+        <KeybotAvatar small />
+        <div>
+          <h2 className="text-xl font-black lowercase text-[#071e29]">
+            keybot
+          </h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#42474e]">
+            AI keyboard expert
+          </p>
+        </div>
+      </div>
+
+      <nav aria-label="Configurator modes" className="mt-9 space-y-2">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const active = item.state === "active";
+
+          return (
+            <button
+              aria-current={active ? "page" : undefined}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition ${
+                active
+                  ? "bg-[#9bd5fb] text-[#093C5D]"
+                  : "text-[#42474e] opacity-80"
+              }`}
+              disabled={!active}
+              key={item.label}
+              type="button"
+            >
+              <Icon className="h-4 w-4" aria-hidden />
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      <div className="mt-9 rounded-xl border border-[#e1e7ed] bg-white p-3 shadow-sm">
+        <p className="text-xs leading-5 text-[#42474e]">
+          Ask Keybot about sound profiles, layouts, compatibility, or why a
+          selected build fits your prompt.
+        </p>
+        <button
+          className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[#093C5D] px-3 text-xs font-bold text-white transition hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30"
+          onClick={onAskKeybot}
+          type="button"
+        >
+          <MessageCircle className="h-4 w-4" aria-hidden />
+          Ask Keybot
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function getCompactBuildName(
+  recommendation: RecommendationBuild,
+  index: number,
+) {
+  const layout = recommendation.components.case.layouts[0];
+  const soundProfile = recommendation.components.switch.soundProfile;
+
+  if (soundProfile === "silent") {
+    return ["The Quiet Desk", "The Office Calm", "The Soft Focus"][index % 3];
+  }
+
+  if (soundProfile === "thocky") {
+    return ["The Midnight Typer", "The Deep Studio", "The Warm Board"][
+      index % 3
+    ];
+  }
+
+  if (soundProfile === "creamy") {
+    return ["The Smooth Studio", "The Creamy Coder", "The Soft Linear"][
+      index % 3
+    ];
+  }
+
+  if (soundProfile === "clacky") {
+    return ["The Crisp Writer", "The Bright Desk", "The Sharp Typist"][
+      index % 3
+    ];
+  }
+
+  if (layout?.toLowerCase() === "tkl") {
+    return ["The TKL Typist", "The Studio TKL", "The Workhorse"][
+      index % 3
+    ];
+  }
+
+  return ["The Daily Driver", "The Alpine Studio", "The Focus Board"][
+    index % 3
+  ];
+}
+
+function shortenCaseName(name: string) {
+  return name
+    .replace(/\bCNC\b/gi, "")
+    .replace(/\bAluminum\b/gi, "")
+    .replace(/\bABS\b/gi, "")
+    .replace(/\bPlastic\b/gi, "")
+    .replace(/\bCase\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function shortenSwitchName(name: string) {
+  return name
+    .replace(/\b(Gateron|Akko|MMD|HMX|Outemu)\b/gi, "")
+    .replace(/\b(Linear|Tactile|Clicky|Silent)\b/gi, "")
+    .replace(/\bSwitch(?:es)?\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function CompactRecommendationGrid({
+  onSaveRecommendation,
+  onSelect,
+  recommendations,
+  selectedId,
+}: {
+  onSaveRecommendation: (recommendation: RecommendationBuild) => void;
+  onSelect: (recommendation: RecommendationBuild) => void;
+  recommendations: RecommendationBuild[];
+  selectedId: string | null;
+}) {
+  return (
+    <section aria-label="Recommended builds" className="mx-auto w-full max-w-3xl">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1">
+        <div>
+          <h2 className="text-xl font-black text-[#093C5D]">
+            Recommended for you
+          </h2>
+        </div>
+        <div className="hidden gap-2 text-[#42474e] sm:flex">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eceef2] text-sm">
+            ‹
+          </span>
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eceef2] text-sm">
+            ›
+          </span>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        {recommendations.slice(0, 3).map((recommendation, index) => {
+          const selected = recommendation.id === selectedId;
+          const layout = recommendation.components.case.layouts[0];
+          const soundProfile =
+            recommendation.components.switch.soundProfile ?? "neutral";
+          const displayName = getCompactBuildName(recommendation, index);
+          const summary = `${shortenCaseName(
+            recommendation.components.case.name,
+          )} • ${shortenSwitchName(recommendation.components.switch.name)}`;
+          const price =
+            recommendation.estimatedPrice === null
+              ? "Estimate unavailable"
+              : formatMoney(
+                  recommendation.estimatedPrice,
+                  recommendation.estimatedPriceCurrency ?? "MYR",
+                );
+
+          return (
+            <article
+              className={`rounded-lg border bg-white p-2 shadow-sm transition ${
+                selected
+                  ? "border-[#6FD1D7] ring-4 ring-[#6FD1D7]/20"
+                  : "border-[#e1e7ed] hover:border-[#9bd5fb]"
+              }`}
+              key={recommendation.id}
+            >
+              <button
+                aria-label={`Select Build ${index + 1}: ${displayName}`}
+                className="flex w-full items-center gap-3 text-left"
+                onClick={() => onSelect(recommendation)}
+                type="button"
+              >
+                <CompactBuildThumbnail index={index} selected={selected} />
+
+                <span className="min-w-0 flex-1 py-1">
+                  <span className="flex items-start justify-between gap-2">
+                    <span className="min-w-0">
+                      <span className="block truncate pr-2 text-sm font-black leading-5 text-[#093C5D]">
+                        {displayName}
+                      </span>
+                      <span className="mt-1 block truncate text-[11px] leading-4 text-[#42474e]">
+                        {summary}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-xs font-black text-[#093C5D]">
+                      {price}
+                    </span>
+                  </span>
+
+                  <span className="mt-3 flex flex-wrap gap-1.5">
+                    <span className="rounded border border-[#e1e7ed] bg-[#f8f8fb] px-2 py-0.5 text-[10px] font-bold text-[#42474e]">
+                      {formatLayoutChip(layout)}
+                    </span>
+                    <span className="rounded border border-[#e1e7ed] bg-[#f8f8fb] px-2 py-0.5 text-[10px] font-bold capitalize text-[#42474e]">
+                      {soundProfile}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded border border-[#6FD1D7]/60 bg-[#e8fbfd] px-2 py-0.5 text-[10px] font-bold text-[#093C5D]">
+                      <CheckCircle2 className="h-3 w-3" aria-hidden />
+                      Validated
+                    </span>
+                  </span>
+                </span>
+              </button>
+
+              <div className="mt-2 flex items-center gap-2 border-t border-[#eef2f6] pt-2">
+                <Link
+                  className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#093C5D] px-3 text-xs font-bold text-white transition hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30"
+                  href={buildVisualBuilderHref(recommendation.componentIds)}
+                >
+                  Open build
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+                <button
+                  aria-label="Save build"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#e1e7ed] bg-white text-[#093C5D] transition hover:border-[#6FD1D7] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20"
+                  onClick={() => onSaveRecommendation(recommendation)}
+                  type="button"
+                >
+                  <BookmarkPlus className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function CompactBuildThumbnail({
+  index,
+  selected,
+}: {
+  index: number;
+  selected: boolean;
+}) {
+  return (
+    <span
+      aria-hidden
+      className={`relative block h-24 w-24 flex-none overflow-hidden rounded-md border ${
+        selected ? "border-[#6FD1D7]" : "border-[#e1e7ed]"
+      } bg-[#edf7fb]`}
+    >
+      <span className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(9,60,93,0.14)_1px,transparent_0)] [background-size:14px_14px]" />
+      <span
+        className={`absolute inset-x-3 bottom-4 rounded-lg p-2.5 shadow-sm ${
+          index % 2 === 0 ? "bg-[#d8eefe]" : "bg-[#fffffe]"
+        }`}
+      >
+        <span className="mb-2 grid grid-cols-[1fr_1fr_1fr_2fr] gap-1">
+          <span className="h-3.5 rounded bg-white/80" />
+          <span className="h-3.5 rounded bg-white/80" />
+          <span className="h-3.5 rounded bg-white/80" />
+          <span className="h-3.5 rounded bg-white/80" />
+        </span>
+        <span className="grid grid-cols-[1.4fr_3fr_1.4fr] gap-1">
+          <span className="h-3.5 rounded bg-white/80" />
+          <span className="h-3.5 rounded bg-white/80" />
+          <span className="h-3.5 rounded bg-white/80" />
+        </span>
+      </span>
+    </span>
+  );
+}
+
+function formatLayoutChip(layout: string | undefined) {
+  if (!layout) {
+    return "Layout";
+  }
+
+  return layout === "tkl" ? "TKL Layout" : `${layout}% Layout`;
+}
+
 function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
   const navLinks = [
     ["Configurator", "/configurator"],
@@ -1242,7 +1770,7 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
           onClick={onStartBuilding}
           type="button"
         >
-          Start Building
+          Get Started
           <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
       </div>
@@ -1262,10 +1790,19 @@ type KeybotPanelProps = {
 function FloatingKeybot({
   catalogById,
   manualSelection,
+  openSignal = 0,
   result,
   selectedRecommendation,
-}: Omit<KeybotPanelProps, "floating" | "onClose">) {
+}: Omit<KeybotPanelProps, "floating" | "onClose"> & { openSignal?: number }) {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (openSignal > 0) {
+      const timeoutId = window.setTimeout(() => setIsOpen(true), 0);
+
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [openSignal]);
 
   if (!isOpen) {
     return (

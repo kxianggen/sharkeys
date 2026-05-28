@@ -348,6 +348,12 @@ Phase 10B.2A separates the product information architecture into focused routes:
 
 This phase moves visible workspace density out of the landing page without changing recommendation ranking, Keybot service behavior, Supabase schema, catalog data, or deterministic validation authority.
 
+## Phase 10B.2B Configurator Redesign
+
+Phase 10B.2B reshapes `/configurator` into a focused AI assistant flow: a calm Keybot sidebar, centered prompt surface, compact validated recommendation cards, progressive technical details, and a lower-priority manual compatibility check.
+
+Selected recommendations still hand off to `/visual-builder` through component ID query params. Recommendation APIs, Keybot service behavior, saved builds, Supabase schema, catalog data, and deterministic validation rules remain unchanged.
+
 ## Development Phases
 
 Phase 0 establishes the project foundation, folder structure, environment contract, quality tooling, and minimal integration placeholders.

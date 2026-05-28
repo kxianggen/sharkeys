@@ -18,12 +18,16 @@ describe("ConfiguratorPage", () => {
     render(await ConfiguratorPage({ searchParams: Promise.resolve({}) }));
 
     expect(
-      screen.getByRole("heading", { name: /Configurator workspace/i }),
+      screen.getByRole("heading", { name: /What's your dream sound/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("form", { name: /AI keyboard prompt form/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Manual build check")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Thocky/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Quiet Office/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /65% Layout/i })).toBeInTheDocument();
+    expect(screen.queryByText("Manual build check")).not.toBeInTheDocument();
+    expect(screen.queryByText("Request summary")).not.toBeInTheDocument();
     expect(screen.queryByText("How it works")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("region", { name: /Saved builds gallery/i }),

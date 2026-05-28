@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
+import { GlobalKeybotLauncher } from "@/components/global-keybot-launcher";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -23,7 +24,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#f5faff] text-[#071e29]">{children}</body>
+      <body className="min-h-full bg-[#f5faff] text-[#071e29]">
+        {children}
+        <GlobalKeybotLauncher />
+      </body>
     </html>
   );
 }

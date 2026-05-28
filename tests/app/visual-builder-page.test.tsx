@@ -7,30 +7,26 @@ describe("VisualBuilderPage", () => {
   it("renders the dedicated visual builder layout with grounded default parts", async () => {
     render(await VisualBuilderPage({ searchParams: Promise.resolve({}) }));
 
-    expect(
-      screen.getByRole("heading", { name: "Build Assistant" }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Live Preview")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "keybot" })).toBeInTheDocument();
+    expect(screen.getByText("Preview placeholder")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Acoustic Profile" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Build Configuration" }),
+      screen.getByRole("heading", { name: "Build Summary" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Compatibility Engine" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("region", { name: /2D build preview/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: "Compatibility Engine" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("Ask Keybot...")).not.toBeInTheDocument();
+    expect(screen.getByText("Fully Compatible")).toBeInTheDocument();
     expect(screen.getAllByText("Keychron V2 Max 65% ABS Case").length).toBeGreaterThan(
       0,
     );
     expect(
       screen.getAllByText("Gateron Sea Salt Smoothie Linear Switch").length,
     ).toBeGreaterThan(0);
-    expect(screen.getAllByText("Validated").length).toBeGreaterThan(0);
-    expect(screen.getByText("Layout Match")).toBeInTheDocument();
+    expect(screen.getByText("6 Parts")).toBeInTheDocument();
     expect(screen.queryByText(/Aero-75|GMK Minimal/i)).not.toBeInTheDocument();
   });
 
@@ -54,7 +50,7 @@ describe("VisualBuilderPage", () => {
     expect(
       screen.getAllByText("MMD Holy Panda V3 Tactile Switch").length,
     ).toBeGreaterThan(0);
-    expect(screen.getAllByText("TKL layout").length).toBeGreaterThan(0);
+    expect(screen.getByText(/TKL layout match/i)).toBeInTheDocument();
     expect(screen.queryByText(/Aero-75|GMK Minimal/i)).not.toBeInTheDocument();
   });
 

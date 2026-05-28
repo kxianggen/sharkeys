@@ -254,11 +254,26 @@ function getSelect(label: string) {
 function getPromptSubmitButton() {
   return within(
     screen.getByRole("form", { name: /AI keyboard prompt form/i }),
-  ).getByRole("button", { name: /Start Building/i });
+  ).getByRole("button", { name: /Start/i });
 }
 
 function getSavedGallery() {
   return screen.getByRole("region", { name: /Saved builds gallery/i });
+}
+
+function openManualCheck() {
+  const button = screen.queryByRole("button", { name: /Open manual check/i });
+
+  if (button) {
+    fireEvent.click(button);
+  }
+}
+
+function submitConfiguratorPrompt(prompt: string) {
+  fireEvent.change(screen.getByLabelText("Keyboard request"), {
+    target: { value: prompt },
+  });
+  fireEvent.click(getPromptSubmitButton());
 }
 
 function getLastKeybotPanel() {
@@ -310,28 +325,30 @@ describe("RecommendationDemo", () => {
       .mockImplementation(() => undefined);
     let root: ReturnType<typeof hydrateRoot> | undefined;
 
-    await act(async () => {
-      root = hydrateRoot(container, <RecommendationDemo mode="configurator" />);
-    });
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, <RecommendationDemo mode="configurator" />);
+      });
 
-    await waitFor(() => {
-      expect(within(container).getByLabelText("Case")).toBeEnabled();
-    });
+      await waitFor(() => {
+        expect(within(container).getByLabelText("Keyboard request")).toBeEnabled();
+      });
 
-    const consoleErrors = consoleErrorSpy.mock.calls
-      .flat()
-      .map(String)
-      .join("\n");
+      const consoleErrors = consoleErrorSpy.mock.calls
+        .flat()
+        .map(String)
+        .join("\n");
 
-    expect(consoleErrors).not.toContain("hydration");
-    expect(consoleErrors).not.toContain("did not match");
-    expect(consoleErrors).not.toContain("A tree hydrated");
-
-    await act(async () => {
-      root?.unmount();
-    });
-    consoleErrorSpy.mockRestore();
-    container.remove();
+      expect(consoleErrors).not.toContain("hydration");
+      expect(consoleErrors).not.toContain("did not match");
+      expect(consoleErrors).not.toContain("A tree hydrated");
+    } finally {
+      await act(async () => {
+        root?.unmount();
+      });
+      consoleErrorSpy.mockRestore();
+      container.remove();
+    }
   });
 
   it("renders the landing route without workspace clutter", async () => {
@@ -439,13 +456,21 @@ describe("RecommendationDemo", () => {
     render(<RecommendationDemo mode="configurator" />);
 
     expect(
-      screen.getByRole("heading", { name: /Configurator workspace/i }),
+      screen.getByRole("heading", { name: /What's your dream sound/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Manual build check")).toBeInTheDocument();
+    expect(screen.getByText("AI keyboard expert")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /AI Assistant/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Thocky/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Quiet Office/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /65% Layout/i })).toBeInTheDocument();
+    expect(screen.queryByText("Manual build check")).not.toBeInTheDocument();
+    expect(screen.queryByText("Request summary")).not.toBeInTheDocument();
     expect(screen.queryByText(/How it works/i)).not.toBeInTheDocument();
     expect(
       screen.queryByRole("region", { name: /Saved builds gallery/i }),
     ).not.toBeInTheDocument();
+
+    openManualCheck();
 
     await waitFor(() => {
       expect(getSelect("Case")).toBeEnabled();
@@ -461,9 +486,7 @@ describe("RecommendationDemo", () => {
     });
     fireEvent.click(getPromptSubmitButton());
 
-    expect(
-      await screen.findByText("Rule-engine validated"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
     expect(getRecommendationRequestBodies().at(-1)?.message).toBe(
       "quiet office keyboard under RM500",
     );
@@ -474,14 +497,14 @@ describe("RecommendationDemo", () => {
     render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: /Quiet office keyboard/i }),
+      screen.getByRole("button", { name: /Quiet Office/i }),
     );
 
     expect(
-      await screen.findByText("Rule-engine validated"),
+      await screen.findByText("Recommended for you"),
     ).toBeInTheDocument();
     expect(getRecommendationRequestBodies().at(-1)?.message).toBe(
-      "Quiet office keyboard",
+      "Quiet office keyboard under RM500",
     );
   });
 
@@ -698,15 +721,9 @@ describe("RecommendationDemo", () => {
     mockFetch();
     render(<RecommendationDemo mode="configurator" />);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
-      }),
-    );
+    submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(
-      await screen.findByText("Rule-engine validated"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", {
         name: /Open Keybot assistant/i,
@@ -743,15 +760,9 @@ describe("RecommendationDemo", () => {
     mockFetch([recommendationResult], { keybotDelayMs: 20 });
     render(<RecommendationDemo mode="configurator" />);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
-      }),
-    );
+    submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(
-      await screen.findByText("Rule-engine validated"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", {
         name: /Open Keybot assistant/i,
@@ -789,6 +800,8 @@ describe("RecommendationDemo", () => {
     mockFetch();
     render(<RecommendationDemo mode="configurator" />);
 
+    openManualCheck();
+
     await waitFor(() => {
       expect(getSelect("Case")).toBeEnabled();
     });
@@ -824,15 +837,11 @@ describe("RecommendationDemo", () => {
     mockFetch();
     render(<RecommendationDemo mode="configurator" />);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
-      }),
-    );
+    submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(
-      await screen.findByText("Rule-engine validated"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    openManualCheck();
+
     expect(getSelect("Case").value).toBe("case_keychron_v2_max_65_abs");
     expect(getSelect("PCB").value).toBe("pcb_keychron_v2_max_65_hotswap");
     expect(getSelect("Plate").value).toBe("plate_keychron_v2_max_65_pc");
@@ -848,15 +857,11 @@ describe("RecommendationDemo", () => {
     mockFetch([recommendationResult, emptyRecommendationResult]);
     render(<RecommendationDemo mode="configurator" />);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
-      }),
-    );
+    submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(
-      await screen.findByText("Rule-engine validated"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    openManualCheck();
+
     expect(getSelect("Case").value).toBe("case_keychron_v2_max_65_abs");
 
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
@@ -882,15 +887,11 @@ describe("RecommendationDemo", () => {
     mockFetch();
     render(<RecommendationDemo mode="configurator" />);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
-      }),
-    );
+    submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(
-      await screen.findByText("Rule-engine validated"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Technical details"));
+
     expect(screen.getByText(/Estimated total/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Keychron V2 Max/i).length).toBeGreaterThan(0);
     expect(screen.getByText("Open vendor page")).toBeInTheDocument();
@@ -900,16 +901,12 @@ describe("RecommendationDemo", () => {
     mockFetch();
     render(<RecommendationDemo mode="configurator" />);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
-      }),
-    );
+    submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(await screen.findByText("Visual builder ready")).toBeInTheDocument();
+    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
 
     const builderLinks = screen.getAllByRole("link", {
-      name: /Open visual builder/i,
+      name: /Open build/i,
     });
 
     expect(builderLinks.length).toBeGreaterThan(0);
@@ -935,9 +932,9 @@ describe("RecommendationDemo", () => {
     });
     fireEvent.click(getPromptSubmitButton());
 
-    expect(await screen.findByText("Visual builder ready")).toBeInTheDocument();
+    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
     expect(
-      screen.getAllByRole("link", { name: /Open visual builder/i })[0],
+      screen.getAllByRole("link", { name: /Open build/i })[0],
     ).toHaveAttribute(
       "href",
       expect.stringContaining("switch=switch_mmd_holy_panda_v3"),
@@ -946,16 +943,21 @@ describe("RecommendationDemo", () => {
     fireEvent.click(screen.getByRole("button", { name: /Build 3/i }));
 
     expect(
-      screen.getAllByRole("link", { name: /Open visual builder/i })[0],
-    ).toHaveAttribute(
-      "href",
-      expect.stringContaining("switch=switch_akko_lavender_purple_v3_pro"),
-    );
+      screen
+        .getAllByRole("link", { name: /Open build/i })
+        .some((link) =>
+          link
+            .getAttribute("href")
+            ?.includes("switch=switch_akko_lavender_purple_v3_pro"),
+        ),
+    ).toBe(true);
   });
 
   it("shows manual selection visual builder link and compatible validation status", async () => {
     mockFetch();
     render(<RecommendationDemo mode="configurator" />);
+
+    openManualCheck();
 
     await waitFor(() => {
       expect(getSelect("Case")).toBeEnabled();
@@ -1015,7 +1017,7 @@ describe("RecommendationDemo", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Visual builder ready")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /Open visual builder/i }),
+      screen.queryByRole("link", { name: /Open build/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -1023,16 +1025,10 @@ describe("RecommendationDemo", () => {
     mockFetch();
     render(<RecommendationDemo mode="configurator" />);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
-      }),
-    );
+    submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(
-      await screen.findByText("Rule-engine validated"),
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /^Save build$/i }));
+    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole("button", { name: /^Save build$/i })[0]);
 
     expect(
       await screen.findByText(/saved locally/i),
@@ -1096,14 +1092,9 @@ describe("RecommendationDemo", () => {
     mockFetch();
     render(<RecommendationDemo mode="configurator" />);
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
-      }),
-    );
-    expect(
-      await screen.findByText("Rule-engine validated"),
-    ).toBeInTheDocument();
+    submitConfiguratorPrompt("Creamy 65% under RM500");
+    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    openManualCheck();
 
     fireEvent.click(screen.getByRole("button", { name: /Validate manual build/i }));
     expect(await screen.findByText("Compatible build")).toBeInTheDocument();
