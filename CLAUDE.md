@@ -16,6 +16,7 @@ npm run verify       # typecheck + lint + test + build (full gate)
 npx vitest run tests/rules/compatibility.test.ts
 
 # Supabase catalog (requires .env.local with real credentials)
+npm run eval                     # run all eval suites (no API key needed)
 npm run supabase:seed-catalog    # upsert seed data into Supabase
 npm run supabase:verify-catalog  # verify catalog counts via anon key
 ```

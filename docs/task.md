@@ -19,9 +19,22 @@
 ### 1B. Evaluation Suite
 
 - [x] Create `src/lib/eval/intent-extraction-eval.ts` (30 synthetic buyer test cases)
-- [x] Create `src/lib/eval/keybot-grounding-eval.ts` (10 secret-sauce grounding tests)
-- [ ] Create `src/lib/eval/rag-retrieval-eval.ts` (verify expert combos surface from catalog)
-- [ ] Create `scripts/run-eval.ts` (CLI runner — executes all evals, prints pass/fail metrics)
+- [x] Create `src/lib/eval/keybot-grounding-eval.ts` (10 grounding tests)
+- [x] Create `src/lib/eval/rag-retrieval-eval.ts` (10 retrieval tests; 2 semantic-only, 2 pending catalog seed)
+- [x] Create `scripts/run-eval.ts` (CLI runner — `npm run eval`)
+
+### Baseline Scores (keyword-fallback, no OpenAI key)
+
+| Suite | Pass | Fail | Expected-fail | Pending |
+|---|---|---|---|---|
+| Intent Extraction (30) | 20 | 10 | 0 | 0 |
+| Keybot Grounding (10) | 8 | 2 | 0 | 0 |
+| RAG Retrieval (10) | 6 | 0 | 2 | 2 |
+
+**Known failure patterns to fix:**
+- Intent: game titles (Valorant/CSGO/FPS) not mapped to `gaming`; "WFH" not mapped to `office`; range budgets (RM200-250) parse first number not max; "heavy thock"/"deep thock" not matched; "RM200 budget 65%" → parser grabs 65 as budget
+- Keybot: kg-008 (budget switch expert pick), kg-010 (lube specifics) require Phase 3 agent training
+- RAG: rr-007/rr-008 are documented semantic gaps — passing requires Phase 2 pgvector; rr-009/rr-010 require MZ Z1 + KTT Cabbage Tofu catalog seed
 
 ### Phase 1 Checkpoints (explain before moving to Phase 2)
 
