@@ -431,21 +431,6 @@ type RecommendationDemoProps = {
   mode?: RecommendationDemoMode;
 };
 
-function buildVisualBuilderHref(selection: ManualSelection) {
-  const params = new URLSearchParams();
-
-  for (const category of componentCategories) {
-    const componentId = selection[category];
-
-    if (componentId) {
-      params.set(category, componentId);
-    }
-  }
-
-  const query = params.toString();
-
-  return query ? `/visual-builder?${query}` : "/visual-builder";
-}
 
 function buildConfiguratorPromptHref(prompt: string) {
   const trimmedPrompt = prompt.trim();
@@ -1066,7 +1051,7 @@ export function RecommendationDemo({
         <p className="mt-6 max-w-2xl text-base leading-7 text-[#093C5D]/70 sm:text-lg">
           {isLanding
             ? "Tell sharkeys your sound, layout, budget, and use case. We’ll turn it into compatible keyboard build options."
-            : "Generate validated recommendations, compare builds, inspect grounded catalog parts, and open the visual builder."}
+            : "Generate validated recommendations, compare builds, and inspect grounded catalog parts."}
         </p>
 
         <form
@@ -1346,8 +1331,14 @@ export function MyBuildsPage() {
     return () => controller.abort();
   }, []);
 
-  function openSavedBuild(savedBuild: SavedBuild) {
-    router.push(buildVisualBuilderHref(savedBuild.componentIds));
+  function loadSavedBuild(savedBuild: SavedBuild) {
+    const params = new URLSearchParams();
+    for (const category of componentCategories) {
+      if (savedBuild.componentIds[category]) {
+        params.set(category, savedBuild.componentIds[category]);
+      }
+    }
+    router.push(`/configurator?${params.toString()}`);
   }
 
   function deleteSavedBuild(savedBuildId: string) {
@@ -1380,7 +1371,7 @@ export function MyBuildsPage() {
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-[#42474e]">
             Saved recommendations and compatible manual builds live in this
-            browser. Open a build in the visual builder or remove old drafts.
+            browser. Remove old drafts or load them to the manual selection panel.
           </p>
         </div>
 
@@ -1396,11 +1387,11 @@ export function MyBuildsPage() {
         <div className="mt-8">
           <SavedBuildsGallery
             catalogById={catalogById}
-            loadLabel="Open visual builder"
+            loadLabel="Load build"
             message={savedBuildMessage}
             onClear={clearSavedBuilds}
             onDelete={deleteSavedBuild}
-            onLoad={openSavedBuild}
+            onLoad={loadSavedBuild}
             savedBuilds={savedBuilds}
             savedBuildsLoaded={savedBuildsLoaded}
           />
@@ -1658,13 +1649,6 @@ function CompactRecommendationGrid({
               </button>
 
               <div className="mt-2 flex items-center gap-2 border-t border-[#eef2f6] pt-2">
-                <Link
-                  className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#093C5D] px-3 text-xs font-bold text-white transition hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30"
-                  href={buildVisualBuilderHref(recommendation.componentIds)}
-                >
-                  Open build
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </Link>
                 <button
                   aria-label="Save build"
                   className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#e1e7ed] bg-white text-[#093C5D] transition hover:border-[#6FD1D7] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20"
@@ -2660,7 +2644,7 @@ function WorkspaceHeader({
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#42474e]">
             {result
-              ? "Review recommendations, inspect grounded catalog parts, save compatible builds, or open the visual builder."
+              ? "Review recommendations, inspect grounded catalog parts, or save compatible builds."
               : "Submit a prompt above and sharkeys will show the validated recommendations in this lower workspace."}
           </p>
         </div>
@@ -2842,48 +2826,12 @@ function RecommendationInspector({
                     recommendation.estimatedPriceCurrency ?? "MYR",
                   )}
             </p>
-            <button
-              className="mt-3 inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#094067] px-4 text-sm font-bold text-white transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
-              onClick={() => onSaveRecommendation(recommendation)}
-              type="button"
-            >
-              <BookmarkPlus className="h-4 w-4" aria-hidden />
-              Save build
-            </button>
-            <Link
-              className="mt-2 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-4 text-sm font-bold text-[#094067] transition hover:border-[#3DA9FC] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
-              href={buildVisualBuilderHref(recommendation.componentIds)}
-            >
-              <Eye className="h-4 w-4" aria-hidden />
-              Open visual builder
-            </Link>
           </div>
         </div>
       </div>
 
       <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="border-b border-[#c2c7cf] p-5 lg:border-b-0 lg:border-r">
-          <div className="rounded-3xl border border-[#c2c7cf] bg-[#f5faff] p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-bold text-[#071e29]">
-                  Visual builder ready
-                </p>
-                <p className="mt-1 text-sm leading-6 text-[#42474e]">
-                  Open the dedicated visual builder for the larger schematic,
-                  acoustic profile, and compatibility engine.
-                </p>
-              </div>
-              <Link
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#094067] px-4 text-sm font-bold text-white transition hover:bg-[#002a47] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
-                href={buildVisualBuilderHref(recommendation.componentIds)}
-              >
-                Open visual builder
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </div>
-          </div>
-
           <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {componentCategories.map((category) => {
               const component = recommendation.components[category];
@@ -3137,15 +3085,7 @@ function ManualSelectionPanel({
         Validate manual build
       </button>
 
-      {Object.values(manualSelection).some(Boolean) ? (
-        <Link
-          className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-4 text-sm font-bold text-[#094067] transition hover:border-[#3DA9FC] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#43acff]/30"
-          href={buildVisualBuilderHref(manualSelection)}
-        >
-          Open visual builder
-          <ArrowRight className="h-4 w-4" aria-hidden />
-        </Link>
-      ) : null}
+
 
       {manualError ? (
         <Notice
@@ -3394,7 +3334,6 @@ function EmptyWorkspace() {
       </h2>
       <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[#42474e]">
         Recommendations, component inspection, and manual validation appear here.
-        The dedicated visual builder opens after you select a build.
       </p>
     </div>
   );

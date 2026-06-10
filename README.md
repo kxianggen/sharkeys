@@ -344,7 +344,7 @@ This phase is landing-page-only. Recommendation submission, Keybot, saved builds
 
 ## Phase 10B.2A Route Separation
 
-Phase 10B.2A separates the product information architecture into focused routes: `/` for the prompt-first landing page, `/configurator` for recommendation generation and manual validation, `/visual-builder` for the 2D schematic preview, `/my-builds` for local saved builds, and placeholders for `/browse` and `/community-gallery`.
+Phase 10B.2A separates the product information architecture into focused routes: `/` for the prompt-first landing page, `/configurator` for recommendation generation and manual validation, `/my-builds` for local saved builds, and placeholders for `/browse` and `/community-gallery`.
 
 This phase moves visible workspace density out of the landing page without changing recommendation ranking, Keybot service behavior, Supabase schema, catalog data, or deterministic validation authority.
 
@@ -352,7 +352,7 @@ This phase moves visible workspace density out of the landing page without chang
 
 Phase 10B.2B reshapes `/configurator` into a focused AI assistant flow: a calm Keybot sidebar, centered prompt surface, compact validated recommendation cards, progressive technical details, and a lower-priority manual compatibility check.
 
-Selected recommendations still hand off to `/visual-builder` through component ID query params. Recommendation APIs, Keybot service behavior, saved builds, Supabase schema, catalog data, and deterministic validation rules remain unchanged.
+Recommendation APIs, Keybot service behavior, saved builds, Supabase schema, catalog data, and deterministic validation rules remain unchanged.
 
 ## Development Phases
 

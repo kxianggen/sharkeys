@@ -897,63 +897,9 @@ describe("RecommendationDemo", () => {
     expect(screen.getByText("Open vendor page")).toBeInTheDocument();
   });
 
-  it("shows visual builder links after recommendations load without embedding the full preview", async () => {
-    mockFetch();
-    render(<RecommendationDemo mode="configurator" />);
 
-    submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
-
-    const builderLinks = screen.getAllByRole("link", {
-      name: /Open build/i,
-    });
-
-    expect(builderLinks.length).toBeGreaterThan(0);
-    expect(builderLinks[0]).toHaveAttribute(
-      "href",
-      expect.stringContaining("/visual-builder?case=case_keychron_v2_max_65_abs"),
-    );
-    expect(builderLinks[0]).toHaveAttribute(
-      "href",
-      expect.stringContaining("switch=switch_gateron_seasalt_smoothie"),
-    );
-    expect(
-      screen.queryByText("Selected recommendation preview"),
-    ).not.toBeInTheDocument();
-  });
-
-  it("updates the visual builder link when another recommendation is selected", async () => {
-    mockFetch([tklRecommendationResult]);
-    render(<RecommendationDemo mode="configurator" />);
-
-    fireEvent.change(screen.getByLabelText("Keyboard request"), {
-      target: { value: "TKL typing keyboard" },
-    });
-    fireEvent.click(getPromptSubmitButton());
-
-    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
-    expect(
-      screen.getAllByRole("link", { name: /Open build/i })[0],
-    ).toHaveAttribute(
-      "href",
-      expect.stringContaining("switch=switch_mmd_holy_panda_v3"),
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /Build 3/i }));
-
-    expect(
-      screen
-        .getAllByRole("link", { name: /Open build/i })
-        .some((link) =>
-          link
-            .getAttribute("href")
-            ?.includes("switch=switch_akko_lavender_purple_v3_pro"),
-        ),
-    ).toBe(true);
-  });
-
-  it("shows manual selection visual builder link and compatible validation status", async () => {
+  it("shows compatible validation status for manual selection", async () => {
     mockFetch();
     render(<RecommendationDemo mode="configurator" />);
 
@@ -965,13 +911,6 @@ describe("RecommendationDemo", () => {
     fireEvent.change(getSelect("Case"), {
       target: { value: "case_keychron_v2_max_65_abs" },
     });
-
-    expect(
-      screen.getByRole("link", { name: /Open visual builder/i }),
-    ).toHaveAttribute(
-      "href",
-      expect.stringContaining("/visual-builder?case=case_keychron_v2_max_65_abs"),
-    );
 
     fireEvent.change(getSelect("PCB"), {
       target: { value: "pcb_keychron_v2_max_65_hotswap" },
@@ -992,12 +931,6 @@ describe("RecommendationDemo", () => {
     fireEvent.click(screen.getByRole("button", { name: /Validate manual build/i }));
 
     expect(await screen.findByText("Compatible build")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /Open visual builder/i }),
-    ).toHaveAttribute(
-      "href",
-      expect.stringContaining("switch=switch_gateron_seasalt_smoothie"),
-    );
   });
 
   it("does not show a fake selected preview for no-build responses", async () => {
@@ -1012,13 +945,6 @@ describe("RecommendationDemo", () => {
     expect(
       await screen.findByText("No validated build found"),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByText("Selected recommendation preview"),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText("Visual builder ready")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: /Open build/i }),
-    ).not.toBeInTheDocument();
   });
 
   it("saves the selected validated recommendation to local storage", async () => {
@@ -1052,7 +978,7 @@ describe("RecommendationDemo", () => {
     expect(screen.getByRole("heading", { name: /My Builds/i })).toBeInTheDocument();
   });
 
-  it("opens a saved build from My Builds in the visual builder", async () => {
+  it("loads a saved build from My Builds into manual selection", async () => {
     mockFetch();
     const recommendation = recommendationResult.recommendations[0];
 
@@ -1080,11 +1006,11 @@ describe("RecommendationDemo", () => {
       await within(gallery).findByText(recommendation.title),
     ).toBeInTheDocument();
     fireEvent.click(
-      within(gallery).getByRole("button", { name: /Open visual builder/i }),
+      within(gallery).getByRole("button", { name: /Load build/i }),
     );
 
     expect(navigationMocks.push).toHaveBeenCalledWith(
-      expect.stringContaining("/visual-builder?case=case_keychron_v2_max_65_abs"),
+      expect.stringContaining("/configurator?case=case_keychron_v2_max_65_abs"),
     );
   });
 
