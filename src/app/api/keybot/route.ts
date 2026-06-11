@@ -4,8 +4,8 @@ import {
   jsonOk,
   jsonZodError,
 } from "@/lib/api";
+import { invokeKeybotAgent } from "@/lib/agent";
 import {
-  generateKeybotResponse,
   keybotApiResponseSchema,
   keybotRequestSchema,
 } from "@/lib/keybot";
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
   try {
     const parsedRequest = keybotRequestSchema.parse(payload);
-    const result = await generateKeybotResponse(parsedRequest);
+    const result = await invokeKeybotAgent(parsedRequest);
 
     return jsonOk(keybotApiResponseSchema, {
       success: true,

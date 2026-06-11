@@ -67,16 +67,16 @@
 
 **Goal:** Replace the hardcoded regex classifier and linear pipeline with a stateful LangGraph agent. Add LangSmith tracing.
 
-- [ ] Install `@langchain/langgraph`, `langsmith` packages
-- [ ] Define agent state in `src/lib/agent/state.ts`
-- [ ] Create nodes: `classify`, `retrieve`, `extract`, `validate`, `answer`
-- [ ] Compile graph with conditional routing
-- [ ] Wire `POST /api/keybot` to invoke agent
-- [ ] Implement short-lived memory using LangGraph checkpointers
+- [x] Install `@langchain/langgraph`, `@langchain/openai`, `@langchain/core`, `langsmith` packages
+- [x] Define agent state in `src/lib/agent/state.ts` (`KeybotAgentState` via `Annotation.Root`)
+- [x] Create nodes: `classify`, `retrieve`, `extract`, `validate`, `answer` (in `src/lib/agent/nodes/`)
+- [x] Compile graph with conditional routing (`src/lib/agent/graph.ts`, `invokeKeybotAgent`)
+- [x] Wire `POST /api/keybot` to invoke agent
+- [x] Implement short-lived memory using LangGraph checkpointers (`MemorySaver`)
 - [ ] Sign up at [smith.langchain.com](https://smith.langchain.com) for LangSmith account
-- [ ] Configure `LANGCHAIN_TRACING_V2=true` and `LANGCHAIN_API_KEY` in `.env.local`
+- [ ] Configure `LANGCHAIN_TRACING_V2=true` and `LANGCHAIN_API_KEY` in `.env.local` *(placeholders added; key still empty, tracing off)*
 - [ ] Observe traces: analyze latency, token usage, node routing
-- [ ] Run eval suite — verify agent matches or beats baseline
+- [x] Run eval suite — verify agent matches or beats baseline *(default routing matches baseline exactly: 44 pass / 4 fail / 2 pending in semantic mode)*
 
 ### Phase 3 Checkpoints
 

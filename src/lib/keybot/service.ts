@@ -2,6 +2,7 @@ import { zodTextFormat } from "openai/helpers/zod";
 import type OpenAI from "openai";
 import { z } from "zod";
 
+import { invokeKeybotAgent } from "@/lib/agent/graph";
 import { generateRecommendationsFromMessage } from "@/lib/recommendations";
 import {
   getCatalogComponents,
@@ -18,7 +19,6 @@ import {
   type KeyboardBuildSelection,
 } from "@/lib/types";
 import {
-  keybotRequestSchema,
   keybotResponseSchema,
   type KeybotRequest,
   type KeybotResponse,
@@ -35,7 +35,7 @@ export type GenerateKeybotResponseOptions = {
   maxOutputTokens?: number;
 };
 
-type KeybotClassification =
+export type KeybotClassification =
   | "build_request"
   | "capability_help"
   | "compatibility_question"
@@ -112,12 +112,26 @@ const conceptDefinitions = [
   },
 ];
 
+// Backwards-compatible entry point. Preserved so existing callers (the eval
+// runner, keybot/index, and the API route) keep working unchanged. It now
+// delegates to the LangGraph agent, which performs classification + grounding.
 export async function generateKeybotResponse(
   input: KeybotRequest,
   options: GenerateKeybotResponseOptions = {},
 ): Promise<KeybotResponse> {
-  const request = keybotRequestSchema.parse(input);
-  const classification = classifyKeybotMessage(request.message);
+  return invokeKeybotAgent(input, options);
+}
+
+// Grounded-response core: given an already-resolved classification, assemble the
+// deterministic facts and either reformat them with OpenAI or fall back to the
+// deterministic answer. This is the single authority for Keybot's grounded
+// output — the agent's `answer` node calls straight into it, so the invariant
+// (OpenAI may reformat but never authors product/compat claims) is preserved.
+export async function buildGroundedKeybotResponse(
+  request: KeybotRequest,
+  classification: KeybotClassification,
+  options: GenerateKeybotResponseOptions = {},
+): Promise<KeybotResponse> {
   const catalogComponents = needsCatalogComponents(request, classification)
     ? options.catalogComponents ?? (await getCatalogComponents())
     : [];
@@ -251,7 +265,7 @@ async function buildKeybotFacts(
   };
 }
 
-function classifyKeybotMessage(message: string): KeybotClassification {
+export function classifyKeybotMessage(message: string): KeybotClassification {
   const text = message.toLowerCase();
 
   if (isSmallTalkMessage(text)) {
