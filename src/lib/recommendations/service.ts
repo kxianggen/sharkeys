@@ -5,6 +5,7 @@ import { z } from "zod";
 import {
   extractKeyboardIntent,
   prepareIntentMatches,
+  prepareIntentMatchesAsync,
   type ComponentCandidateIdsByCategory,
   type ExtractedKeyboardIntent,
   type IntentExtractionResult,
@@ -90,8 +91,16 @@ export async function generateRecommendationsFromMessage(
   const catalogComponents =
     options.catalogComponents ?? (await getCatalogComponents());
 
+  // Use async path so semantic search can augment switch candidates when
+  // soundProfile is absent but constraints contain descriptive language.
+  const preparation = await prepareIntentMatchesAsync(
+    extraction.intent,
+    catalogComponents,
+  );
+
   const deterministicResult = createRecommendationResult(extraction, {
     catalogComponents,
+    preparation,
     maxRecommendations: options.maxRecommendations,
   });
 

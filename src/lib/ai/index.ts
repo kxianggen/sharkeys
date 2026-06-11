@@ -4,7 +4,15 @@ export {
 export {
   mapIntentToSearchCriteria,
   prepareIntentMatches,
+  prepareIntentMatchesAsync,
 } from "./intent-preparation";
+export {
+  buildComponentEmbeddingText,
+  getEmbedding,
+  searchComponentsBySemantic,
+  type SemanticSearchResult,
+  type SemanticSearchOptions,
+} from "./embeddings";
 export {
   budgetIntentSchema,
   aiIntentApiResponseSchema,

@@ -10,8 +10,13 @@
  * Usage:  npm run eval
  */
 
-// Force keyword fallback for reproducible offline runs
-delete process.env.OPENAI_API_KEY;
+// EVAL_SEMANTIC=true  → keep the API key, enabling semantic (pgvector) search.
+//                       rr-007 and rr-008 will pass when Supabase + OpenAI are live.
+// EVAL_SEMANTIC=false → delete the key for a reproducible offline baseline.
+const SEMANTIC_MODE = process.env.EVAL_SEMANTIC === "true";
+if (!SEMANTIC_MODE) {
+  delete process.env.OPENAI_API_KEY;
+}
 
 import {
   intentExtractionEvalCases,
@@ -25,8 +30,7 @@ import {
   ragRetrievalEvalCases,
   type RagRetrievalTestCase,
 } from "@/lib/eval/rag-retrieval-eval";
-import { extractKeyboardIntent } from "@/lib/ai";
-import { prepareIntentMatches } from "@/lib/ai";
+import { extractKeyboardIntent, prepareIntentMatchesAsync } from "@/lib/ai";
 import { generateKeybotResponse } from "@/lib/keybot";
 import { keyboardComponents } from "@/data";
 import { getComponentById } from "@/lib/components";
@@ -156,7 +160,7 @@ async function runKeybotGroundingSuite(): Promise<CaseResult[]> {
 
 // ── Suite 3: RAG Retrieval ────────────────────────────────────────────────────
 
-function runRagRetrievalSuite(): CaseResult[] {
+async function runRagRetrievalSuite(): Promise<CaseResult[]> {
   const results: CaseResult[] = [];
 
   for (const tc of ragRetrievalEvalCases) {
@@ -165,7 +169,7 @@ function runRagRetrievalSuite(): CaseResult[] {
       continue;
     }
 
-    const preparation = prepareIntentMatches(tc.intent, keyboardComponents);
+    const preparation = await prepareIntentMatchesAsync(tc.intent, keyboardComponents);
     const switchIds = preparation.candidateComponentIds.switch;
     const failures: string[] = [];
     const a = tc.assertions;
@@ -283,7 +287,7 @@ function printSuiteResults(title: string, results: CaseResult[]) {
         fail++;
         break;
       case "expected_fail":
-        console.log(`  ${C.yellow}~${C.reset} ${r.id} ${C.dim}(expected — semantic gap, needs Phase 2)${C.reset}`);
+        console.log(`  ${C.yellow}~${C.reset} ${r.id} ${C.dim}(expected — semantic gap; run with EVAL_SEMANTIC=true after seeding)${C.reset}`);
         for (const note of r.notes) {
           console.log(`      ${C.dim}${note}${C.reset}`);
         }
@@ -309,14 +313,17 @@ function printSuiteResults(title: string, results: CaseResult[]) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log(`\n${C.bold}Sharkeys Eval Runner — keyword-fallback baseline${C.reset}`);
-  console.log(`${C.dim}OPENAI_API_KEY absent → deterministic fallback mode${C.reset}`);
+  const modeLabel = SEMANTIC_MODE
+    ? `${C.cyan}semantic mode${C.reset} (pgvector + OpenAI enabled)`
+    : `${C.dim}offline baseline${C.reset} (keyword-fallback, no API key)`;
 
-  const [intentResults, keybotResults] = await Promise.all([
+  console.log(`\n${C.bold}Sharkeys Eval Runner${C.reset} — ${modeLabel}`);
+
+  const [intentResults, keybotResults, ragResults] = await Promise.all([
     runIntentExtractionSuite(),
     runKeybotGroundingSuite(),
+    runRagRetrievalSuite(),
   ]);
-  const ragResults = runRagRetrievalSuite();
 
   const intentSummary = printSuiteResults(
     `Intent Extraction (${intentExtractionEvalCases.length} cases)`,
