@@ -43,6 +43,7 @@ export type Database = {
           metadata: Json;
           created_at: string;
           updated_at: string;
+          embedding: number[] | null;
         };
         Insert: {
           id: string;
@@ -77,6 +78,7 @@ export type Database = {
           metadata?: Json;
           created_at?: string;
           updated_at?: string;
+          embedding?: number[] | null;
         };
         Update: Partial<Database["public"]["Tables"]["keyboard_components"]["Insert"]>;
         Relationships: [];
@@ -112,7 +114,19 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      match_components: {
+        Args: {
+          query_embedding: number[];
+          match_count?: number;
+          filter_category?: string | null;
+        };
+        Returns: Array<{
+          id: string;
+          similarity: number;
+        }>;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
