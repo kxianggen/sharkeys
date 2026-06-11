@@ -10,6 +10,15 @@
  * Usage:  npm run eval
  */
 
+// Load .env.local so EVAL_SEMANTIC=true can reach the live OpenAI + Supabase
+// credentials. Guarded: process.loadEnvFile throws if the file is absent
+// (e.g. CI), in which case we silently continue on the existing environment.
+try {
+  process.loadEnvFile(".env.local");
+} catch {
+  // No .env.local — rely on the ambient environment (offline baseline / CI).
+}
+
 // EVAL_SEMANTIC=true  → keep the API key, enabling semantic (pgvector) search.
 //                       rr-007 and rr-008 will pass when Supabase + OpenAI are live.
 // EVAL_SEMANTIC=false → delete the key for a reproducible offline baseline.
