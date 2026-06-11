@@ -1,6 +1,9 @@
 export {
   generateKeybotResponse,
+  buildGroundedKeybotResponse,
+  classifyKeybotMessage,
   type GenerateKeybotResponseOptions,
+  type KeybotClassification,
 } from "./service";
 export {
   keybotApiResponseSchema,
