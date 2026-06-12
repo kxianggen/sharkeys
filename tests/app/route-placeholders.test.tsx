@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import BrowsePage from "@/app/browse/page";
-import CommunityGalleryPage from "@/app/community-gallery/page";
 import MyBuildsRoute from "@/app/my-builds/page";
 import { keyboardComponents } from "@/data";
 
@@ -82,17 +81,8 @@ describe("route placeholders", () => {
     );
   });
 
-  it("renders the Community Gallery placeholder", () => {
-    render(<CommunityGalleryPage />);
-
-    expect(
-      screen.getByRole("heading", { name: /Community Gallery/i }),
-    ).toBeInTheDocument();
-    expect(screen.getAllByText(/No auth or sharing is enabled/i)).toHaveLength(3);
-    expect(
-      screen.getByRole("link", { name: /Create or save a build/i }),
-    ).toHaveAttribute("href", "/configurator");
-  });
+  // Community Gallery is no longer a static placeholder — it is now an async
+  // server component backed by Supabase (covered by the gallery service + build).
 
   it("renders the My Builds route empty state", async () => {
     render(<MyBuildsRoute />);

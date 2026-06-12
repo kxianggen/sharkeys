@@ -112,6 +112,97 @@ export type Database = {
           },
         ];
       };
+      profiles: {
+        Row: {
+          id: string;
+          username: string;
+          display_name: string | null;
+          avatar_url: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          username: string;
+          display_name?: string | null;
+          avatar_url?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey";
+            columns: ["id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      build_posts: {
+        Row: {
+          id: string;
+          author_id: string;
+          title: string;
+          description: string | null;
+          component_ids: Json;
+          validation_snapshot: Json | null;
+          is_published: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          author_id: string;
+          title: string;
+          description?: string | null;
+          component_ids?: Json;
+          validation_snapshot?: Json | null;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["build_posts"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "build_posts_author_id_fkey";
+            columns: ["author_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      post_comments: {
+        Row: {
+          id: string;
+          post_id: string;
+          author_id: string | null;
+          body: string;
+          is_keybot: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          post_id: string;
+          author_id?: string | null;
+          body: string;
+          is_keybot?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["post_comments"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey";
+            columns: ["post_id"];
+            referencedRelation: "build_posts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "post_comments_author_id_fkey";
+            columns: ["author_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
