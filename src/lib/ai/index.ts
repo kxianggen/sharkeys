@@ -1,5 +1,6 @@
 export {
   extractKeyboardIntent,
+  extractIntentFromImage,
 } from "./intent-extraction";
 export {
   mapIntentToSearchCriteria,
@@ -22,10 +23,12 @@ export {
   intentExtractionSourceSchema,
   intentMatchingCriteriaSchema,
   intentPreparationSchema,
+  imageIntentRequestSchema,
   intentPrioritySchema,
   keyboardUseCaseSchema,
   userIntentRequestSchema,
   type BudgetIntent,
+  type ImageIntentRequest,
   type AiIntentApiResponse,
   type ComponentCandidateIdsByCategory,
   type ExtractedKeyboardIntent,

@@ -107,10 +107,10 @@
 
 **Goal:** Image-based intent extraction. Systematic prompt optimization. Final eval report.
 
-- [ ] Add `extractIntentFromImage()` using GPT-4.1-mini vision
-- [ ] Image upload UI
-- [ ] A/B test 3-5 prompt variants using eval suite — adopt winning prompt
-- [ ] Generate final markdown report: baseline vs. final metrics across all eval categories
+- [x] Add `extractIntentFromImage()` using `gpt-4o-mini` vision (text+image fusion)
+- [x] Image upload UI (drag-drop, client-side compression, ephemeral base64)
+- [x] A/B test prompt variants using eval suite — adopt winning prompt *(structured variant: 100% vs baseline 92.2%)*
+- [x] Generate final markdown report: baseline vs. final metrics *(see [eval-report.md](./eval-report.md): 34→46 passing)*
 
 ### Phase 5 Checkpoints
 
