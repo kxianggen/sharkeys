@@ -32,7 +32,12 @@ import {
   X,
 } from "lucide-react";
 
+import { ImageDrop } from "@/components/image-drop";
 import type { CompatibilityResult, KeyboardComponent } from "@/lib/types";
+import type {
+  AiIntentApiResponse,
+  ExtractedKeyboardIntent,
+} from "@/lib/ai";
 import type { RecommendationsApiResponse } from "@/lib/recommendations/schemas";
 import type { KeybotApiResponse } from "@/lib/keybot/schemas";
 
@@ -444,6 +449,24 @@ function buildConfiguratorPromptHref(prompt: string) {
   return `/configurator?${params.toString()}`;
 }
 
+// Renders an image-derived intent into an editable natural-language prompt.
+function intentToPrompt(intent: ExtractedKeyboardIntent): string {
+  const parts: string[] = [];
+  if (intent.useCase && intent.useCase !== "unknown") {
+    parts.push(`${intent.useCase} use`);
+  }
+  if (intent.soundProfile) parts.push(`${intent.soundProfile} sound`);
+  if (intent.switchTechnology) parts.push(`${intent.switchTechnology} switches`);
+  if (intent.layout) parts.push(`${intent.layout} layout`);
+  if (intent.budget?.amount) {
+    parts.push(`under ${intent.budget.amount} ${intent.budget.currency ?? "MYR"}`);
+  }
+  if (parts.length === 0) {
+    return "A keyboard inspired by the uploaded photo";
+  }
+  return `A ${parts.join(", ")} keyboard`;
+}
+
 export function RecommendationDemo({
   initialPrompt = null,
   mode = "landing",
@@ -477,6 +500,9 @@ export function RecommendationDemo({
   );
   const [hasMounted, setHasMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+  const [visionLoading, setVisionLoading] = useState(false);
+  const [visionNote, setVisionNote] = useState<string | null>(null);
   const [isCatalogLoading, setIsCatalogLoading] = useState(true);
   const [isManualValidating, setIsManualValidating] = useState(false);
 
@@ -685,6 +711,50 @@ export function RecommendationDemo({
     await runRecommendationRequest(prompt);
   }
 
+  // Phase 5: turn an uploaded inspiration photo (fused with any typed text) into
+  // a prompt the user can edit, then run through the normal recommendation flow.
+  async function handleImageChange(dataUrl: string | null) {
+    setImageDataUrl(dataUrl);
+    setVisionNote(null);
+    if (!dataUrl) return;
+
+    setVisionLoading(true);
+    try {
+      const response = await fetch("/api/ai/vision-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageDataUrl: dataUrl,
+          message: message.trim() || undefined,
+        }),
+      });
+      const body = (await response.json()) as
+        | AiIntentApiResponse
+        | ApiErrorResponse;
+
+      if (!response.ok || !body.success) {
+        throw new Error(
+          body.success ? "Image request failed." : body.error.message,
+        );
+      }
+
+      setMessage(intentToPrompt(body.data.intent));
+      setVisionNote(
+        body.data.source === "openai"
+          ? "Filled from your image — edit the prompt or press Start."
+          : "OpenAI key is not configured, so the image could not be read. Type your request instead.",
+      );
+    } catch (caughtError) {
+      setVisionNote(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Could not read the image.",
+      );
+    } finally {
+      setVisionLoading(false);
+    }
+  }
+
   function focusPrompt() {
     if (isLanding) {
       router.push(buildConfiguratorPromptHref(message));
@@ -845,9 +915,30 @@ export function RecommendationDemo({
                 compatible build paths from the grounded catalog.
               </p>
 
+              <div className="mt-8 w-full max-w-4xl">
+                <p className="mb-2 text-sm font-bold text-[#093C5D]">
+                  Have a photo for inspiration? (optional)
+                </p>
+                <ImageDrop
+                  disabled={isSubmitting || visionLoading}
+                  onChange={(value) => void handleImageChange(value)}
+                  value={imageDataUrl}
+                />
+                {visionLoading ? (
+                  <p className="mt-2 text-sm text-[#42474e]">
+                    Reading your image…
+                  </p>
+                ) : null}
+                {visionNote ? (
+                  <p className="mt-2 text-sm font-medium text-[#093C5D]">
+                    {visionNote}
+                  </p>
+                ) : null}
+              </div>
+
               <form
                 aria-label="AI keyboard prompt form"
-                className="mt-8 flex w-full max-w-4xl flex-col gap-3 rounded-2xl border border-[#e1e7ed] bg-white p-4 text-left shadow-[0_8px_24px_rgba(9,60,93,0.07)] transition focus-within:border-[#6FD1D7] focus-within:ring-4 focus-within:ring-[#6FD1D7]/20 sm:flex-row sm:items-center"
+                className="mt-4 flex w-full max-w-4xl flex-col gap-3 rounded-2xl border border-[#e1e7ed] bg-white p-4 text-left shadow-[0_8px_24px_rgba(9,60,93,0.07)] transition focus-within:border-[#6FD1D7] focus-within:ring-4 focus-within:ring-[#6FD1D7]/20 sm:flex-row sm:items-center"
                 onSubmit={handleSubmit}
               >
                 <label className="sr-only" htmlFor="keyboard-request">

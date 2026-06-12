@@ -74,3 +74,31 @@ revisit: prompt-tune the router, or relax kg-006's brittle term assertions.
   `LANGCHAIN_TRACING_V2=true`, observe traces.
 - Decide on the LLM-router default vs the kg-006 tradeoff.
 - Rotate the Supabase `service_role` key (carried over from Phase 2).
+
+---
+
+# Phase 5 Walkthrough — Vision + Prompt Optimization
+
+## What was built
+- **Vision intent** (`extractIntentFromImage`, `gpt-4o-mini`): an uploaded photo,
+  optionally fused with text ("like this, but silent"), is interpreted into the
+  same `ExtractedKeyboardIntent` and flows through the unchanged prepare →
+  recommend pipeline. Same silent fallback contract as text intent. Image is
+  in-memory only — never persisted (D8). Exposed via `POST /api/ai/vision-intent`.
+- **Upload UI** (`image-drop.tsx`): drag-drop + picker, client-side compression
+  (≤1024px JPEG → base64) so raw files never leave the device. Wired into the
+  configurator: upload → vision intent → editable prompt → existing flow.
+- **Prompt A/B** (`prompts.ts` registry + `scripts/run-prompt-ab.ts`): 3 variants
+  × 3 runs × 30 intent cases. Winner = `structured` (100% mean pass-rate vs
+  baseline 92.2%, conversational 96.7%); set as `defaultIntentPromptVariant`.
+- **Final report** (`docs/eval-report.md`): Phase 1B → Phase 5, 34 → 46 passing.
+
+## Results
+- Intent extraction: **20/30 → 30/30**. RAG: 6 → 8 (pgvector). Total: 34 → 46.
+- `npm run verify` green; offline eval baseline unchanged (structured prompt only
+  affects the LLM path, not the keyword fallback).
+
+## Decisions honored
+D6 text+image fusion · D7 gpt-4o-mini for vision (text intent stays on the
+configured model) · D8 ephemeral images · D9 pass-rate winner, N=3 · D10 intent
+prompt only.

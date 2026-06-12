@@ -6,21 +6,52 @@ import { createOpenAIClient } from "@/lib/openai";
 import type { CurrencyCode } from "@/lib/types";
 
 import {
+  defaultIntentPromptVariant,
+  intentPromptVariants,
+} from "./prompts";
+
+import {
   extractedKeyboardIntentSchema,
+  imageIntentRequestSchema,
   intentExtractionResultSchema,
   userIntentRequestSchema,
+  type ImageIntentRequest,
   type IntentExtractionResult,
   type UserIntentRequest,
 } from "./intent-schema";
 
 type OpenAIIntentClient = Pick<OpenAI, "responses">;
 
+// Vision model for image intent (Phase 5, decision D7). Text-only intent keeps
+// using the configured OPENAI_MODEL.
+const defaultVisionModel = "gpt-4o-mini";
+
 type ExtractKeyboardIntentOptions = {
   apiKey?: string;
   client?: OpenAIIntentClient;
   model?: string;
   maxOutputTokens?: number;
+  // Override the system prompt (Phase 5 A/B harness injects variants here).
+  systemPrompt?: string;
 };
+
+type ExtractIntentFromImageOptions = ExtractKeyboardIntentOptions & {
+  visionModel?: string;
+};
+
+const intentSystemPrompt =
+  intentPromptVariants[defaultIntentPromptVariant];
+
+const visionIntentSystemPrompt = [
+  "You extract keyboard build intent into structured criteria from an image and optional text.",
+  "Infer layout size, sound profile, switch feel, and aesthetic cues from visible case material, keycap colors/profile, and switch colors.",
+  "When text accompanies the image, let the text OVERRIDE conflicting image cues (e.g. 'like this, but silent').",
+  "Do not recommend final products or complete builds.",
+  "Do not invent component IDs, products, prices, vendors, or availability.",
+  "Use MYR or USD when a budget is present; default Malaysia-local RM budgets to MYR.",
+  "If the image is ambiguous, set clarificationNeeded and ask one concise question.",
+  "Use only the schema fields. Compatibility is decided later by deterministic validation.",
+].join(" ");
 
 export async function extractKeyboardIntent(
   input: UserIntentRequest,
@@ -49,14 +80,7 @@ export async function extractKeyboardIntent(
       input: [
         {
           role: "system",
-          content: [
-            "You extract keyboard build intent into structured criteria.",
-            "Do not recommend final products or complete builds.",
-            "Do not invent component IDs, products, prices, vendors, or availability.",
-            "Use MYR or USD when a budget currency is present; default Malaysia-local RM budgets to MYR.",
-            "If the user is vague, set clarificationNeeded and ask one concise question.",
-            "Use only the schema fields. Compatibility is decided later by deterministic validation.",
-          ].join(" "),
+          content: options.systemPrompt ?? intentSystemPrompt,
         },
         {
           role: "user",
@@ -90,6 +114,95 @@ export async function extractKeyboardIntent(
       intent: parseLocalFallbackIntent(request.message),
       source: "fallback_error",
       error: formatOpenAIError(error, "Intent extraction"),
+    });
+  }
+}
+
+/**
+ * Extracts keyboard build intent from an uploaded image, optionally fused with a
+ * text message ("like this, but silent"). Uses the gpt-4o-mini vision model and
+ * the same ExtractedKeyboardIntent structured output, so the result flows into
+ * the existing prepare → recommend pipeline unchanged.
+ *
+ * Fallback contract mirrors extractKeyboardIntent: with no API key (or on any
+ * error) it returns a deterministic intent parsed from the accompanying text
+ * (or a neutral clarification-needed intent), never throwing. The image is held
+ * in memory only and never persisted (decision D8).
+ */
+export async function extractIntentFromImage(
+  input: ImageIntentRequest,
+  options: ExtractIntentFromImageOptions = {},
+): Promise<IntentExtractionResult> {
+  const request = imageIntentRequestSchema.parse(input);
+  const config = readOptionalOpenAIConfig();
+  const apiKey = options.apiKey ?? config.OPENAI_API_KEY;
+  const model = options.visionModel ?? defaultVisionModel;
+  const maxOutputTokens =
+    options.maxOutputTokens ?? config.OPENAI_MAX_OUTPUT_TOKENS;
+
+  if (!options.client && !apiKey) {
+    return intentExtractionResultSchema.parse({
+      intent: parseLocalFallbackIntent(request.message ?? ""),
+      source: "fallback_missing_api_key",
+      error:
+        "OPENAI_API_KEY is not configured, so image intent extraction is unavailable; used deterministic text fallback.",
+    });
+  }
+
+  try {
+    const client = options.client ?? createOpenAIClient(apiKey);
+    const userText = [
+      "Infer keyboard build intent from this image.",
+      request.message
+        ? `The user also said: "${request.message}". Fuse the image and the text; the text overrides conflicting image cues.`
+        : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    const response = await client.responses.parse({
+      model,
+      input: [
+        {
+          role: "system",
+          content: options.systemPrompt ?? visionIntentSystemPrompt,
+        },
+        {
+          role: "user",
+          content: [
+            { type: "input_text", text: userText },
+            {
+              type: "input_image",
+              image_url: request.imageDataUrl,
+              detail: "auto",
+            },
+          ],
+        },
+      ],
+      text: {
+        format: zodTextFormat(extractedKeyboardIntentSchema, "keyboard_intent"),
+      },
+      max_output_tokens: maxOutputTokens,
+    });
+    const parsedIntent = response.output_parsed;
+
+    if (!parsedIntent) {
+      return intentExtractionResultSchema.parse({
+        intent: parseLocalFallbackIntent(request.message ?? ""),
+        source: "fallback_error",
+        error: "OpenAI returned no parsed intent from the image.",
+      });
+    }
+
+    return intentExtractionResultSchema.parse({
+      intent: parsedIntent,
+      source: "openai",
+    });
+  } catch (error) {
+    return intentExtractionResultSchema.parse({
+      intent: parseLocalFallbackIntent(request.message ?? ""),
+      source: "fallback_error",
+      error: formatOpenAIError(error, "Image intent extraction"),
     });
   }
 }

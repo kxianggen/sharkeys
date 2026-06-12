@@ -42,6 +42,23 @@ export const userIntentRequestSchema = z
   })
   .strict();
 
+// Image-based intent (Phase 5). `imageDataUrl` is a base64 image data URL kept
+// in memory only (never persisted). `message` is optional so a user can fuse a
+// picture with text ("like this, but silent"). The ~6M char cap bounds the
+// request payload (base64 inflates ~1.33x, so ≈4.5MB of image bytes).
+export const imageIntentRequestSchema = z
+  .object({
+    imageDataUrl: z
+      .string()
+      .regex(
+        /^data:image\/(png|jpe?g|webp|gif);base64,/,
+        "Must be a base64 image data URL.",
+      )
+      .max(6_000_000, "Image is too large (max ~4MB)."),
+    message: z.string().trim().max(2000).optional(),
+  })
+  .strict();
+
 export const extractedKeyboardIntentSchema = z
   .object({
     budget: budgetIntentSchema.nullable(),
@@ -116,6 +133,7 @@ export type KeyboardUseCase = z.infer<typeof keyboardUseCaseSchema>;
 export type IntentPriority = z.infer<typeof intentPrioritySchema>;
 export type BudgetIntent = z.infer<typeof budgetIntentSchema>;
 export type UserIntentRequest = z.infer<typeof userIntentRequestSchema>;
+export type ImageIntentRequest = z.infer<typeof imageIntentRequestSchema>;
 export type ExtractedKeyboardIntent = z.infer<
   typeof extractedKeyboardIntentSchema
 >;
