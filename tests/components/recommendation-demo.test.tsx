@@ -256,7 +256,7 @@ function getSelect(label: string) {
 function getPromptSubmitButton() {
   return within(
     screen.getByRole("form", { name: /AI keyboard prompt form/i }),
-  ).getByRole("button", { name: /Start/i });
+  ).getByRole("button", { name: /Design my build|Start Building/i });
 }
 
 function getSavedGallery() {
@@ -458,10 +458,12 @@ describe("RecommendationDemo", () => {
     render(<RecommendationDemo mode="configurator" />);
 
     expect(
-      screen.getByRole("heading", { name: /What's your dream sound/i }),
+      screen.getByRole("heading", { name: /Ask Meg/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText("AI keyboard expert")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /AI Assistant/i })).toBeInTheDocument();
+    expect(screen.getByText("AI build control")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Open Meg assistant/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Thocky/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Quiet Office/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /65% Layout/i })).toBeInTheDocument();

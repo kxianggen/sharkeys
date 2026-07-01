@@ -18,7 +18,7 @@ describe("ConfiguratorPage", () => {
     render(await ConfiguratorPage({ searchParams: Promise.resolve({}) }));
 
     expect(
-      screen.getByRole("heading", { name: /What's your dream sound/i }),
+      screen.getByRole("heading", { name: /Ask Meg/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("form", { name: /AI keyboard prompt form/i }),

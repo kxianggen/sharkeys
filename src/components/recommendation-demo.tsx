@@ -23,6 +23,7 @@ import {
   Mic,
   PackageSearch,
   Send,
+  ShieldAlert,
   ShieldCheck,
   SlidersHorizontal,
   Volume2,
@@ -893,117 +894,187 @@ export function RecommendationDemo({
   }
 
   if (isConfigurator) {
+    const activeBuild = selectedRecommendation;
+    const buildValid = activeBuild?.validation.isValid ?? null;
+    const buildErrorCount = activeBuild?.validation.errors.length ?? 0;
+    const buildPrice =
+      activeBuild && activeBuild.estimatedPrice !== null
+        ? formatMoney(
+            activeBuild.estimatedPrice,
+            activeBuild.estimatedPriceCurrency ?? "MYR",
+          )
+        : null;
+    const isDesigning = isSubmitting || visionLoading;
+
     return (
-      <div className="min-h-screen overflow-x-hidden bg-[#f8f8fb] text-[#071e29]">
+      <div className="flex h-screen flex-col overflow-hidden bg-[#f4f8fb] text-[#071e29]">
         <LandingNav onStartBuilding={focusPrompt} />
 
-        <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[272px_minmax(0,1fr)]">
-          <ConfiguratorSidebar
-            onAskKeybot={() => setKeybotOpenSignal((current) => current + 1)}
-          />
+        <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 lg:flex-row lg:gap-6 lg:p-6">
+          {/* LEFT PANE — Ask Meg control center */}
+          <aside className="flex min-h-0 w-full flex-col overflow-hidden rounded-3xl border border-white/60 bg-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-xl lg:w-[34%] lg:max-w-md">
+            <header className="flex items-center gap-3 border-b border-[#093C5D]/10 px-5 py-4">
+              <span
+                aria-hidden
+                className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-[#093C5D] text-white shadow-sm"
+              >
+                <Bot className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-base font-black tracking-[-0.01em] text-[#093C5D]">
+                  Ask Meg
+                </h2>
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#3B7597]">
+                  AI build control
+                </p>
+              </div>
+              <button
+                aria-label="Open Meg assistant"
+                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-[#3B7597] transition hover:bg-[#E8F4FA] hover:text-[#093C5D] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#6FD1D7]/25"
+                onClick={() => setKeybotOpenSignal((current) => current + 1)}
+                type="button"
+              >
+                <MessageCircle className="h-4 w-4" aria-hidden />
+              </button>
+            </header>
 
-          <main className="min-w-0">
-            <section
-              className="mx-auto flex min-h-[34rem] w-full max-w-5xl flex-col items-center justify-center px-4 py-16 text-center sm:px-8 lg:py-24"
-              id="configurator"
-            >
-              <h1 className="text-4xl font-black tracking-[-0.01em] text-[#093C5D] sm:text-5xl">
-                What&apos;s your dream sound?
-              </h1>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-[#42474e]">
-                Tell Keybot what you want to feel and hear. sharkeys will return
-                compatible build paths from the grounded catalog.
+            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
+              <p className="text-sm leading-6 text-[#42474e]">
+                Describe the sound, feel, budget, or layout you want. Meg returns
+                compatible builds from the grounded catalog — every result is
+                validated by the deterministic rule engine.
               </p>
 
-              <div className="mt-8 w-full max-w-4xl">
-                <p className="mb-2 text-sm font-bold text-[#093C5D]">
-                  Have a photo for inspiration? (optional)
+              <div>
+                <p className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-[#3B7597]">
+                  Try a starting point
                 </p>
+                <div className="flex flex-col gap-2">
+                  {configuratorQuickPrompts.map((prompt) => (
+                    <button
+                      className="group inline-flex items-center justify-between gap-2 rounded-2xl border border-[#e1e7ed] bg-white px-4 py-2.5 text-left text-sm font-bold text-[#42474e] shadow-sm transition hover:-translate-y-0.5 hover:border-[#6FD1D7] hover:text-[#093C5D] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#6FD1D7]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={hasMounted && isSubmitting}
+                      key={prompt.label}
+                      onClick={() => void handleQuickPrompt(prompt.prompt)}
+                      type="button"
+                    >
+                      {prompt.label}
+                      <ArrowRight
+                        className="h-4 w-4 flex-none text-[#6FD1D7] transition-transform group-hover:translate-x-1"
+                        aria-hidden
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {visionNote ? (
+                <p className="rounded-2xl bg-[#E8F4FA] px-4 py-3 text-sm font-medium text-[#093C5D]">
+                  {visionNote}
+                </p>
+              ) : null}
+            </div>
+
+            {/* Loaders / error sit directly above the premium input */}
+            <div className="space-y-3 border-t border-[#093C5D]/10 p-4">
+              {isDesigning ? (
+                <div className="inline-flex w-full items-center gap-2 rounded-2xl bg-[#093C5D] px-4 py-3 text-sm font-bold text-white">
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  {visionLoading
+                    ? "Reading your image…"
+                    : "Meg is designing your build…"}
+                </div>
+              ) : null}
+
+              {error ? (
+                <Notice icon={AlertCircle} message={error} tone="red" />
+              ) : null}
+
+              <form
+                aria-label="AI keyboard prompt form"
+                className="space-y-3"
+                onSubmit={handleSubmit}
+              >
                 <ImageDrop
                   disabled={isSubmitting || visionLoading}
                   onChange={(value) => void handleImageChange(value)}
                   value={imageDataUrl}
                 />
-                {visionLoading ? (
-                  <p className="mt-2 text-sm text-[#42474e]">
-                    Reading your image…
-                  </p>
-                ) : null}
-                {visionNote ? (
-                  <p className="mt-2 text-sm font-medium text-[#093C5D]">
-                    {visionNote}
-                  </p>
-                ) : null}
-              </div>
 
-              <form
-                aria-label="AI keyboard prompt form"
-                className="mt-4 flex w-full max-w-4xl flex-col gap-3 rounded-2xl border border-[#e1e7ed] bg-white p-4 text-left shadow-[0_8px_24px_rgba(9,60,93,0.07)] transition focus-within:border-[#6FD1D7] focus-within:ring-4 focus-within:ring-[#6FD1D7]/20 sm:flex-row sm:items-center"
-                onSubmit={handleSubmit}
-              >
-                <label className="sr-only" htmlFor="keyboard-request">
-                  Keyboard request
-                </label>
-                <textarea
-                  className="min-h-[72px] min-w-0 flex-1 resize-none border-none bg-transparent p-0 text-base leading-7 text-[#071e29] outline-none placeholder:text-[#42474e]/70 focus:ring-0 sm:min-h-16"
-                  id="keyboard-request"
-                  maxLength={2000}
-                  onChange={(event) => setMessage(event.target.value)}
-                  placeholder="Describe your typing style... e.g., 'A deep thocky build for coding in a quiet office'"
-                  ref={promptRef}
-                  value={message}
-                />
-                <button
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#093C5D] px-5 text-sm font-black text-white shadow-sm transition hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 disabled:cursor-not-allowed disabled:bg-[#72777f]"
-                  disabled={isSubmitDisabled}
-                  type="submit"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-                      <span>Starting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Start</span>
-                      <Sparkles className="h-4 w-4" aria-hidden />
-                    </>
-                  )}
-                </button>
-              </form>
-
-              <div className="mt-5 flex max-w-3xl flex-wrap justify-center gap-3">
-                {configuratorQuickPrompts.map((prompt) => (
+                <div className="rounded-2xl border border-[#e1e7ed] bg-white p-2 shadow-[0_8px_24px_rgba(9,60,93,0.07)] transition focus-within:border-[#6FD1D7] focus-within:ring-4 focus-within:ring-[#6FD1D7]/20">
+                  <label className="sr-only" htmlFor="keyboard-request">
+                    Keyboard request
+                  </label>
+                  <textarea
+                    className="min-h-[64px] w-full resize-none border-none bg-transparent px-2 py-1.5 text-sm leading-6 text-[#071e29] outline-none placeholder:text-[#42474e]/70 focus:ring-0"
+                    id="keyboard-request"
+                    maxLength={2000}
+                    onChange={(event) => setMessage(event.target.value)}
+                    placeholder="e.g., 'A deep thocky build for coding in a quiet office'"
+                    ref={promptRef}
+                    value={message}
+                  />
                   <button
-                    className="inline-flex min-h-11 items-center rounded-xl border border-[#e1e7ed] bg-white px-5 py-2 text-sm font-bold text-[#42474e] shadow-sm transition hover:border-[#6FD1D7] hover:text-[#093C5D] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                    disabled={hasMounted && isSubmitting}
-                    key={prompt.label}
-                    onClick={() => void handleQuickPrompt(prompt.prompt)}
-                    type="button"
+                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#093C5D] px-5 text-sm font-black text-white shadow-sm transition hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 disabled:cursor-not-allowed disabled:bg-[#72777f]"
+                    disabled={isSubmitDisabled}
+                    type="submit"
                   >
-                    {prompt.label}
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                        <span>Designing…</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Design my build</span>
+                        <Sparkles className="h-4 w-4" aria-hidden />
+                      </>
+                    )}
                   </button>
-                ))}
+                </div>
+              </form>
+            </div>
+          </aside>
+
+          {/* RIGHT PANE — Active build / garage */}
+          <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/80 shadow-2xl backdrop-blur-xl">
+            <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#093C5D]/10 px-6 py-5">
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.12em] text-[#3B7597]">
+                  Active build
+                </p>
+                <h1 className="mt-1 truncate text-xl font-black tracking-[-0.01em] text-[#093C5D] sm:text-2xl">
+                  {activeBuild?.title ?? "Your build appears here"}
+                </h1>
+                {buildPrice ? (
+                  <p className="mt-1 text-sm font-bold text-[#42474e]">
+                    Est. total{" "}
+                    <span className="text-[#093C5D]">{buildPrice}</span>
+                  </p>
+                ) : null}
               </div>
 
-              {error ? (
-                <Notice
-                  className="mt-6 w-full max-w-4xl"
-                  icon={AlertCircle}
-                  message={error}
-                  tone="red"
-                />
-              ) : null}
-            </section>
+              {buildValid === null ? null : buildValid ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3.5 py-1.5 text-sm font-bold text-emerald-700 shadow-[0_0_20px_rgba(16,185,129,0.25)] ring-1 ring-inset ring-emerald-500/30">
+                  <ShieldCheck className="h-4 w-4" aria-hidden /> Compatible
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-3.5 py-1.5 text-sm font-bold text-rose-700 shadow-[0_0_20px_rgba(244,63,94,0.2)] ring-1 ring-inset ring-rose-500/30">
+                  <ShieldAlert className="h-4 w-4" aria-hidden />
+                  {buildErrorCount > 0
+                    ? `${buildErrorCount} blocker${buildErrorCount > 1 ? "s" : ""}`
+                    : "Blocked"}
+                </span>
+              )}
+            </header>
 
             <section
-              className="mx-auto w-full max-w-5xl px-4 pb-10 sm:px-8"
+              className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-6"
               id="results"
               ref={resultsRef}
             >
               {savedBuildMessage ? (
                 <Notice
-                  className="mb-5"
                   icon={Info}
                   message={`${savedBuildMessage} View saved builds on the My Builds page.`}
                   tone="sky"
@@ -1012,55 +1083,111 @@ export function RecommendationDemo({
 
               {result?.source === "fallback_missing_api_key" ? (
                 <Notice
-                  className="mb-5"
                   icon={Info}
                   message="OpenAI key is not configured, so this demo is using local keyword extraction."
                   tone="sky"
                 />
               ) : null}
 
-              {result && result.recommendations.length > 0 ? (
-                <CompactRecommendationGrid
-                  onSaveRecommendation={saveRecommendationBuild}
-                  onSelect={(recommendation) => {
-                    setSelectedRecommendationId(recommendation.id);
-                    loadRecommendationIntoManualPanel(recommendation);
-                  }}
-                  recommendations={result.recommendations}
-                  selectedId={selectedRecommendation?.id ?? null}
-                />
-              ) : null}
-
-              {result && result.recommendations.length === 0 ? (
-                <EmptyRecommendationState result={result} />
-              ) : null}
-
-              {selectedRecommendation ? (
-                <details className="mt-6 rounded-3xl border border-[#dbe5ec] bg-white p-4 shadow-sm">
-                  <summary className="cursor-pointer text-sm font-black text-[#093C5D] outline-none focus:ring-4 focus:ring-[#6FD1D7]/20">
-                    Technical details
-                  </summary>
-                  <div className="mt-4">
-                    <RecommendationInspector
-                      activeCategory={activeCategory}
-                      onActiveCategoryChange={setActiveCategory}
-                      onSaveRecommendation={saveRecommendationBuild}
-                      recommendation={selectedRecommendation}
-                      selectedComponent={selectedComponent}
-                    />
+              {activeBuild ? (
+                <>
+                  {/* Component tabs — active category pops navy */}
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {componentCategories.map((category) => {
+                      const component = activeBuild.components[category];
+                      const isActive = activeCategory === category;
+                      return (
+                        <button
+                          className={`flex flex-col rounded-2xl border p-3 text-left transition ${
+                            isActive
+                              ? "border-[#093C5D] bg-[#093C5D] text-white shadow-lg"
+                              : "border-[#e1e7ed] bg-white text-[#071e29] shadow-sm hover:-translate-y-0.5 hover:border-[#6FD1D7]"
+                          }`}
+                          key={category}
+                          onClick={() => setActiveCategory(category)}
+                          type="button"
+                        >
+                          <span
+                            className={`text-[11px] font-black uppercase tracking-[0.1em] ${
+                              isActive ? "text-white/70" : "text-[#3B7597]"
+                            }`}
+                          >
+                            {categoryLabels[category]}
+                          </span>
+                          <span className="mt-1 line-clamp-2 text-sm font-bold leading-5">
+                            {component?.name ?? "—"}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
-                </details>
-              ) : null}
 
-              <section className="mt-6 rounded-3xl border border-dashed border-[#c2c7cf] bg-white/70 p-5 shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-4">
+                  {/* Active component detail */}
+                  {selectedComponent ? (
+                    <div className="rounded-2xl border border-[#dbe5ec] bg-white/70 p-5 shadow-sm">
+                      <p className="text-xs font-black uppercase tracking-[0.12em] text-[#3B7597]">
+                        {categoryLabels[activeCategory]}
+                      </p>
+                      <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
+                        <h2 className="text-lg font-black tracking-[-0.01em] text-[#093C5D]">
+                          {selectedComponent.name}
+                        </h2>
+                        <span className="text-sm font-bold text-[#42474e]">
+                          {formatComponentPrice(selectedComponent)}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-[#42474e]">
+                        {categorySummaries[activeCategory]}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {/* Alternate build paths */}
+                  {result && result.recommendations.length > 0 ? (
+                    <div>
+                      <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-[#3B7597]">
+                        Build paths
+                      </p>
+                      <CompactRecommendationGrid
+                        onSaveRecommendation={saveRecommendationBuild}
+                        onSelect={(recommendation) => {
+                          setSelectedRecommendationId(recommendation.id);
+                          loadRecommendationIntoManualPanel(recommendation);
+                        }}
+                        recommendations={result.recommendations}
+                        selectedId={selectedRecommendation?.id ?? null}
+                      />
+                    </div>
+                  ) : null}
+
+                </>
+              ) : result && result.recommendations.length === 0 ? (
+                <EmptyRecommendationState result={result} />
+              ) : (
+                <div className="flex min-h-[20rem] flex-col items-center justify-center rounded-2xl border border-dashed border-[#c2c7cf] bg-white/50 px-6 py-12 text-center">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E8F4FA] text-[#093C5D]">
+                    <Keyboard className="h-7 w-7" aria-hidden />
+                  </span>
+                  <h2 className="mt-4 text-lg font-black tracking-[-0.01em] text-[#093C5D]">
+                    No build yet
+                  </h2>
+                  <p className="mt-2 max-w-sm text-sm leading-6 text-[#42474e]">
+                    Ask Meg on the left — describe your dream sound and she will
+                    assemble a validated build here.
+                  </p>
+                </div>
+              )}
+
+              {/* Manual compatibility check — always available */}
+              <section className="rounded-2xl border border-dashed border-[#c2c7cf] bg-white/60 p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h2 className="text-base font-black text-[#071e29]">
                       Manual check
                     </h2>
                     <p className="mt-1 text-sm leading-6 text-[#42474e]">
-                      Prefer hands-on validation? Open the compatibility controls
-                      when you need them.
+                      Hand-pick components and validate them against the rule
+                      engine.
                     </p>
                   </div>
                   <button
@@ -1069,7 +1196,9 @@ export function RecommendationDemo({
                     onClick={() => setIsManualCheckOpen((current) => !current)}
                     type="button"
                   >
-                    {isManualCheckOpen ? "Hide manual check" : "Open manual check"}
+                    {isManualCheckOpen
+                      ? "Hide manual check"
+                      : "Open manual check"}
                   </button>
                 </div>
 
@@ -1100,10 +1229,8 @@ export function RecommendationDemo({
                 ) : null}
               </section>
             </section>
-          </main>
+          </section>
         </div>
-
-        <SharkeysFooter />
 
         <FloatingKeybot
           catalogById={catalogById}
