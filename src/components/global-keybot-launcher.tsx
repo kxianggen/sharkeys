@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { RotateCcw, Send, Sparkles, X } from "lucide-react";
@@ -181,9 +182,15 @@ export function GlobalKeybotLauncher() {
         <header className="flex items-center gap-3 bg-accent px-4 py-4 text-white">
           <span
             aria-hidden
-            className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20"
+            className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20"
           >
-            <Sparkles className="h-5 w-5" />
+            <Image
+              alt="Meg"
+              className="h-full w-full rounded-2xl object-cover"
+              height={44}
+              src="/meg-avatar.png"
+              width={44}
+            />
           </span>
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-bold leading-5 tracking-tight">
@@ -226,9 +233,15 @@ export function GlobalKeybotLauncher() {
               {message.role === "assistant" ? (
                 <span
                   aria-hidden
-                  className="mb-1 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-accent text-white shadow-sm"
+                  className="mb-1 flex h-7 w-7 flex-none items-center justify-center overflow-hidden rounded-full bg-accent text-white shadow-sm"
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
+                  <Image
+                    alt="Meg"
+                    className="h-full w-full rounded-full object-cover"
+                    height={28}
+                    src="/meg-avatar.png"
+                    width={28}
+                  />
                 </span>
               ) : null}
               <div
@@ -273,9 +286,15 @@ export function GlobalKeybotLauncher() {
             <div className="flex items-end gap-2">
               <span
                 aria-hidden
-                className="mb-1 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-accent text-white shadow-sm"
+                className="mb-1 flex h-7 w-7 flex-none items-center justify-center overflow-hidden rounded-full bg-accent text-white shadow-sm"
               >
-                <Sparkles className="h-3.5 w-3.5" />
+                <Image
+                  alt="Meg"
+                  className="h-full w-full rounded-full object-cover"
+                  height={28}
+                  src="/meg-avatar.png"
+                  width={28}
+                />
               </span>
               <div className="inline-flex items-center gap-2 rounded-3xl rounded-bl-md bg-white px-4 py-3 text-sm font-medium text-primary shadow-sm ring-1 ring-accent/5">
                 <span className="flex items-center gap-1" aria-hidden>

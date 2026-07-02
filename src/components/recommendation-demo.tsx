@@ -917,9 +917,15 @@ export function RecommendationDemo({
             <header className="flex items-center gap-3 border-b border-accent/10 px-5 py-4">
               <span
                 aria-hidden
-                className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-accent text-white shadow-sm"
+                className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-2xl bg-accent text-white shadow-sm"
               >
-                <Bot className="h-5 w-5" />
+                <Image
+                  alt="Meg"
+                  className="h-full w-full rounded-2xl object-cover"
+                  height={44}
+                  src="/meg-avatar.png"
+                  width={44}
+                />
               </span>
               <div className="min-w-0 flex-1">
                 <h2 className="text-base font-black tracking-[-0.01em] text-primary">
@@ -2333,7 +2339,13 @@ function KeybotAvatar({ small = false }: { small?: boolean }) {
         small ? "h-8 w-8" : "h-11 w-11"
       }`}
     >
-      <Bot className={small ? "h-4 w-4" : "h-5 w-5"} />
+      <Image
+        alt="Meg"
+        className="h-full w-full rounded-full object-cover"
+        height={44}
+        src="/meg-avatar.png"
+        width={44}
+      />
       <span className="absolute -right-0.5 top-1 h-2.5 w-2.5 rounded-full border-2 border-border bg-accent" />
     </span>
   );
@@ -2723,8 +2735,14 @@ function FeatureBento() {
             </p>
           </div>
           <div className="mt-5 flex items-center gap-2 rounded-xl border border-white/70 bg-white/45 p-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-white">
-              <Bot className="h-3.5 w-3.5" aria-hidden />
+            <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-accent text-white">
+              <Image
+                alt="Meg"
+                className="h-full w-full rounded-full object-cover"
+                height={24}
+                src="/meg-avatar.png"
+                width={24}
+              />
             </span>
             <span className="text-xs font-bold text-primary/60">
               “What’s a thock?”
