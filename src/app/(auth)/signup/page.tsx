@@ -18,10 +18,10 @@ export default async function SignupPage({
 
   return (
     <>
-      <h1 className="text-2xl font-black tracking-[-0.01em] text-[#001d32]">
+      <h1 className="text-2xl font-black tracking-[-0.01em] text-primary">
         Create your account
       </h1>
-      <p className="mb-6 mt-2 text-sm text-[#42474e]">
+      <p className="mb-6 mt-2 text-sm text-secondary">
         Join the community to post builds and tag @keybot for grounded advice.
       </p>
       <AuthForm action={signUpAction} mode="signup" next={next} />

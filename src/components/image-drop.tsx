@@ -61,7 +61,7 @@ export function ImageDrop({ value, onChange, disabled }: ImageDropProps) {
       <div className="relative inline-block">
         <Image
           alt="Uploaded inspiration"
-          className="h-28 w-28 rounded-2xl border border-[#c2c7cf] object-cover"
+          className="h-28 w-28 rounded-2xl border border-border object-cover"
           height={112}
           src={value}
           unoptimized
@@ -69,7 +69,7 @@ export function ImageDrop({ value, onChange, disabled }: ImageDropProps) {
         />
         <button
           aria-label="Remove image"
-          className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#093C5D] text-white shadow-sm transition hover:bg-[#00263e] disabled:opacity-60"
+          className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-accent text-white shadow-sm transition hover:bg-accent-hover disabled:opacity-60"
           disabled={disabled}
           onClick={() => onChange(null)}
           type="button"
@@ -85,8 +85,8 @@ export function ImageDrop({ value, onChange, disabled }: ImageDropProps) {
       <button
         className={`flex h-28 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 text-sm font-bold transition ${
           dragOver
-            ? "border-[#093C5D] bg-[#e8f7fb] text-[#093C5D]"
-            : "border-[#c2c7cf] bg-white text-[#42474e] hover:border-[#093C5D] hover:text-[#093C5D]"
+            ? "border-accent bg-accent-subtle text-primary"
+            : "border-border bg-white text-secondary hover:border-accent hover:text-primary"
         } disabled:cursor-not-allowed disabled:opacity-60`}
         disabled={disabled}
         onClick={() => inputRef.current?.click()}

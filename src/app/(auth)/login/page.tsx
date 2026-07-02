@@ -18,10 +18,10 @@ export default async function LoginPage({
 
   return (
     <>
-      <h1 className="text-2xl font-black tracking-[-0.01em] text-[#001d32]">
+      <h1 className="text-2xl font-black tracking-[-0.01em] text-primary">
         Welcome back
       </h1>
-      <p className="mb-6 mt-2 text-sm text-[#42474e]">
+      <p className="mb-6 mt-2 text-sm text-secondary">
         Sign in to share builds and chat with Keybot.
       </p>
       <AuthForm action={signInAction} mode="login" next={next} />

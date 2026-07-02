@@ -146,21 +146,21 @@ export function GlobalKeybotLauncher() {
     return (
       <button
         aria-label="Open Meg assistant"
-        className="group fixed bottom-5 right-5 z-40 flex h-16 w-16 items-center justify-center rounded-full bg-[#093C5D] text-white shadow-[0_18px_45px_rgba(9,60,93,0.45)] outline-none transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(9,60,93,0.55)] focus-visible:ring-4 focus-visible:ring-[#3DA9FC]/40 sm:bottom-6 sm:right-6"
+        className="group fixed bottom-5 right-5 z-40 flex h-16 w-16 items-center justify-center rounded-full bg-accent text-white shadow-xl outline-none transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:ring-4 focus-visible:ring-accent/40 sm:bottom-6 sm:right-6"
         onClick={() => setIsOpen(true)}
         type="button"
       >
         {/* Living, pulsing halo */}
         <span
           aria-hidden
-          className="absolute inset-0 rounded-full bg-[#3DA9FC]/40 motion-safe:animate-ping"
+          className="absolute inset-0 rounded-full bg-accent/40 motion-safe:animate-ping"
         />
         <span
           aria-hidden
           className="absolute inset-0 rounded-full ring-1 ring-inset ring-white/20"
         />
         <Sparkles className="relative h-6 w-6 transition-transform duration-300 group-hover:scale-110" aria-hidden />
-        <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-[#093C5D] bg-[#3DA9FC]" />
+        <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-accent bg-accent" />
       </button>
     );
   }
@@ -178,7 +178,7 @@ export function GlobalKeybotLauncher() {
       }</style>
       <div className="flex max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-3xl border border-white/40 bg-white/85 shadow-2xl backdrop-blur-2xl sm:h-[600px]">
         {/* Deep Navy Mac-style header */}
-        <header className="flex items-center gap-3 bg-[#093C5D] px-4 py-4 text-white">
+        <header className="flex items-center gap-3 bg-accent px-4 py-4 text-white">
           <span
             aria-hidden
             className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20"
@@ -189,7 +189,7 @@ export function GlobalKeybotLauncher() {
             <h2 className="text-base font-bold leading-5 tracking-tight">
               Ask Meg
             </h2>
-            <p className="flex items-center gap-1.5 text-xs font-medium text-[#D8EEFE]/80">
+            <p className="flex items-center gap-1.5 text-xs font-medium text-on-accent/80">
               <span className="h-1.5 w-1.5 rounded-full bg-[#7CE7AC]" />
               Grounded Assistant
             </p>
@@ -214,7 +214,7 @@ export function GlobalKeybotLauncher() {
 
         <div
           aria-live="polite"
-          className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-[#F4FAFF] to-white px-4 py-4"
+          className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-surface-secondary to-white px-4 py-4"
         >
           {messages.map((message) => (
             <div
@@ -226,7 +226,7 @@ export function GlobalKeybotLauncher() {
               {message.role === "assistant" ? (
                 <span
                   aria-hidden
-                  className="mb-1 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-[#093C5D] text-white shadow-sm"
+                  className="mb-1 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-accent text-white shadow-sm"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                 </span>
@@ -234,13 +234,13 @@ export function GlobalKeybotLauncher() {
               <div
                 className={`max-w-[82%] rounded-3xl px-4 py-3 text-sm leading-6 shadow-sm transition ${
                   message.role === "assistant"
-                    ? "rounded-bl-md bg-white text-[#071e29] ring-1 ring-[#093C5D]/5"
-                    : "rounded-br-md bg-[#D8EEFE] text-[#093C5D]"
+                    ? "rounded-bl-md bg-white text-primary ring-1 ring-accent/5"
+                    : "rounded-br-md bg-accent-subtle text-primary"
                 }`}
               >
                 {message.content}
                 {message.role === "assistant" && message.source ? (
-                  <div className="mt-3 border-t border-[#093C5D]/10 pt-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[#5F6C7B]">
+                  <div className="mt-3 border-t border-accent/10 pt-2 text-[11px] font-bold uppercase tracking-[0.08em] text-secondary">
                     {message.source === "fallback_missing_api_key" ||
                     message.source === "fallback_error"
                       ? "Using local grounded fallback"
@@ -255,7 +255,7 @@ export function GlobalKeybotLauncher() {
             <div className="flex flex-wrap gap-2 pt-1">
               {SUGGESTED_QUERIES.map((query) => (
                 <button
-                  className="rounded-full border border-[#093C5D]/15 bg-white px-3.5 py-2 text-xs font-medium tracking-tight text-[#093C5D] shadow-sm transition hover:-translate-y-0.5 hover:border-[#3DA9FC] hover:bg-[#E8F4FA] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#3DA9FC]/25"
+                  className="rounded-full border border-accent/15 bg-white px-3.5 py-2 text-xs font-medium tracking-tight text-primary shadow-sm transition hover:-translate-y-0.5 hover:border-accent hover:bg-accent-subtle focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/25"
                   key={query}
                   onClick={() => {
                     setInput(query);
@@ -273,15 +273,15 @@ export function GlobalKeybotLauncher() {
             <div className="flex items-end gap-2">
               <span
                 aria-hidden
-                className="mb-1 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-[#093C5D] text-white shadow-sm"
+                className="mb-1 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-accent text-white shadow-sm"
               >
                 <Sparkles className="h-3.5 w-3.5" />
               </span>
-              <div className="inline-flex items-center gap-2 rounded-3xl rounded-bl-md bg-white px-4 py-3 text-sm font-medium text-[#093C5D] shadow-sm ring-1 ring-[#093C5D]/5">
+              <div className="inline-flex items-center gap-2 rounded-3xl rounded-bl-md bg-white px-4 py-3 text-sm font-medium text-primary shadow-sm ring-1 ring-accent/5">
                 <span className="flex items-center gap-1" aria-hidden>
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#3DA9FC] motion-safe:animate-bounce [animation-delay:-0.3s]" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#3DA9FC] motion-safe:animate-bounce [animation-delay:-0.15s]" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#3DA9FC] motion-safe:animate-bounce" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent motion-safe:animate-bounce [animation-delay:-0.3s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent motion-safe:animate-bounce [animation-delay:-0.15s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent motion-safe:animate-bounce" />
                 </span>
                 Meg is pondering...
               </div>
@@ -291,22 +291,22 @@ export function GlobalKeybotLauncher() {
         </div>
 
         {error ? (
-          <p className="border-t border-[#ba1a1a]/20 bg-[#fff5f5] px-4 py-2 text-xs font-semibold text-[#ba1a1a]">
+          <p className="border-t border-error/20 bg-error px-4 py-2 text-xs font-semibold text-error">
             {error}
           </p>
         ) : null}
 
         <form
-          className="border-t border-[#093C5D]/10 bg-white/70 p-3 backdrop-blur"
+          className="border-t border-accent/10 bg-white/70 p-3 backdrop-blur"
           onSubmit={(event) => {
             event.preventDefault();
             void sendMessage(input);
           }}
         >
-          <div className="flex items-center gap-2 rounded-2xl border border-[#093C5D]/15 bg-[#F4FAFF] p-1.5 transition focus-within:border-[#3DA9FC] focus-within:ring-4 focus-within:ring-[#3DA9FC]/20">
+          <div className="flex items-center gap-2 rounded-2xl border border-accent/15 bg-surface-secondary p-1.5 transition focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/20">
             <input
               aria-label="Ask Meg a question"
-              className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-[#071e29] placeholder:text-[#5F6C7B]/70 focus:outline-none disabled:cursor-not-allowed"
+              className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-primary placeholder:text-secondary/70 focus:outline-none disabled:cursor-not-allowed"
               disabled={isSending}
               onChange={(event) => setInput(event.target.value)}
               placeholder={
@@ -316,7 +316,7 @@ export function GlobalKeybotLauncher() {
             />
             <button
               aria-label="Send message to Meg"
-              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-[#093C5D] text-white transition hover:bg-[#0c4f78] hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-[#3DA9FC]/30 disabled:cursor-not-allowed disabled:bg-[#c2c7cf]"
+              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent text-white transition hover:bg-accent-hover hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:bg-surface-secondary"
               disabled={isSending || input.trim().length === 0}
               type="submit"
             >

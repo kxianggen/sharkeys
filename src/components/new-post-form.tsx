@@ -25,10 +25,10 @@ export function NewPostForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
-      <label className="flex flex-col gap-1 text-sm font-bold text-[#071e29]">
+      <label className="flex flex-col gap-1 text-sm font-bold text-primary">
         Title
         <input
-          className="h-11 rounded-xl border border-[#c2c7cf] bg-white px-3 text-sm font-medium focus:border-[#093C5D] focus:outline-none focus:ring-2 focus:ring-[#6FD1D7]/30"
+          className="h-11 rounded-xl border border-border bg-white px-3 text-sm font-medium focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
           maxLength={120}
           name="title"
           required
@@ -36,10 +36,10 @@ export function NewPostForm({
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm font-bold text-[#071e29]">
+      <label className="flex flex-col gap-1 text-sm font-bold text-primary">
         Description
         <textarea
-          className="min-h-24 rounded-xl border border-[#c2c7cf] bg-white px-3 py-2 text-sm font-medium focus:border-[#093C5D] focus:outline-none focus:ring-2 focus:ring-[#6FD1D7]/30"
+          className="min-h-24 rounded-xl border border-border bg-white px-3 py-2 text-sm font-medium focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
           maxLength={2000}
           name="description"
           rows={4}
@@ -49,12 +49,12 @@ export function NewPostForm({
       <fieldset className="grid gap-4 sm:grid-cols-2">
         {categories.map((category) => (
           <label
-            className="flex flex-col gap-1 text-sm font-bold capitalize text-[#071e29]"
+            className="flex flex-col gap-1 text-sm font-bold capitalize text-primary"
             key={category}
           >
             {category}
             <select
-              className="h-11 rounded-xl border border-[#c2c7cf] bg-white px-3 text-sm font-medium focus:border-[#093C5D] focus:outline-none focus:ring-2 focus:ring-[#6FD1D7]/30"
+              className="h-11 rounded-xl border border-border bg-white px-3 text-sm font-medium focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
               defaultValue=""
               name={category}
               required
@@ -79,7 +79,7 @@ export function NewPostForm({
       ) : null}
 
       <button
-        className="inline-flex h-12 items-center justify-center rounded-full bg-[#093C5D] px-6 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#00263e] disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
         disabled={pending}
         type="submit"
       >

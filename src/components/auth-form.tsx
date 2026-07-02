@@ -24,22 +24,22 @@ export function AuthForm({ mode, action, next }: AuthFormProps) {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1 text-sm font-bold text-[#071e29]">
+      <label className="flex flex-col gap-1 text-sm font-bold text-primary">
         Email
         <input
           autoComplete="email"
-          className="h-11 rounded-xl border border-[#c2c7cf] bg-white px-3 text-sm font-medium text-[#071e29] focus:border-[#093C5D] focus:outline-none focus:ring-2 focus:ring-[#6FD1D7]/30"
+          className="h-11 rounded-xl border border-border bg-white px-3 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
           name="email"
           required
           type="email"
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm font-bold text-[#071e29]">
+      <label className="flex flex-col gap-1 text-sm font-bold text-primary">
         Password
         <input
           autoComplete={isLogin ? "current-password" : "new-password"}
-          className="h-11 rounded-xl border border-[#c2c7cf] bg-white px-3 text-sm font-medium text-[#071e29] focus:border-[#093C5D] focus:outline-none focus:ring-2 focus:ring-[#6FD1D7]/30"
+          className="h-11 rounded-xl border border-border bg-white px-3 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
           minLength={8}
           name="password"
           required
@@ -61,7 +61,7 @@ export function AuthForm({ mode, action, next }: AuthFormProps) {
       ) : null}
 
       <button
-        className="inline-flex h-12 items-center justify-center rounded-full bg-[#093C5D] px-6 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
         disabled={pending}
         type="submit"
       >
@@ -72,18 +72,18 @@ export function AuthForm({ mode, action, next }: AuthFormProps) {
             : "Create account"}
       </button>
 
-      <p className="text-center text-sm text-[#42474e]">
+      <p className="text-center text-sm text-secondary">
         {isLogin ? (
           <>
             No account?{" "}
-            <Link className="font-bold text-[#093C5D] underline" href="/signup">
+            <Link className="font-bold text-primary underline" href="/signup">
               Sign up
             </Link>
           </>
         ) : (
           <>
             Already have an account?{" "}
-            <Link className="font-bold text-[#093C5D] underline" href="/login">
+            <Link className="font-bold text-primary underline" href="/login">
               Sign in
             </Link>
           </>

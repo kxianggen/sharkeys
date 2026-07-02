@@ -19,10 +19,10 @@ export async function SiteNav({ active }: { active?: string }) {
   const profile = await getCurrentProfile();
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-[#dbe5ec] bg-[#f4f9fc]/95 backdrop-blur">
+    <nav className="sticky top-0 z-50 border-b border-border bg-surface-secondary/95 backdrop-blur">
       <div className="mx-auto flex min-h-16 w-full max-w-[1280px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <Link className="flex items-center gap-3 text-[#093C5D]" href="/">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#e1f3fe] text-[#093C5D]">
+        <Link className="flex items-center gap-3 text-primary" href="/">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-subtle text-primary">
             <Keyboard className="h-5 w-5" aria-hidden />
           </span>
           <span className="text-base font-black tracking-[-0.01em]">
@@ -35,8 +35,8 @@ export async function SiteNav({ active }: { active?: string }) {
             <Link
               className={`flex min-h-16 items-center border-b-2 text-xs font-bold transition lg:text-sm ${
                 label === active
-                  ? "border-[#093C5D] text-[#093C5D]"
-                  : "border-transparent text-[#42474e] hover:text-[#093C5D]"
+                  ? "border-accent text-primary"
+                  : "border-transparent text-secondary hover:text-primary"
               }`}
               href={href}
               key={label}
@@ -48,12 +48,12 @@ export async function SiteNav({ active }: { active?: string }) {
 
         {profile ? (
           <div className="flex items-center gap-3">
-            <span className="hidden text-sm font-bold text-[#093C5D] sm:inline">
+            <span className="hidden text-sm font-bold text-primary sm:inline">
               @{profile.username}
             </span>
             <form action={signOutAction}>
               <button
-                className="inline-flex h-11 items-center justify-center rounded-full border border-[#093C5D] px-4 text-sm font-bold text-[#093C5D] transition hover:bg-[#093C5D] hover:text-white focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30"
+                className="inline-flex h-11 items-center justify-center rounded-full border border-accent px-4 text-sm font-bold text-primary transition hover:bg-accent-hover hover:text-white focus:outline-none focus:ring-4 focus:ring-accent/30"
                 type="submit"
               >
                 Sign out
@@ -62,7 +62,7 @@ export async function SiteNav({ active }: { active?: string }) {
           </div>
         ) : (
           <Link
-            className="inline-flex h-11 items-center justify-center rounded-full bg-[#093C5D] px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 sm:px-6"
+            className="inline-flex h-11 items-center justify-center rounded-full bg-accent px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 sm:px-6"
             href="/login"
           >
             Sign in

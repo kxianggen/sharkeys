@@ -29,12 +29,12 @@ export default async function PostDetailPage({
   const valid = post.validationSnapshot?.isValid ?? null;
 
   return (
-    <main className="min-h-screen bg-[#f4f8fb] text-[#071e29]">
+    <main className="min-h-screen bg-surface-secondary text-primary">
       <SiteNav active="Community Gallery" />
 
       <section className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-8">
         <Link
-          className="text-sm font-bold text-[#3B7597] hover:underline"
+          className="text-sm font-bold text-primary hover:underline"
           href="/community-gallery"
         >
           ← Back to gallery
@@ -42,10 +42,10 @@ export default async function PostDetailPage({
 
         <div className="mt-4 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black tracking-[-0.01em] text-[#001d32]">
+            <h1 className="text-3xl font-black tracking-[-0.01em] text-primary">
               {post.title}
             </h1>
-            <p className="mt-1 text-sm font-bold text-[#3B7597]">
+            <p className="mt-1 text-sm font-bold text-primary">
               @{post.author?.username ?? "unknown"}
             </p>
           </div>
@@ -61,14 +61,14 @@ export default async function PostDetailPage({
         </div>
 
         {post.description ? (
-          <p className="mt-4 text-base leading-7 text-[#42474e]">
+          <p className="mt-4 text-base leading-7 text-secondary">
             {post.description}
           </p>
         ) : null}
 
         {/* Bill of materials */}
-        <div className="mt-8 rounded-3xl border border-[#c2c7cf] bg-white p-6">
-          <h2 className="text-sm font-black uppercase tracking-[0.12em] text-[#3B7597]">
+        <div className="mt-8 rounded-3xl border border-border bg-white p-6">
+          <h2 className="text-sm font-black uppercase tracking-[0.12em] text-primary">
             Build
           </h2>
           <dl className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -76,10 +76,10 @@ export default async function PostDetailPage({
               const id = post.componentIds[category];
               return (
                 <div key={category}>
-                  <dt className="text-xs font-bold uppercase capitalize text-[#7a8189]">
+                  <dt className="text-xs font-bold uppercase capitalize text-secondary">
                     {category}
                   </dt>
-                  <dd className="text-sm font-medium text-[#071e29]">
+                  <dd className="text-sm font-medium text-primary">
                     {id ? (nameById.get(id) ?? id) : "—"}
                   </dd>
                 </div>
@@ -88,7 +88,7 @@ export default async function PostDetailPage({
           </dl>
 
           {post.validationSnapshot?.explanations?.length ? (
-            <ul className="mt-5 space-y-1 border-t border-[#e3e8ee] pt-4 text-sm text-[#42474e]">
+            <ul className="mt-5 space-y-1 border-t border-border pt-4 text-sm text-secondary">
               {post.validationSnapshot.explanations.map((line, i) => (
                 <li key={i}>• {line}</li>
               ))}
@@ -98,7 +98,7 @@ export default async function PostDetailPage({
 
         {/* Comments */}
         <div className="mt-10">
-          <h2 className="text-lg font-black text-[#001d32]">
+          <h2 className="text-lg font-black text-primary">
             Comments ({comments.length})
           </h2>
 
@@ -107,29 +107,29 @@ export default async function PostDetailPage({
               <li
                 className={`rounded-2xl border p-4 ${
                   comment.isKeybot
-                    ? "border-[#6FD1D7]/50 bg-[#e8f7fb]"
-                    : "border-[#dbe5ec] bg-white"
+                    ? "border-accent/50 bg-accent-subtle"
+                    : "border-border bg-white"
                 }`}
                 key={comment.id}
               >
                 <div className="flex items-center gap-2 text-xs font-bold">
                   {comment.isKeybot ? (
-                    <span className="inline-flex items-center gap-1 text-[#093C5D]">
+                    <span className="inline-flex items-center gap-1 text-primary">
                       <Bot className="h-4 w-4" aria-hidden /> Keybot
                     </span>
                   ) : (
-                    <span className="text-[#3B7597]">
+                    <span className="text-primary">
                       @{comment.author?.username ?? "unknown"}
                     </span>
                   )}
                 </div>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#071e29]">
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-primary">
                   {comment.body}
                 </p>
               </li>
             ))}
             {comments.length === 0 ? (
-              <li className="text-sm text-[#42474e]">
+              <li className="text-sm text-secondary">
                 No comments yet. Tag @keybot to get grounded advice on this build.
               </li>
             ) : null}
@@ -139,9 +139,9 @@ export default async function PostDetailPage({
             {user ? (
               <CommentComposer postId={post.id} />
             ) : (
-              <p className="rounded-2xl border border-[#dbe5ec] bg-white p-4 text-sm text-[#42474e]">
+              <p className="rounded-2xl border border-border bg-white p-4 text-sm text-secondary">
                 <Link
-                  className="font-bold text-[#093C5D] underline"
+                  className="font-bold text-primary underline"
                   href={`/login?next=/community-gallery/${post.id}`}
                 >
                   Sign in

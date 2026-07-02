@@ -24,7 +24,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#f5faff] text-[#071e29]">
+      <body className="min-h-full bg-surface text-primary">
         {children}
         <GlobalKeybotLauncher />
       </body>

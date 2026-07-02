@@ -907,30 +907,30 @@ export function RecommendationDemo({
     const isDesigning = isSubmitting || visionLoading;
 
     return (
-      <div className="flex h-screen flex-col overflow-hidden bg-[#f4f8fb] text-[#071e29]">
+      <div className="flex h-screen flex-col overflow-hidden bg-surface-secondary text-primary">
         <LandingNav onStartBuilding={focusPrompt} />
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 lg:flex-row lg:gap-6 lg:p-6">
           {/* LEFT PANE — Ask Meg control center */}
           <aside className="flex min-h-0 w-full flex-col overflow-hidden rounded-3xl border border-white/60 bg-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-xl lg:w-[34%] lg:max-w-md">
-            <header className="flex items-center gap-3 border-b border-[#093C5D]/10 px-5 py-4">
+            <header className="flex items-center gap-3 border-b border-accent/10 px-5 py-4">
               <span
                 aria-hidden
-                className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-[#093C5D] text-white shadow-sm"
+                className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-accent text-white shadow-sm"
               >
                 <Bot className="h-5 w-5" />
               </span>
               <div className="min-w-0 flex-1">
-                <h2 className="text-base font-black tracking-[-0.01em] text-[#093C5D]">
+                <h2 className="text-base font-black tracking-[-0.01em] text-primary">
                   Ask Meg
                 </h2>
-                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#3B7597]">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">
                   AI build control
                 </p>
               </div>
               <button
                 aria-label="Open Meg assistant"
-                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-[#3B7597] transition hover:bg-[#E8F4FA] hover:text-[#093C5D] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#6FD1D7]/25"
+                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-primary transition hover:bg-accent-subtle hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/25"
                 onClick={() => setKeybotOpenSignal((current) => current + 1)}
                 type="button"
               >
@@ -939,20 +939,20 @@ export function RecommendationDemo({
             </header>
 
             <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
-              <p className="text-sm leading-6 text-[#42474e]">
+              <p className="text-sm leading-6 text-secondary">
                 Describe the sound, feel, budget, or layout you want. Meg returns
                 compatible builds from the grounded catalog — every result is
                 validated by the deterministic rule engine.
               </p>
 
               <div>
-                <p className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-[#3B7597]">
+                <p className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-primary">
                   Try a starting point
                 </p>
                 <div className="flex flex-col gap-2">
                   {configuratorQuickPrompts.map((prompt) => (
                     <button
-                      className="group inline-flex items-center justify-between gap-2 rounded-2xl border border-[#e1e7ed] bg-white px-4 py-2.5 text-left text-sm font-bold text-[#42474e] shadow-sm transition hover:-translate-y-0.5 hover:border-[#6FD1D7] hover:text-[#093C5D] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#6FD1D7]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="group inline-flex items-center justify-between gap-2 rounded-2xl border border-border bg-white px-4 py-2.5 text-left text-sm font-bold text-secondary shadow-sm transition hover:-translate-y-0.5 hover:border-accent hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
                       disabled={hasMounted && isSubmitting}
                       key={prompt.label}
                       onClick={() => void handleQuickPrompt(prompt.prompt)}
@@ -960,7 +960,7 @@ export function RecommendationDemo({
                     >
                       {prompt.label}
                       <ArrowRight
-                        className="h-4 w-4 flex-none text-[#6FD1D7] transition-transform group-hover:translate-x-1"
+                        className="h-4 w-4 flex-none text-accent transition-transform group-hover:translate-x-1"
                         aria-hidden
                       />
                     </button>
@@ -969,16 +969,16 @@ export function RecommendationDemo({
               </div>
 
               {visionNote ? (
-                <p className="rounded-2xl bg-[#E8F4FA] px-4 py-3 text-sm font-medium text-[#093C5D]">
+                <p className="rounded-2xl bg-accent-subtle px-4 py-3 text-sm font-medium text-primary">
                   {visionNote}
                 </p>
               ) : null}
             </div>
 
             {/* Loaders / error sit directly above the premium input */}
-            <div className="space-y-3 border-t border-[#093C5D]/10 p-4">
+            <div className="space-y-3 border-t border-accent/10 p-4">
               {isDesigning ? (
-                <div className="inline-flex w-full items-center gap-2 rounded-2xl bg-[#093C5D] px-4 py-3 text-sm font-bold text-white">
+                <div className="inline-flex w-full items-center gap-2 rounded-2xl bg-accent px-4 py-3 text-sm font-bold text-white">
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   {visionLoading
                     ? "Reading your image…"
@@ -1001,12 +1001,12 @@ export function RecommendationDemo({
                   value={imageDataUrl}
                 />
 
-                <div className="rounded-2xl border border-[#e1e7ed] bg-white p-2 shadow-[0_8px_24px_rgba(9,60,93,0.07)] transition focus-within:border-[#6FD1D7] focus-within:ring-4 focus-within:ring-[#6FD1D7]/20">
+                <div className="rounded-2xl border border-border bg-white p-2 shadow-sm transition focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/20">
                   <label className="sr-only" htmlFor="keyboard-request">
                     Keyboard request
                   </label>
                   <textarea
-                    className="min-h-[64px] w-full resize-none border-none bg-transparent px-2 py-1.5 text-sm leading-6 text-[#071e29] outline-none placeholder:text-[#42474e]/70 focus:ring-0"
+                    className="min-h-[64px] w-full resize-none border-none bg-transparent px-2 py-1.5 text-sm leading-6 text-primary outline-none placeholder:text-secondary/70 focus:ring-0"
                     id="keyboard-request"
                     maxLength={2000}
                     onChange={(event) => setMessage(event.target.value)}
@@ -1015,7 +1015,7 @@ export function RecommendationDemo({
                     value={message}
                   />
                   <button
-                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#093C5D] px-5 text-sm font-black text-white shadow-sm transition hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 disabled:cursor-not-allowed disabled:bg-[#72777f]"
+                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 text-sm font-black text-white shadow-sm transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:bg-border-strong"
                     disabled={isSubmitDisabled}
                     type="submit"
                   >
@@ -1038,18 +1038,18 @@ export function RecommendationDemo({
 
           {/* RIGHT PANE — Active build / garage */}
           <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/80 shadow-2xl backdrop-blur-xl">
-            <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#093C5D]/10 px-6 py-5">
+            <header className="flex flex-wrap items-center justify-between gap-4 border-b border-accent/10 px-6 py-5">
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.12em] text-[#3B7597]">
+                <p className="text-xs font-black uppercase tracking-[0.12em] text-primary">
                   Active build
                 </p>
-                <h1 className="mt-1 truncate text-xl font-black tracking-[-0.01em] text-[#093C5D] sm:text-2xl">
+                <h1 className="mt-1 truncate text-xl font-black tracking-[-0.01em] text-primary sm:text-2xl">
                   {activeBuild?.title ?? "Your build appears here"}
                 </h1>
                 {buildPrice ? (
-                  <p className="mt-1 text-sm font-bold text-[#42474e]">
+                  <p className="mt-1 text-sm font-bold text-secondary">
                     Est. total{" "}
-                    <span className="text-[#093C5D]">{buildPrice}</span>
+                    <span className="text-primary">{buildPrice}</span>
                   </p>
                 ) : null}
               </div>
@@ -1100,8 +1100,8 @@ export function RecommendationDemo({
                         <button
                           className={`flex flex-col rounded-2xl border p-3 text-left transition ${
                             isActive
-                              ? "border-[#093C5D] bg-[#093C5D] text-white shadow-lg"
-                              : "border-[#e1e7ed] bg-white text-[#071e29] shadow-sm hover:-translate-y-0.5 hover:border-[#6FD1D7]"
+                              ? "border-accent bg-accent text-white shadow-lg"
+                              : "border-border bg-white text-primary shadow-sm hover:-translate-y-0.5 hover:border-accent"
                           }`}
                           key={category}
                           onClick={() => setActiveCategory(category)}
@@ -1109,7 +1109,7 @@ export function RecommendationDemo({
                         >
                           <span
                             className={`text-[11px] font-black uppercase tracking-[0.1em] ${
-                              isActive ? "text-white/70" : "text-[#3B7597]"
+                              isActive ? "text-white/70" : "text-primary"
                             }`}
                           >
                             {categoryLabels[category]}
@@ -1124,19 +1124,19 @@ export function RecommendationDemo({
 
                   {/* Active component detail */}
                   {selectedComponent ? (
-                    <div className="rounded-2xl border border-[#dbe5ec] bg-white/70 p-5 shadow-sm">
-                      <p className="text-xs font-black uppercase tracking-[0.12em] text-[#3B7597]">
+                    <div className="rounded-2xl border border-border bg-white/70 p-5 shadow-sm">
+                      <p className="text-xs font-black uppercase tracking-[0.12em] text-primary">
                         {categoryLabels[activeCategory]}
                       </p>
                       <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
-                        <h2 className="text-lg font-black tracking-[-0.01em] text-[#093C5D]">
+                        <h2 className="text-lg font-black tracking-[-0.01em] text-primary">
                           {selectedComponent.name}
                         </h2>
-                        <span className="text-sm font-bold text-[#42474e]">
+                        <span className="text-sm font-bold text-secondary">
                           {formatComponentPrice(selectedComponent)}
                         </span>
                       </div>
-                      <p className="mt-2 text-sm leading-6 text-[#42474e]">
+                      <p className="mt-2 text-sm leading-6 text-secondary">
                         {categorySummaries[activeCategory]}
                       </p>
                     </div>
@@ -1145,7 +1145,7 @@ export function RecommendationDemo({
                   {/* Alternate build paths */}
                   {result && result.recommendations.length > 0 ? (
                     <div>
-                      <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-[#3B7597]">
+                      <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-primary">
                         Build paths
                       </p>
                       <CompactRecommendationGrid
@@ -1164,14 +1164,14 @@ export function RecommendationDemo({
               ) : result && result.recommendations.length === 0 ? (
                 <EmptyRecommendationState result={result} />
               ) : (
-                <div className="flex min-h-[20rem] flex-col items-center justify-center rounded-2xl border border-dashed border-[#c2c7cf] bg-white/50 px-6 py-12 text-center">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E8F4FA] text-[#093C5D]">
+                <div className="flex min-h-[20rem] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-white/50 px-6 py-12 text-center">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-subtle text-primary">
                     <Keyboard className="h-7 w-7" aria-hidden />
                   </span>
-                  <h2 className="mt-4 text-lg font-black tracking-[-0.01em] text-[#093C5D]">
+                  <h2 className="mt-4 text-lg font-black tracking-[-0.01em] text-primary">
                     No build yet
                   </h2>
-                  <p className="mt-2 max-w-sm text-sm leading-6 text-[#42474e]">
+                  <p className="mt-2 max-w-sm text-sm leading-6 text-secondary">
                     Ask Meg on the left — describe your dream sound and she will
                     assemble a validated build here.
                   </p>
@@ -1179,20 +1179,20 @@ export function RecommendationDemo({
               )}
 
               {/* Manual compatibility check — always available */}
-              <section className="rounded-2xl border border-dashed border-[#c2c7cf] bg-white/60 p-5">
+              <section className="rounded-2xl border border-dashed border-border bg-white/60 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-base font-black text-[#071e29]">
+                    <h2 className="text-base font-black text-primary">
                       Manual check
                     </h2>
-                    <p className="mt-1 text-sm leading-6 text-[#42474e]">
+                    <p className="mt-1 text-sm leading-6 text-secondary">
                       Hand-pick components and validate them against the rule
                       engine.
                     </p>
                   </div>
                   <button
                     aria-expanded={isManualCheckOpen}
-                    className="inline-flex h-10 items-center justify-center rounded-xl border border-[#c2c7cf] bg-white px-4 text-sm font-bold text-[#093C5D] transition hover:border-[#6FD1D7] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20"
+                    className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-white px-4 text-sm font-bold text-primary transition hover:border-accent hover:bg-surface-secondary focus:outline-none focus:ring-4 focus:ring-accent/20"
                     onClick={() => setIsManualCheckOpen((current) => !current)}
                     type="button"
                   >
@@ -1244,7 +1244,7 @@ export function RecommendationDemo({
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#f4f8fb] text-[#071e29]">
+    <div className="min-h-screen overflow-x-hidden bg-surface-secondary text-primary">
       <LandingNav onStartBuilding={focusPrompt} />
 
       <section
@@ -1256,7 +1256,7 @@ export function RecommendationDemo({
         id="configurator"
       >
         <h1
-          className={`max-w-4xl font-black leading-[1.08] tracking-[-0.01em] text-[#001d32] ${
+          className={`max-w-4xl font-black leading-[1.08] tracking-[-0.01em] text-primary ${
             isLanding
               ? "text-[42px] sm:text-5xl lg:text-[64px] lg:leading-[1.08]"
               : "text-4xl sm:text-5xl"
@@ -1266,7 +1266,7 @@ export function RecommendationDemo({
             ? "Build your dream keyboard in words"
             : "Configurator workspace"}
         </h1>
-        <p className="mt-6 max-w-2xl text-base leading-7 text-[#093C5D]/70 sm:text-lg">
+        <p className="mt-6 max-w-2xl text-base leading-7 text-primary/70 sm:text-lg">
           {isLanding
             ? "Tell sharkeys your sound, layout, budget, and use case. We’ll turn it into compatible keyboard build options."
             : "Generate validated recommendations, compare builds, and inspect grounded catalog parts."}
@@ -1274,14 +1274,14 @@ export function RecommendationDemo({
 
         <form
           aria-label="AI keyboard prompt form"
-          className="sharkeys-soft-shadow mt-10 w-full max-w-3xl rounded-[28px] border border-white/80 bg-white/80 p-4 text-left backdrop-blur transition focus-within:border-[#6FD1D7] focus-within:ring-4 focus-within:ring-[#6FD1D7]/20 sm:p-5"
+          className="sharkeys-soft-shadow mt-10 w-full max-w-3xl rounded-[28px] border border-white/80 bg-white/80 p-4 text-left backdrop-blur transition focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/20 sm:p-5"
           onSubmit={handleSubmit}
         >
           <label className="sr-only" htmlFor="keyboard-request">
             Keyboard request
           </label>
           <textarea
-            className="min-h-[84px] w-full resize-none border-none bg-transparent p-0 text-base leading-7 text-[#093C5D] outline-none placeholder:text-[#093C5D]/45 focus:ring-0 sm:min-h-[88px]"
+            className="min-h-[84px] w-full resize-none border-none bg-transparent p-0 text-base leading-7 text-primary outline-none placeholder:text-primary/45 focus:ring-0 sm:min-h-[88px]"
             id="keyboard-request"
             maxLength={2000}
             onChange={(event) => setMessage(event.target.value)}
@@ -1291,10 +1291,10 @@ export function RecommendationDemo({
           />
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex gap-2 text-[#093C5D]/65">
+            <div className="flex gap-2 text-primary/65">
               <button
                 aria-label="Voice input is not available yet"
-                className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-[#e8f7fb] disabled:cursor-not-allowed disabled:opacity-55"
+                className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-accent-subtle disabled:cursor-not-allowed disabled:opacity-55"
                 disabled
                 type="button"
               >
@@ -1302,7 +1302,7 @@ export function RecommendationDemo({
               </button>
               <button
                 aria-label="Image input is not available yet"
-                className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-[#e8f7fb] disabled:cursor-not-allowed disabled:opacity-55"
+                className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-accent-subtle disabled:cursor-not-allowed disabled:opacity-55"
                 disabled
                 type="button"
               >
@@ -1310,7 +1310,7 @@ export function RecommendationDemo({
               </button>
             </div>
             <button
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#093C5D] px-6 text-sm font-bold text-white shadow-[0_10px_24px_rgba(9,60,93,0.18)] transition hover:-translate-y-0.5 hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 disabled:cursor-not-allowed disabled:translate-y-0 disabled:bg-[#72777f] sm:px-7"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-accent px-6 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:translate-y-0 disabled:bg-border-strong sm:px-7"
               disabled={isSubmitDisabled}
               type="submit"
             >
@@ -1332,7 +1332,7 @@ export function RecommendationDemo({
         <div className="mt-5 flex max-w-4xl flex-wrap justify-center gap-3">
           {quickPrompts.map((prompt) => (
             <button
-              className="inline-flex min-h-9 items-center rounded-full border border-white/90 bg-white/70 px-5 py-2 text-sm font-bold text-[#093C5D] shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-9 items-center rounded-full border border-white/90 bg-white/70 px-5 py-2 text-sm font-bold text-primary shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={hasMounted && isSubmitting}
               key={prompt}
               onClick={() => void handleQuickPrompt(prompt)}
@@ -1343,10 +1343,10 @@ export function RecommendationDemo({
           ))}
         </div>
 
-        <div className="mt-4 flex flex-wrap justify-center gap-2 text-xs text-[#42474e]">
+        <div className="mt-4 flex flex-wrap justify-center gap-2 text-xs text-secondary">
           {smokePromptExamples.map((prompt) => (
             <button
-              className="rounded-full px-3 py-1.5 transition hover:bg-[#e9f5ff] hover:text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#43acff]/20"
+              className="rounded-full px-3 py-1.5 transition hover:bg-accent-subtle hover:text-primary focus:outline-none focus:ring-4 focus:ring-accent/20"
               disabled={hasMounted && isSubmitting}
               key={prompt}
               onClick={() => void handleQuickPrompt(prompt)}
@@ -1576,18 +1576,18 @@ export function MyBuildsPage() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#f4f8fb] text-[#071e29]">
+    <div className="min-h-screen overflow-x-hidden bg-surface-secondary text-primary">
       <LandingNav onStartBuilding={() => router.push("/configurator")} />
 
       <main className="mx-auto w-full max-w-screen-xl px-4 py-12 sm:px-8 lg:px-16">
-        <div className="rounded-[32px] border border-white/80 bg-white/70 p-8 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#3B7597]">
+        <div className="rounded-[32px] border border-white/80 bg-white/70 p-8 shadow-sm backdrop-blur">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-primary">
             Local builds
           </p>
-          <h1 className="mt-3 text-4xl font-black tracking-[-0.01em] text-[#001d32] sm:text-5xl">
+          <h1 className="mt-3 text-4xl font-black tracking-[-0.01em] text-primary sm:text-5xl">
             My Builds
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-[#42474e]">
+          <p className="mt-4 max-w-2xl text-base leading-7 text-secondary">
             Saved recommendations and compatible manual builds live in this
             browser. Remove old drafts or load them to the manual selection panel.
           </p>
@@ -1657,14 +1657,14 @@ function ConfiguratorSidebar({ onAskKeybot }: { onAskKeybot: () => void }) {
   ] as const;
 
   return (
-    <aside className="border-b border-[#e1e7ed] bg-[#f0f1f4] px-4 py-6 lg:min-h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r">
+    <aside className="border-b border-border bg-surface-secondary px-4 py-6 lg:min-h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r">
       <div className="flex items-center gap-3">
         <KeybotAvatar small />
         <div>
-          <h2 className="text-xl font-black lowercase text-[#071e29]">
+          <h2 className="text-xl font-black lowercase text-primary">
             keybot
           </h2>
-          <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#42474e]">
+          <p className="text-[10px] font-black uppercase tracking-[0.08em] text-secondary">
             AI keyboard expert
           </p>
         </div>
@@ -1680,8 +1680,8 @@ function ConfiguratorSidebar({ onAskKeybot }: { onAskKeybot: () => void }) {
               aria-current={active ? "page" : undefined}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition ${
                 active
-                  ? "bg-[#9bd5fb] text-[#093C5D]"
-                  : "text-[#42474e] opacity-80"
+                  ? "bg-accent-subtle text-primary"
+                  : "text-secondary opacity-80"
               }`}
               disabled={!active}
               key={item.label}
@@ -1694,13 +1694,13 @@ function ConfiguratorSidebar({ onAskKeybot }: { onAskKeybot: () => void }) {
         })}
       </nav>
 
-      <div className="mt-9 rounded-xl border border-[#e1e7ed] bg-white p-3 shadow-sm">
-        <p className="text-xs leading-5 text-[#42474e]">
+      <div className="mt-9 rounded-xl border border-border bg-white p-3 shadow-sm">
+        <p className="text-xs leading-5 text-secondary">
           Ask Keybot about sound profiles, layouts, compatibility, or why a
           selected build fits your prompt.
         </p>
         <button
-          className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[#093C5D] px-3 text-xs font-bold text-white transition hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30"
+          className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-accent px-3 text-xs font-bold text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30"
           onClick={onAskKeybot}
           type="button"
         >
@@ -1787,15 +1787,15 @@ function CompactRecommendationGrid({
     <section aria-label="Recommended builds" className="mx-auto w-full max-w-3xl">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1">
         <div>
-          <h2 className="text-xl font-black text-[#093C5D]">
+          <h2 className="text-xl font-black text-primary">
             Recommended for you
           </h2>
         </div>
-        <div className="hidden gap-2 text-[#42474e] sm:flex">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eceef2] text-sm">
+        <div className="hidden gap-2 text-secondary sm:flex">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-secondary text-sm">
             ‹
           </span>
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eceef2] text-sm">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-secondary text-sm">
             ›
           </span>
         </div>
@@ -1823,8 +1823,8 @@ function CompactRecommendationGrid({
             <article
               className={`rounded-lg border bg-white p-2 shadow-sm transition ${
                 selected
-                  ? "border-[#6FD1D7] ring-4 ring-[#6FD1D7]/20"
-                  : "border-[#e1e7ed] hover:border-[#9bd5fb]"
+                  ? "border-accent ring-4 ring-accent/20"
+                  : "border-border hover:border-border"
               }`}
               key={recommendation.id}
             >
@@ -1839,26 +1839,26 @@ function CompactRecommendationGrid({
                 <span className="min-w-0 flex-1 py-1">
                   <span className="flex items-start justify-between gap-2">
                     <span className="min-w-0">
-                      <span className="block truncate pr-2 text-sm font-black leading-5 text-[#093C5D]">
+                      <span className="block truncate pr-2 text-sm font-black leading-5 text-primary">
                         {displayName}
                       </span>
-                      <span className="mt-1 block truncate text-[11px] leading-4 text-[#42474e]">
+                      <span className="mt-1 block truncate text-[11px] leading-4 text-secondary">
                         {summary}
                       </span>
                     </span>
-                    <span className="shrink-0 text-xs font-black text-[#093C5D]">
+                    <span className="shrink-0 text-xs font-black text-primary">
                       {price}
                     </span>
                   </span>
 
                   <span className="mt-3 flex flex-wrap gap-1.5">
-                    <span className="rounded border border-[#e1e7ed] bg-[#f8f8fb] px-2 py-0.5 text-[10px] font-bold text-[#42474e]">
+                    <span className="rounded border border-border bg-surface px-2 py-0.5 text-[10px] font-bold text-secondary">
                       {formatLayoutChip(layout)}
                     </span>
-                    <span className="rounded border border-[#e1e7ed] bg-[#f8f8fb] px-2 py-0.5 text-[10px] font-bold capitalize text-[#42474e]">
+                    <span className="rounded border border-border bg-surface px-2 py-0.5 text-[10px] font-bold capitalize text-secondary">
                       {soundProfile}
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded border border-[#6FD1D7]/60 bg-[#e8fbfd] px-2 py-0.5 text-[10px] font-bold text-[#093C5D]">
+                    <span className="inline-flex items-center gap-1 rounded border border-accent/60 bg-surface-secondary px-2 py-0.5 text-[10px] font-bold text-primary">
                       <CheckCircle2 className="h-3 w-3" aria-hidden />
                       Validated
                     </span>
@@ -1866,10 +1866,10 @@ function CompactRecommendationGrid({
                 </span>
               </button>
 
-              <div className="mt-2 flex items-center gap-2 border-t border-[#eef2f6] pt-2">
+              <div className="mt-2 flex items-center gap-2 border-t border-border pt-2">
                 <button
                   aria-label="Save build"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#e1e7ed] bg-white text-[#093C5D] transition hover:border-[#6FD1D7] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white text-primary transition hover:border-accent hover:bg-surface-secondary focus:outline-none focus:ring-4 focus:ring-accent/20"
                   onClick={() => onSaveRecommendation(recommendation)}
                   type="button"
                 >
@@ -1895,13 +1895,13 @@ function CompactBuildThumbnail({
     <span
       aria-hidden
       className={`relative block h-24 w-24 flex-none overflow-hidden rounded-md border ${
-        selected ? "border-[#6FD1D7]" : "border-[#e1e7ed]"
-      } bg-[#edf7fb]`}
+        selected ? "border-accent" : "border-border"
+      } bg-surface-secondary`}
     >
       <span className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(9,60,93,0.14)_1px,transparent_0)] [background-size:14px_14px]" />
       <span
         className={`absolute inset-x-3 bottom-4 rounded-lg p-2.5 shadow-sm ${
-          index % 2 === 0 ? "bg-[#d8eefe]" : "bg-[#fffffe]"
+          index % 2 === 0 ? "bg-accent-subtle" : "bg-surface"
         }`}
       >
         <span className="mb-2 grid grid-cols-[1fr_1fr_1fr_2fr] gap-1">
@@ -1937,13 +1937,13 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
   ] as const;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-[#dbe5ec] bg-[#f4f9fc]/95 backdrop-blur">
+    <nav className="sticky top-0 z-50 border-b border-border bg-surface-secondary/95 backdrop-blur">
       <div className="mx-auto flex min-h-16 w-full max-w-[1280px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <Link
-          className="flex items-center gap-3 text-[#093C5D] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30"
+          className="flex items-center gap-3 text-primary focus:outline-none focus:ring-4 focus:ring-accent/30"
           href="/"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#e1f3fe] text-[#093C5D]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-subtle text-primary">
             <Keyboard className="h-5 w-5" aria-hidden />
           </span>
           <span className="text-base font-black tracking-[-0.01em]">
@@ -1956,8 +1956,8 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
             <Link
               className={`flex min-h-16 items-center border-b-2 text-xs font-bold transition lg:text-sm ${
                 index === 0
-                  ? "border-[#093C5D] text-[#093C5D]"
-                  : "border-transparent text-[#42474e] hover:text-[#093C5D]"
+                  ? "border-accent text-primary"
+                  : "border-transparent text-secondary hover:text-primary"
               }`}
               href={href}
               key={label}
@@ -1968,7 +1968,7 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
         </div>
 
         <button
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#093C5D] px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 sm:px-6"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-accent px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 sm:px-6"
           onClick={onStartBuilding}
           type="button"
         >
@@ -2010,14 +2010,14 @@ function FloatingKeybot({
     return (
       <button
         aria-label="Open Keybot assistant"
-        className="sharkeys-soft-shadow fixed bottom-4 right-4 z-40 inline-flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-full border border-[#c2c7cf] bg-[#fffffe] px-4 py-3 text-left text-[#071e29] transition hover:-translate-y-0.5 hover:border-[#3DA9FC] hover:bg-[#f5faff] focus:outline-none focus:ring-4 focus:ring-[#3DA9FC]/30 sm:bottom-6 sm:right-6"
+        className="sharkeys-soft-shadow fixed bottom-4 right-4 z-40 inline-flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-full border border-border bg-surface px-4 py-3 text-left text-primary transition hover:-translate-y-0.5 hover:border-accent hover:bg-surface-secondary focus:outline-none focus:ring-4 focus:ring-accent/30 sm:bottom-6 sm:right-6"
         onClick={() => setIsOpen(true)}
         type="button"
       >
         <KeybotAvatar />
         <span className="min-w-0">
           <span className="block text-sm font-bold leading-4">Ask Keybot</span>
-          <span className="mt-0.5 hidden items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5F6C7B] sm:flex">
+          <span className="mt-0.5 hidden items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary sm:flex">
             <span className="h-1.5 w-1.5 rounded-full bg-[#2F8F46]" />
             Grounded
           </span>
@@ -2179,25 +2179,25 @@ function KeybotPanel({
       }
     >
       <div
-        className={`sharkeys-soft-shadow flex max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-[28px] border border-[#c2c7cf] bg-[#fffffe] ${
+        className={`sharkeys-soft-shadow flex max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-[28px] border border-border bg-surface ${
           floating ? "sm:h-[640px]" : ""
         }`}
       >
-        <div className="border-b border-[#c2c7cf]/70 p-4">
+        <div className="border-b border-border/70 p-4">
           <div className="flex items-center gap-3">
             <KeybotAvatar />
             <div className="min-w-0 flex-1">
-              <h2 className="text-base font-bold leading-5 text-[#071e29]">
+              <h2 className="text-base font-bold leading-5 text-primary">
                 Keybot
               </h2>
-              <p className="text-xs font-semibold text-[#5F6C7B]">
+              <p className="text-xs font-semibold text-secondary">
                 Grounded assistant
               </p>
             </div>
             {onClose ? (
               <button
                 aria-label="Close Keybot assistant"
-                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-[#5F6C7B] transition hover:bg-[#D8EEFE] hover:text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#3DA9FC]/25"
+                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-secondary transition hover:bg-accent-subtle hover:text-primary focus:outline-none focus:ring-4 focus:ring-accent/25"
                 onClick={onClose}
                 type="button"
               >
@@ -2207,12 +2207,12 @@ function KeybotPanel({
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#c2c7cf]/80 bg-[#f5faff] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[#094067]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-surface-secondary px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-primary">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
               Grounded in catalog + rules
             </span>
             {contextSummary ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3DA9FC]/40 bg-[#D8EEFE] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[#094067]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent-subtle px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-primary">
                 <Cpu className="h-3.5 w-3.5" aria-hidden />
                 Active build context
               </span>
@@ -2220,17 +2220,17 @@ function KeybotPanel({
           </div>
 
           {contextSummary ? (
-            <div className="mt-3 rounded-2xl border border-[#c2c7cf]/70 bg-[#f5faff] p-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5F6C7B]">
+            <div className="mt-3 rounded-2xl border border-border/70 bg-surface-secondary p-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-secondary">
                 {contextSummary.label}
               </p>
-              <p className="mt-1 truncate text-sm font-bold text-[#071e29]">
+              <p className="mt-1 truncate text-sm font-bold text-primary">
                 {contextSummary.title}
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {contextSummary.parts.map((part) => (
                   <span
-                    className="rounded-full border border-[#c2c7cf]/70 bg-[#fffffe] px-2.5 py-1 text-[11px] font-semibold text-[#42474E]"
+                    className="rounded-full border border-border/70 bg-surface px-2.5 py-1 text-[11px] font-semibold text-secondary"
                     key={part}
                   >
                     {part}
@@ -2241,14 +2241,14 @@ function KeybotPanel({
           ) : null}
         </div>
 
-        <div className="border-b border-[#c2c7cf]/70 px-4 py-3">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#5F6C7B]">
+        <div className="border-b border-border/70 px-4 py-3">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.1em] text-secondary">
             Suggested queries
           </p>
           <div className="flex flex-wrap gap-2">
             {keybotQuickActions.map((action) => (
               <button
-                className="inline-flex items-center rounded-full border border-[#c2c7cf]/80 bg-[#fffffe] px-3 py-2 text-xs font-bold text-[#42474E] transition hover:border-[#3DA9FC] hover:bg-[#D8EEFE] hover:text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#3DA9FC]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center rounded-full border border-border/80 bg-surface px-3 py-2 text-xs font-bold text-secondary transition hover:border-accent hover:bg-accent-subtle hover:text-primary focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={isSending}
                 key={action.label}
                 onClick={() => void sendKeybotMessage(action.message)}
@@ -2262,7 +2262,7 @@ function KeybotPanel({
 
         <div
           aria-live="polite"
-          className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-[#f8fbff] px-4 py-4"
+          className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-surface-secondary px-4 py-4"
         >
           {messages.map((message) => (
             <KeybotMessageBubble
@@ -2278,22 +2278,22 @@ function KeybotPanel({
         </div>
 
         {error ? (
-          <p className="border-t border-[#ba1a1a]/20 bg-[#fff5f5] px-4 py-2 text-xs font-semibold text-[#ba1a1a]">
+          <p className="border-t border-error/20 bg-error px-4 py-2 text-xs font-semibold text-error">
             {error}
           </p>
         ) : null}
 
         <form
-          className="border-t border-[#c2c7cf]/70 bg-[#fffffe] p-3"
+          className="border-t border-border/70 bg-surface p-3"
           onSubmit={(event) => {
             event.preventDefault();
             void sendKeybotMessage(input);
           }}
         >
-          <div className="flex items-center gap-2 rounded-2xl border border-[#c2c7cf] bg-[#f5faff] p-1.5 focus-within:border-[#3DA9FC] focus-within:ring-4 focus-within:ring-[#3DA9FC]/20">
+          <div className="flex items-center gap-2 rounded-2xl border border-border bg-surface-secondary p-1.5 focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/20">
             <input
               aria-label="Keybot question"
-              className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-[#071e29] placeholder:text-[#5F6C7B]/70 focus:outline-none"
+              className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-primary placeholder:text-secondary/70 focus:outline-none"
               disabled={isSending}
               onChange={(event) => setInput(event.target.value)}
               placeholder={isSending ? "Thinking..." : "Ask about switches, sound..."}
@@ -2301,7 +2301,7 @@ function KeybotPanel({
             />
             <button
               aria-label="Send Keybot question"
-              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-[#3DA9FC] text-[#003e66] transition hover:bg-[#094067] hover:text-white focus:outline-none focus:ring-4 focus:ring-[#3DA9FC]/30 disabled:cursor-not-allowed disabled:bg-[#c2c7cf] disabled:text-white"
+              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent text-primary transition hover:bg-accent-hover hover:text-white focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:bg-surface-secondary disabled:text-white"
               disabled={isSending || input.trim().length === 0}
               type="submit"
             >
@@ -2328,12 +2328,12 @@ function KeybotAvatar({ small = false }: { small?: boolean }) {
   return (
     <span
       aria-hidden
-      className={`relative flex flex-none items-center justify-center rounded-full border border-[#c2c7cf]/80 bg-[#D8EEFE] text-[#094067] ${
+      className={`relative flex flex-none items-center justify-center rounded-full border border-border/80 bg-accent-subtle text-primary ${
         small ? "h-8 w-8" : "h-11 w-11"
       }`}
     >
       <Bot className={small ? "h-4 w-4" : "h-5 w-5"} />
-      <span className="absolute -right-0.5 top-1 h-2.5 w-2.5 rounded-full border-2 border-[#fffffe] bg-[#3DA9FC]" />
+      <span className="absolute -right-0.5 top-1 h-2.5 w-2.5 rounded-full border-2 border-border bg-accent" />
     </span>
   );
 }
@@ -2372,13 +2372,13 @@ function KeybotMessageBubble({
           className={`rounded-3xl border px-4 py-3 text-sm leading-6 shadow-sm ${
             isAssistant
               ? isBlocker
-                ? "rounded-tl-md border-[#3DA9FC]/35 bg-[#fffffe] text-[#071e29]"
-                : "rounded-tl-md border-[#c2c7cf]/70 bg-[#fffffe] text-[#071e29]"
-              : "rounded-tr-md border-[#b9ddf7] bg-[#D8EEFE] text-[#071e29]"
+                ? "rounded-tl-md border-accent/35 bg-surface text-primary"
+                : "rounded-tl-md border-border/70 bg-surface text-primary"
+              : "rounded-tr-md border-border bg-accent-subtle text-primary"
           }`}
         >
           {isBlocker ? (
-            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#D8EEFE] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#094067]">
+            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-accent-subtle px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-primary">
               <AlertCircle className="h-3.5 w-3.5" aria-hidden />
               Build blocker
             </div>
@@ -2391,7 +2391,7 @@ function KeybotMessageBubble({
           </div>
 
           {trustLabel ? (
-            <div className="mt-3 flex items-center gap-1.5 border-t border-[#c2c7cf]/50 pt-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[#5F6C7B]">
+            <div className="mt-3 flex items-center gap-1.5 border-t border-border/50 pt-2 text-[11px] font-bold uppercase tracking-[0.08em] text-secondary">
               {message.isRouteFailure ? (
                 <AlertCircle className="h-3.5 w-3.5" aria-hidden />
               ) : (
@@ -2409,7 +2409,7 @@ function KeybotMessageBubble({
 
                 return (
                   <span
-                    className="inline-flex items-center rounded-full border border-[#c2c7cf]/70 bg-[#D8EEFE]/70 px-2.5 py-1 text-[11px] font-semibold text-[#094067]"
+                    className="inline-flex items-center rounded-full border border-border/70 bg-accent-subtle/70 px-2.5 py-1 text-[11px] font-semibold text-primary"
                     key={id}
                   >
                     {component?.name ?? id}
@@ -2424,7 +2424,7 @@ function KeybotMessageBubble({
           <div className="mt-2 flex flex-wrap gap-2">
             {keybotBlockerActions.map((action) => (
               <button
-                className="rounded-full border border-[#c2c7cf]/80 bg-[#fffffe] px-3 py-1.5 text-xs font-bold text-[#42474E] transition hover:border-[#3DA9FC] hover:bg-[#D8EEFE] hover:text-[#094067] focus:outline-none focus:ring-4 focus:ring-[#3DA9FC]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-full border border-border/80 bg-surface px-3 py-1.5 text-xs font-bold text-secondary transition hover:border-accent hover:bg-accent-subtle hover:text-primary focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={disabled}
                 key={action.label}
                 onClick={() => onSuggestion(action.message)}
@@ -2444,10 +2444,10 @@ function KeybotLoadingState({ label }: { label: string }) {
   return (
     <div className="flex items-start gap-2.5">
       <KeybotAvatar small />
-      <div className="inline-flex min-h-12 items-center gap-2 rounded-3xl rounded-tl-md border border-[#c2c7cf]/70 bg-[#fffffe] px-4 py-3 text-sm font-bold text-[#094067] shadow-sm">
+      <div className="inline-flex min-h-12 items-center gap-2 rounded-3xl rounded-tl-md border border-border/70 bg-surface px-4 py-3 text-sm font-bold text-primary shadow-sm">
         <span className="relative flex h-3 w-3">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3DA9FC] opacity-40" />
-          <span className="relative inline-flex h-3 w-3 rounded-full bg-[#094067]" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-40" />
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-accent" />
         </span>
         {label}
       </div>
@@ -2592,41 +2592,41 @@ function HowItWorksSection() {
     <section className="px-4 py-20 sm:px-8 lg:px-16">
       <div className="mx-auto max-w-4xl">
         <div className="mb-16 text-center">
-          <h2 className="text-3xl font-bold tracking-[-0.01em] text-[#001d32] sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-[-0.01em] text-primary sm:text-4xl">
             How it works
           </h2>
-          <p className="mt-3 text-base leading-7 text-[#093C5D]/70">
+          <p className="mt-3 text-base leading-7 text-primary/70">
             Your journey from thought to thock in four simple steps.
           </p>
         </div>
 
         <div className="relative mx-auto max-w-2xl pl-12">
-          <div className="absolute bottom-8 left-[31px] top-8 w-0.5 rounded-full bg-gradient-to-b from-[#6FD1D7] via-[#5DF8D8] to-[#6FD1D7]/20" />
+          <div className="absolute bottom-8 left-[31px] top-8 w-0.5 rounded-full bg-gradient-to-b from-accent via-[#5DF8D8] to-accent/20" />
           {steps.map((step, index) => (
             <article
               className="relative z-10 mb-10 pl-8 last:mb-0"
               key={step.title}
             >
               <div
-                className={`absolute left-[-24px] top-0 flex h-14 w-14 items-center justify-center rounded-full border-4 bg-white text-lg font-black text-[#093C5D] shadow-lg ${
-                  index % 2 === 0 ? "border-[#6FD1D7]" : "border-[#5DF8D8]"
+                className={`absolute left-[-24px] top-0 flex h-14 w-14 items-center justify-center rounded-full border-4 bg-white text-lg font-black text-primary shadow-lg ${
+                  index % 2 === 0 ? "border-accent" : "border-[#5DF8D8]"
                 }`}
               >
                 {index + 1}
               </div>
-              <div className="rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+              <div className="rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
                 <div className="mb-2 flex items-center gap-2">
                   <step.icon
                     className={`h-4 w-4 ${
-                      index % 2 === 0 ? "text-[#6FD1D7]" : "text-[#12bfae]"
+                      index % 2 === 0 ? "text-accent" : "text-[#12bfae]"
                     }`}
                     aria-hidden
                   />
-                  <h3 className="text-lg font-bold text-[#093C5D]">
+                  <h3 className="text-lg font-bold text-primary">
                     {step.title}
                   </h3>
                 </div>
-                <p className="text-sm leading-6 text-[#093C5D]/70">
+                <p className="text-sm leading-6 text-primary/70">
                   {step.body}
                 </p>
               </div>
@@ -2645,120 +2645,120 @@ function FeatureBento() {
       id="features"
     >
       <div className="mb-10 text-center">
-        <h2 className="text-3xl font-bold tracking-[-0.01em] text-[#001d32] sm:text-4xl">
+        <h2 className="text-3xl font-bold tracking-[-0.01em] text-primary sm:text-4xl">
           Engineered for precision
         </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-[#093C5D]/70">
+        <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-primary/70">
           High-end tools to visualize, test, and perfect your custom build
           before ordering.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <article className="flex min-h-[220px] flex-col justify-between rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur md:col-span-2">
+        <article className="flex min-h-[220px] flex-col justify-between rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur md:col-span-2">
           <div>
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#093C5D]/10 text-[#093C5D]">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-primary">
               <Cpu className="h-5 w-5" aria-hidden />
             </div>
-            <h3 className="text-lg font-bold text-[#093C5D]">
+            <h3 className="text-lg font-bold text-primary">
               AI Part Compatibility
             </h3>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-[#093C5D]/70">
+            <p className="mt-2 max-w-xl text-sm leading-6 text-primary/70">
               Real-time validation ensures your chosen switches, PCB, and
               keycaps fit perfectly. No more costly mismatch errors.
             </p>
           </div>
           <div className="mt-6 flex items-center justify-between rounded-xl border border-white/70 bg-white/45 p-3">
-            <span className="text-xs font-bold text-[#093C5D]/80">
+            <span className="text-xs font-bold text-primary/80">
               Compatibility Status
             </span>
-            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#093C5D]/60">
-              <span className="h-2 w-2 rounded-full bg-[#6FD1D7]" />
+            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.14em] text-primary/60">
+              <span className="h-2 w-2 rounded-full bg-accent" />
               Live check
             </span>
           </div>
         </article>
 
-        <article className="flex min-h-[220px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+        <article className="flex min-h-[220px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
           <div>
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#093C5D]/10 text-[#093C5D]">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-primary">
               <Eye className="h-5 w-5" aria-hidden />
             </div>
-            <h3 className="text-lg font-bold text-[#093C5D]">
+            <h3 className="text-lg font-bold text-primary">
               Visual Preview
             </h3>
-            <p className="mt-2 text-sm leading-6 text-[#093C5D]/70">
+            <p className="mt-2 text-sm leading-6 text-primary/70">
               See exactly how your components look together before you buy.
             </p>
           </div>
           <FeatureKeyboardMini />
         </article>
 
-        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
           <div>
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#093C5D]/10 text-[#093C5D]">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-primary">
               <Volume2 className="h-5 w-5" aria-hidden />
             </div>
-            <h3 className="text-lg font-bold text-[#093C5D]">
+            <h3 className="text-lg font-bold text-primary">
               Typing Sound Preview
             </h3>
-            <p className="mt-2 text-sm leading-6 text-[#093C5D]/70">
+            <p className="mt-2 text-sm leading-6 text-primary/70">
               Estimate acoustic profiles from switch, plate, and case metadata.
             </p>
           </div>
           <SoundWave />
         </article>
 
-        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
           <div>
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#093C5D]/10 text-[#093C5D]">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-primary">
               <Bot className="h-5 w-5" aria-hidden />
             </div>
-            <h3 className="text-lg font-bold text-[#093C5D]">
+            <h3 className="text-lg font-bold text-primary">
               Knowledge Assistant
             </h3>
-            <p className="mt-2 text-sm leading-6 text-[#093C5D]/70">
+            <p className="mt-2 text-sm leading-6 text-primary/70">
               Ask Keybot anything from switch feel to layout tradeoffs.
             </p>
           </div>
           <div className="mt-5 flex items-center gap-2 rounded-xl border border-white/70 bg-white/45 p-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#093C5D] text-white">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-white">
               <Bot className="h-3.5 w-3.5" aria-hidden />
             </span>
-            <span className="text-xs font-bold text-[#093C5D]/60">
+            <span className="text-xs font-bold text-primary/60">
               “What’s a thock?”
             </span>
           </div>
         </article>
 
-        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
           <div>
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#093C5D]/10 text-[#093C5D]">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-primary">
               <MessageCircle className="h-5 w-5" aria-hidden />
             </div>
-            <h3 className="text-lg font-bold text-[#093C5D]">
+            <h3 className="text-lg font-bold text-primary">
               Community Builds
             </h3>
-            <p className="mt-2 text-sm leading-6 text-[#093C5D]/70">
+            <p className="mt-2 text-sm leading-6 text-primary/70">
               Explore shared builds and remix ideas in future phases.
             </p>
           </div>
           <div className="mt-5 flex items-center -space-x-2">
             {["A", "B", "C"].map((label, index) => (
               <span
-                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-black text-[#093C5D] ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-black text-primary ${
                   index === 0
-                    ? "bg-[#6FD1D7]/30"
+                    ? "bg-accent/30"
                     : index === 1
                       ? "bg-[#5DF8D8]/30"
-                      : "bg-[#093C5D]/15"
+                      : "bg-accent/15"
                 }`}
                 key={label}
               >
                 {label}
               </span>
             ))}
-            <span className="pl-4 text-xs font-bold text-[#093C5D]/45">
+            <span className="pl-4 text-xs font-bold text-primary/45">
               +1k
             </span>
           </div>
@@ -2771,7 +2771,7 @@ function FeatureBento() {
 function FeatureKeyboardMini() {
   return (
     <div className="mt-auto flex h-16 items-center justify-center rounded-xl border border-white/70 bg-white/45">
-      <Keyboard className="h-7 w-7 text-[#093C5D]/25" aria-hidden />
+      <Keyboard className="h-7 w-7 text-primary/25" aria-hidden />
     </div>
   );
 }
@@ -2783,7 +2783,7 @@ function SoundWave() {
     <div className="mt-5 flex h-10 items-end justify-center gap-1.5">
       {heights.map((height, index) => (
         <span
-          className="w-3 rounded-t-sm bg-[#6FD1D7]/70"
+          className="w-3 rounded-t-sm bg-accent/70"
           key={`${height}-${index}`}
           style={{ height: `${height}%` }}
         />
@@ -2795,16 +2795,16 @@ function SoundWave() {
 function FinalCta({ onStartBuilding }: { onStartBuilding: () => void }) {
   return (
     <section className="px-4 py-24 text-center sm:px-8 lg:px-6">
-      <div className="mx-auto max-w-[1280px] rounded-[40px] border border-[#6FD1D7]/30 bg-white/55 px-6 py-16 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur sm:px-10 lg:py-20">
-        <h2 className="text-4xl font-black tracking-[-0.01em] text-[#001d32] sm:text-5xl">
+      <div className="mx-auto max-w-[1280px] rounded-[40px] border border-accent/30 bg-white/55 px-6 py-16 shadow-sm backdrop-blur sm:px-10 lg:py-20">
+        <h2 className="text-4xl font-black tracking-[-0.01em] text-primary sm:text-5xl">
           Ready to hear the perfect click?
         </h2>
-        <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-[#093C5D]/70">
+        <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-primary/70">
           Start your journey with sharkeys today and join thousands of
           enthusiasts building better boards.
         </p>
         <button
-          className="mt-9 inline-flex min-h-14 items-center justify-center rounded-full bg-[#093C5D] px-8 text-sm font-black text-white shadow-[0_14px_28px_rgba(9,60,93,0.22)] transition hover:-translate-y-0.5 hover:bg-[#00263e] focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/30 sm:px-12"
+          className="mt-9 inline-flex min-h-14 items-center justify-center rounded-full bg-accent px-8 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 sm:px-12"
           onClick={onStartBuilding}
           type="button"
         >
@@ -2822,15 +2822,15 @@ function SharkeysFooter() {
     <footer className="border-t border-white/60 bg-white/40 px-4 py-12 backdrop-blur sm:px-8 lg:px-6">
       <div className="mx-auto flex max-w-[1280px] flex-col justify-between gap-8 md:flex-row md:items-center">
         <div>
-          <div className="text-base font-black text-[#001d32]">sharkeys.</div>
-          <p className="mt-3 text-sm text-[#093C5D]/60">
+          <div className="text-base font-black text-primary">sharkeys.</div>
+          <p className="mt-3 text-sm text-primary/60">
             © 2024 sharkeys. build your sound.
           </p>
         </div>
         <div className="flex flex-wrap gap-8 md:justify-end">
           {links.map((link) => (
             <a
-              className="text-sm font-bold text-[#093C5D]/70 transition hover:text-[#093C5D] hover:underline focus:outline-none focus:ring-4 focus:ring-[#6FD1D7]/20"
+              className="text-sm font-bold text-primary/70 transition hover:text-primary hover:underline focus:outline-none focus:ring-4 focus:ring-accent/20"
               href="#configurator"
               key={link}
             >
@@ -2851,23 +2851,23 @@ function WorkspaceHeader({
   selected: RecommendationBuild | null;
 }) {
   return (
-    <div className="rounded-[28px] border border-white/80 bg-white/70 p-6 shadow-[0_12px_40px_rgba(9,60,93,0.05)] backdrop-blur">
+    <div className="rounded-[28px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#3B7597]">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-primary">
             Build output
           </p>
-          <h2 className="mt-2 text-3xl font-black tracking-[-0.01em] text-[#001d32]">
+          <h2 className="mt-2 text-3xl font-black tracking-[-0.01em] text-primary">
             {result ? "Your validated build options" : "Your build results appear here"}
           </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#42474e]">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-secondary">
             {result
               ? "Review recommendations, inspect grounded catalog parts, or save compatible builds."
               : "Submit a prompt above and sharkeys will show the validated recommendations in this lower workspace."}
           </p>
         </div>
         {selected ? (
-          <div className="rounded-full border border-[#6FD1D7]/40 bg-[#eafafd] px-4 py-2 text-sm font-bold text-[#093C5D]">
+          <div className="rounded-full border border-accent/40 bg-surface-secondary px-4 py-2 text-sm font-bold text-primary">
             {selected.estimatedPrice === null
               ? "Estimate unavailable"
               : formatMoney(
@@ -2884,9 +2884,9 @@ function WorkspaceHeader({
 function IntentPanel({ result }: { result: RecommendationResult | null }) {
   if (!result) {
     return (
-      <div className="rounded-3xl border border-[#c2c7cf] bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-[#071e29]">Request summary</h2>
-        <p className="mt-2 text-sm leading-6 text-[#42474e]">
+      <div className="rounded-3xl border border-border bg-white p-5 shadow-sm">
+        <h2 className="text-sm font-bold text-primary">Request summary</h2>
+        <p className="mt-2 text-sm leading-6 text-secondary">
           Submit a request to see grounded build criteria.
         </p>
       </div>
@@ -2915,25 +2915,25 @@ function IntentPanel({ result }: { result: RecommendationResult | null }) {
   ];
 
   return (
-    <div className="rounded-3xl border border-[#c2c7cf] bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-border bg-white p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-bold text-[#071e29]">Request summary</h2>
-        <span className="rounded-full border border-[#c2c7cf] bg-[#e9f5ff] px-2.5 py-1 text-xs font-semibold text-[#094067]">
+        <h2 className="text-sm font-bold text-primary">Request summary</h2>
+        <span className="rounded-full border border-border bg-accent-subtle px-2.5 py-1 text-xs font-semibold text-primary">
           {result.source.replaceAll("_", " ")}
         </span>
       </div>
       <dl className="grid grid-cols-2 gap-3">
         {rows.map(([label, value]) => (
           <div key={label}>
-            <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#42474e]">
+            <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary">
               {label}
             </dt>
-            <dd className="mt-1 text-sm font-semibold text-[#071e29]">{value}</dd>
+            <dd className="mt-1 text-sm font-semibold text-primary">{value}</dd>
           </div>
         ))}
       </dl>
       {result.criteria.maxPrice ? (
-        <p className="mt-3 border-t border-[#c2c7cf]/70 pt-3 text-xs text-[#42474e]">
+        <p className="mt-3 border-t border-border/70 pt-3 text-xs text-secondary">
           Catalog budget: {formatMoney(result.criteria.maxPrice, result.criteria.currency ?? "MYR")}
         </p>
       ) : null}
@@ -2951,10 +2951,10 @@ function RecommendationList({
   selectedId: string | null;
 }) {
   return (
-    <div className="rounded-3xl border border-[#c2c7cf] bg-white p-4 shadow-sm">
+    <div className="rounded-3xl border border-border bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2 px-1">
-        <Layers3 className="h-4 w-4 text-[#00639d]" aria-hidden />
-        <h2 className="text-sm font-bold text-[#071e29]">Compare builds</h2>
+        <Layers3 className="h-4 w-4 text-primary" aria-hidden />
+        <h2 className="text-sm font-bold text-primary">Compare builds</h2>
       </div>
       <div className="space-y-2">
         {recommendations.map((recommendation, index) => {
@@ -2971,8 +2971,8 @@ function RecommendationList({
             <button
               className={`w-full rounded-2xl border p-3 text-left transition ${
                 selected
-                  ? "border-[#00639d] bg-[#ddf1ff]"
-                  : "border-[#c2c7cf] bg-white hover:border-[#00639d] hover:bg-[#f5faff]"
+                  ? "border-accent bg-accent-subtle"
+                  : "border-border bg-white hover:border-accent hover:bg-surface-secondary"
               }`}
               key={recommendation.id}
               onClick={() => onSelect(recommendation)}
@@ -2980,19 +2980,19 @@ function RecommendationList({
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-secondary">
                     Build {index + 1}
                   </p>
-                  <p className="mt-1 text-sm font-bold leading-5 text-[#071e29]">
+                  <p className="mt-1 text-sm font-bold leading-5 text-primary">
                     {recommendation.components.case.name}
                   </p>
                 </div>
-                <span className="rounded-full border border-[#c2c7cf] bg-white px-2 py-1 text-xs font-semibold text-[#094067]">
+                <span className="rounded-full border border-border bg-white px-2 py-1 text-xs font-semibold text-primary">
                   Valid
                 </span>
               </div>
-              <p className="mt-2 text-sm font-bold text-[#071e29]">{price}</p>
-              <p className="mt-1 text-xs text-[#42474e]">
+              <p className="mt-2 text-sm font-bold text-primary">{price}</p>
+              <p className="mt-1 text-xs text-secondary">
                 {recommendation.components.switch.name}
               </p>
             </button>
@@ -3017,26 +3017,26 @@ function RecommendationInspector({
   selectedComponent: KeyboardComponent | undefined;
 }) {
   return (
-    <div className="overflow-hidden rounded-3xl border border-[#c2c7cf] bg-white shadow-sm">
-      <div className="border-b border-[#c2c7cf] p-6">
+    <div className="overflow-hidden rounded-3xl border border-border bg-white shadow-sm">
+      <div className="border-b border-border p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[#c2c7cf] bg-[#ddf1ff] px-2.5 py-1 text-xs font-semibold text-[#094067]">
+            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-border bg-accent-subtle px-2.5 py-1 text-xs font-semibold text-primary">
               <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
               Rule-engine validated
             </div>
-            <h2 className="text-2xl font-bold tracking-[-0.01em] text-[#071e29]">
+            <h2 className="text-2xl font-bold tracking-[-0.01em] text-primary">
               {recommendation.title}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-[#42474e]">
+            <p className="mt-2 text-sm leading-6 text-secondary">
               {recommendation.explanations[0]}
             </p>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-secondary">
               Estimated total
             </p>
-            <p className="mt-1 text-3xl font-bold text-[#071e29]">
+            <p className="mt-1 text-3xl font-bold text-primary">
               {recommendation.estimatedPrice === null
                 ? "Unavailable"
                 : formatMoney(
@@ -3049,7 +3049,7 @@ function RecommendationInspector({
       </div>
 
       <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="border-b border-[#c2c7cf] p-5 lg:border-b-0 lg:border-r">
+        <div className="border-b border-border p-5 lg:border-b-0 lg:border-r">
           <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {componentCategories.map((category) => {
               const component = recommendation.components[category];
@@ -3059,21 +3059,21 @@ function RecommendationInspector({
                 <button
                   className={`rounded-2xl border p-3 text-left transition ${
                     active
-                      ? "border-[#00639d] bg-[#ddf1ff]"
-                      : "border-[#c2c7cf] bg-[#f5faff] hover:border-[#00639d] hover:bg-white"
+                      ? "border-accent bg-accent-subtle"
+                      : "border-border bg-surface-secondary hover:border-accent hover:bg-white"
                   }`}
                   key={category}
                   onClick={() => onActiveCategoryChange(category)}
                   type="button"
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#42474e]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary">
                     {categoryLabels[category]}
                   </p>
-                  <p className="mt-1 line-clamp-2 text-sm font-bold text-[#071e29]">
+                  <p className="mt-1 line-clamp-2 text-sm font-bold text-primary">
                     {component.name}
                   </p>
-                  <p className="mt-1 text-xs text-[#00639d]">{component.brand}</p>
-                  <p className="mt-2 text-xs leading-4 text-[#42474e]">
+                  <p className="mt-1 text-xs text-primary">{component.brand}</p>
+                  <p className="mt-2 text-xs leading-4 text-secondary">
                     {categorySummaries[category]}
                   </p>
                 </button>
@@ -3103,7 +3103,7 @@ function ComponentDetails({
   if (!component) {
     return (
       <div className="p-4">
-        <p className="text-sm text-[#42474e]">No component selected.</p>
+        <p className="text-sm text-secondary">No component selected.</p>
       </div>
     );
   }
@@ -3115,18 +3115,18 @@ function ComponentDetails({
 
   return (
     <aside className="p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
+      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-secondary">
         {categoryLabels[category]}
       </p>
-      <h3 className="mt-1 text-base font-bold leading-6 text-[#071e29]">
+      <h3 className="mt-1 text-base font-bold leading-6 text-primary">
         {component.name}
       </h3>
-      <p className="mt-1 text-sm text-[#00639d]">{component.brand}</p>
-      <p className="mt-4 text-sm leading-6 text-[#42474e]">
+      <p className="mt-1 text-sm text-primary">{component.brand}</p>
+      <p className="mt-4 text-sm leading-6 text-secondary">
         {component.description}
       </p>
 
-      <dl className="mt-4 grid gap-3 border-y border-[#c2c7cf] py-4">
+      <dl className="mt-4 grid gap-3 border-y border-border py-4">
         <DetailRow label="Price" value={formatComponentPrice(component)} />
         <DetailRow
           label="Layouts"
@@ -3145,19 +3145,19 @@ function ComponentDetails({
       </dl>
 
       <div className="mt-4 space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
+        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-secondary">
           Source
         </p>
-        <p className="text-sm font-bold text-[#071e29]">
+        <p className="text-sm font-bold text-primary">
           {sourceVendor ?? "Vendor metadata unavailable"}
         </p>
         {sourceType ? (
-          <p className="text-xs text-[#42474e]">{sourceType.replaceAll("_", " ")}</p>
+          <p className="text-xs text-secondary">{sourceType.replaceAll("_", " ")}</p>
         ) : null}
-        {sourceNote ? <p className="text-xs leading-5 text-[#42474e]">{sourceNote}</p> : null}
+        {sourceNote ? <p className="text-xs leading-5 text-secondary">{sourceNote}</p> : null}
         {component.vendorUrl ? (
           <a
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-[#094067] hover:text-[#002a47] hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary hover:underline"
             href={component.vendorUrl}
             rel="noreferrer"
             target="_blank"
@@ -3174,10 +3174,10 @@ function ComponentDetails({
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#42474e]">
+      <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary">
         {label}
       </dt>
-      <dd className="mt-1 text-sm text-[#071e29]">{value}</dd>
+      <dd className="mt-1 text-sm text-primary">{value}</dd>
     </div>
   );
 }
@@ -3188,14 +3188,14 @@ function CompatibilityPanel({
   recommendation: RecommendationBuild;
 }) {
   return (
-    <div className="mt-4 rounded-2xl border border-[#c2c7cf] bg-[#f5faff] p-4">
+    <div className="mt-4 rounded-2xl border border-border bg-surface-secondary p-4">
       <div className="flex items-start gap-2">
-        <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-[#094067]" aria-hidden />
+        <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-primary" aria-hidden />
         <div>
-          <p className="text-sm font-bold text-[#071e29]">
+          <p className="text-sm font-bold text-primary">
             Compatibility status
           </p>
-          <p className="mt-1 text-sm text-[#42474e]">
+          <p className="mt-1 text-sm text-secondary">
             {recommendation.validation.explanations[0]}
           </p>
         </div>
@@ -3213,7 +3213,7 @@ function CompatibilityPanel({
           ))}
         </div>
       ) : (
-        <p className="mt-3 rounded-2xl border border-[#c2c7cf] bg-white px-3 py-2 text-sm text-[#094067]">
+        <p className="mt-3 rounded-2xl border border-border bg-white px-3 py-2 text-sm text-primary">
           No compatibility warnings from the rule engine.
         </p>
       )}
@@ -3254,10 +3254,10 @@ function ManualSelectionPanel({
     isCatalogLoading || isManualValidating || !manualSelectionComplete;
 
   return (
-    <div className="rounded-3xl border border-[#c2c7cf] bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
-        <SlidersHorizontal className="h-4 w-4 text-[#00639d]" aria-hidden />
-        <h2 className="text-sm font-bold text-[#071e29]">Manual build check</h2>
+        <SlidersHorizontal className="h-4 w-4 text-primary" aria-hidden />
+        <h2 className="text-sm font-bold text-primary">Manual build check</h2>
       </div>
 
       {catalogError ? (
@@ -3267,11 +3267,11 @@ function ManualSelectionPanel({
       <div className="grid gap-3">
         {componentCategories.map((category) => (
           <label className="block" key={category}>
-            <span className="mb-1 flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
+            <span className="mb-1 flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-secondary">
               {categoryLabels[category]}
             </span>
             <select
-              className="h-10 w-full rounded-lg border border-[#c2c7cf] bg-white px-3 text-sm text-[#071e29] outline-none transition focus:border-[#00639d] focus:ring-4 focus:ring-[#43acff]/20 disabled:bg-[#e9f5ff]"
+              className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-primary outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 disabled:bg-accent-subtle"
               disabled={hasMounted && shouldDisableCatalogControls}
               onChange={(event) => onSelect(category, event.target.value)}
               value={manualSelection[category] ?? ""}
@@ -3290,7 +3290,7 @@ function ManualSelectionPanel({
       </div>
 
       <button
-        className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#094067] px-4 text-sm font-bold text-white transition hover:bg-[#002a47] disabled:cursor-not-allowed disabled:bg-[#72777f]"
+        className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-sm font-bold text-white transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-border-strong"
         disabled={hasMounted && shouldDisableManualValidation}
         onClick={onValidate}
         type="button"
@@ -3318,7 +3318,7 @@ function ManualSelectionPanel({
         <div
           className={`mt-3 rounded-2xl border p-3 text-sm ${
             manualValidation.isValid
-              ? "border-[#c2c7cf] bg-[#ddf1ff] text-[#094067]"
+              ? "border-border bg-accent-subtle text-primary"
               : "border-red-200 bg-red-50 text-red-900"
           }`}
         >
@@ -3343,7 +3343,7 @@ function ManualSelectionPanel({
           </ul>
           {manualValidation.isValid ? (
             <button
-              className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[#094067] px-3 text-sm font-bold text-white transition hover:bg-[#002a47]"
+              className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-accent px-3 text-sm font-bold text-white transition hover:bg-accent-hover"
               onClick={onSaveValidatedManualBuild}
               type="button"
             >
@@ -3379,23 +3379,23 @@ function SavedBuildsGallery({
   return (
     <section
       aria-label="Saved builds gallery"
-      className="rounded-3xl border border-[#c2c7cf] bg-white p-5 shadow-sm"
+      className="rounded-3xl border border-border bg-white p-5 shadow-sm"
       id="saved-builds-gallery"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#00639d]">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
             Local gallery
           </p>
-          <h2 className="mt-1 text-base font-bold text-[#071e29]">
+          <h2 className="mt-1 text-base font-bold text-primary">
             Saved builds
           </h2>
-          <p className="mt-1 text-sm text-[#42474e]">
+          <p className="mt-1 text-sm text-secondary">
             Saved in this browser for local prototype review.
           </p>
         </div>
         <button
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-3 text-sm font-semibold text-[#42474e] transition hover:bg-[#e9f5ff] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 text-sm font-semibold text-secondary transition hover:bg-accent-subtle disabled:cursor-not-allowed disabled:opacity-50"
           disabled={savedBuildsLoaded && savedBuilds.length === 0}
           onClick={onClear}
           type="button"
@@ -3415,13 +3415,13 @@ function SavedBuildsGallery({
       ) : null}
 
       {!savedBuildsLoaded ? (
-        <p className="mt-4 rounded-2xl border border-[#c2c7cf] bg-[#f5faff] px-3 py-2 text-sm text-[#42474e]">
+        <p className="mt-4 rounded-2xl border border-border bg-surface-secondary px-3 py-2 text-sm text-secondary">
           Loading saved builds...
         </p>
       ) : null}
 
       {savedBuildsLoaded && savedBuilds.length === 0 ? (
-        <p className="mt-4 rounded-2xl border border-dashed border-[#c2c7cf] bg-[#f5faff] px-3 py-4 text-sm text-[#42474e]">
+        <p className="mt-4 rounded-2xl border border-dashed border-border bg-surface-secondary px-3 py-4 text-sm text-secondary">
           No saved builds yet. Save a validated recommendation or a compatible
           manual build to keep it here.
         </p>
@@ -3464,21 +3464,21 @@ function SavedBuildCard({
       : "No estimate";
 
   return (
-    <article className="rounded-2xl border border-[#c2c7cf] bg-[#f5faff] p-4">
+    <article className="rounded-2xl border border-border bg-surface-secondary p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-[#c2c7cf] bg-white px-2 py-1 text-xs font-semibold text-[#094067]">
+            <span className="rounded-full border border-border bg-white px-2 py-1 text-xs font-semibold text-primary">
               {savedBuild.validation.isValid ? "Compatible" : "Needs review"}
             </span>
-            <span className="rounded-full border border-[#c2c7cf] bg-white px-2 py-1 text-xs font-semibold text-[#42474e]">
+            <span className="rounded-full border border-border bg-white px-2 py-1 text-xs font-semibold text-secondary">
               Saved {savedBuild.source}
             </span>
           </div>
-          <h3 className="mt-2 text-sm font-bold leading-5 text-[#071e29]">
+          <h3 className="mt-2 text-sm font-bold leading-5 text-primary">
             {savedBuild.title}
           </h3>
-          <p className="mt-1 text-xs text-[#42474e]">
+          <p className="mt-1 text-xs text-secondary">
             {new Date(savedBuild.createdAt).toLocaleString("en-MY", {
               dateStyle: "medium",
               timeStyle: "short",
@@ -3486,28 +3486,28 @@ function SavedBuildCard({
           </p>
         </div>
         <div className="text-left sm:text-right">
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#42474e]">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-secondary">
             Estimated total
           </p>
-          <p className="mt-1 text-base font-bold text-[#071e29]">{price}</p>
+          <p className="mt-1 text-base font-bold text-primary">{price}</p>
         </div>
       </div>
 
-      <dl className="mt-3 grid gap-2 border-y border-[#c2c7cf] py-3 sm:grid-cols-2">
+      <dl className="mt-3 grid gap-2 border-y border-border py-3 sm:grid-cols-2">
         {componentCategories.map((category) => {
           const component = catalogById.get(savedBuild.componentIds[category]);
 
           return (
             <div key={category}>
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#42474e]">
+              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary">
                 {categoryLabels[category]}
               </dt>
-              <dd className="mt-1 text-sm text-[#071e29]">
+              <dd className="mt-1 text-sm text-primary">
                 {component?.name ?? savedBuild.componentIds[category]}
               </dd>
               {component?.vendorUrl ? (
                 <a
-                  className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[#094067] hover:text-[#002a47] hover:underline"
+                  className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary hover:underline"
                   href={component.vendorUrl}
                   rel="noreferrer"
                   target="_blank"
@@ -3523,7 +3523,7 @@ function SavedBuildCard({
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[#094067] px-3 text-sm font-bold text-white transition hover:bg-[#002a47]"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-accent px-3 text-sm font-bold text-white transition hover:bg-accent-hover"
           onClick={() => onLoad(savedBuild)}
           type="button"
         >
@@ -3531,7 +3531,7 @@ function SavedBuildCard({
           {loadLabel}
         </button>
         <button
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#c2c7cf] bg-white px-3 text-sm font-semibold text-[#42474e] transition hover:bg-[#e9f5ff]"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 text-sm font-semibold text-secondary transition hover:bg-accent-subtle"
           onClick={() => onDelete(savedBuild.id)}
           type="button"
         >
@@ -3545,12 +3545,12 @@ function SavedBuildCard({
 
 function EmptyWorkspace() {
   return (
-    <div className="rounded-3xl border border-dashed border-[#c2c7cf] bg-white p-10 text-center shadow-sm">
-      <PackageSearch className="mx-auto h-10 w-10 text-[#00639d]" aria-hidden />
-      <h2 className="mt-4 text-lg font-bold text-[#071e29]">
+    <div className="rounded-3xl border border-dashed border-border bg-white p-10 text-center shadow-sm">
+      <PackageSearch className="mx-auto h-10 w-10 text-primary" aria-hidden />
+      <h2 className="mt-4 text-lg font-bold text-primary">
         Ready for configuration
       </h2>
-      <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[#42474e]">
+      <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-secondary">
         Recommendations, component inspection, and manual validation appear here.
       </p>
     </div>
@@ -3559,9 +3559,9 @@ function EmptyWorkspace() {
 
 function EmptyRecommendationState({ result }: { result: RecommendationResult }) {
   return (
-    <div className="rounded-3xl border border-[#c2c7cf] bg-white p-6 text-sm text-[#071e29] shadow-sm">
+    <div className="rounded-3xl border border-border bg-white p-6 text-sm text-primary shadow-sm">
       <div className="mb-2 flex items-center gap-2 font-semibold">
-        <AlertCircle className="h-4 w-4 text-[#ba1a1a]" aria-hidden />
+        <AlertCircle className="h-4 w-4 text-error" aria-hidden />
         No validated build found
       </div>
       <ul className="space-y-1">
@@ -3590,7 +3590,7 @@ function Notice({
   const toneClasses = {
     amber: "border-amber-200 bg-amber-50 text-amber-900",
     red: "border-red-200 bg-red-50 text-red-800",
-    sky: "border-[#c2c7cf] bg-[#ddf1ff] text-[#094067]",
+    sky: "border-border bg-accent-subtle text-primary",
   };
 
   return (

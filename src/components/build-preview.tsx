@@ -55,15 +55,15 @@ export function BuildPreview({
     return (
       <section
         aria-label="2D build preview"
-        className="overflow-hidden rounded-3xl border border-dashed border-[#c2c7cf] bg-[#fffffe] p-5 shadow-sm"
+        className="overflow-hidden rounded-3xl border border-dashed border-border bg-surface p-5 shadow-sm"
       >
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 flex-none items-center justify-center rounded-2xl bg-[#D8EEFE] text-[#094067]">
+          <span className="flex h-10 w-10 flex-none items-center justify-center rounded-2xl bg-accent-subtle text-primary">
             <Keyboard className="h-5 w-5" aria-hidden />
           </span>
           <div className="min-w-0">
-            <h2 className="text-sm font-bold text-[#071e29]">{title}</h2>
-            <p className="mt-1 text-sm leading-6 text-[#42474E]">
+            <h2 className="text-sm font-bold text-primary">{title}</h2>
+            <p className="mt-1 text-sm leading-6 text-secondary">
               Build preview appears after a recommendation or manual selection.
             </p>
           </div>
@@ -108,16 +108,16 @@ export function BuildPreview({
   return (
     <section
       aria-label="2D build preview"
-      className={`overflow-hidden rounded-3xl border border-[#c2c7cf] bg-[#fffffe] shadow-sm ${
+      className={`overflow-hidden rounded-3xl border border-border bg-surface shadow-sm ${
         compact ? "p-4" : "p-5"
       }`}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5F6C7B]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-secondary">
             Visual build preview
           </p>
-          <h2 className="mt-1 text-base font-bold text-[#071e29]">{title}</h2>
+          <h2 className="mt-1 text-base font-bold text-primary">{title}</h2>
         </div>
         <ValidationBadge label={validationLabel} />
       </div>
@@ -131,12 +131,12 @@ export function BuildPreview({
       />
 
       <div className="mt-3 flex flex-wrap gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#c2c7cf] bg-[#f5faff] px-2.5 py-1 text-[11px] font-bold text-[#094067]">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-secondary px-2.5 py-1 text-[11px] font-bold text-primary">
           <Keyboard className="h-3.5 w-3.5" aria-hidden />
           {layoutLabel}
         </span>
         {layout.approximate ? (
-          <span className="rounded-full border border-[#c2c7cf] bg-[#fffffe] px-2.5 py-1 text-[11px] font-bold text-[#5F6C7B]">
+          <span className="rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] font-bold text-secondary">
             Preview approximate
           </span>
         ) : null}
@@ -155,10 +155,10 @@ export function BuildPreview({
         >
           {detailRows.map(([label, value]) => (
             <div className="min-w-0" key={label}>
-              <dt className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#5F6C7B]">
+              <dt className="text-[11px] font-bold uppercase tracking-[0.08em] text-secondary">
                 {label}
               </dt>
-              <dd className="mt-1 truncate text-sm font-semibold text-[#071e29]">
+              <dd className="mt-1 truncate text-sm font-semibold text-primary">
                 {value}
               </dd>
             </div>
@@ -227,8 +227,8 @@ function ValidationBadge({ label }: { label: string }) {
         isValidated
           ? "border-[#2F8F46]/30 bg-[#e8f6ed] text-[#2F8F46]"
           : isIncomplete
-            ? "border-[#c2c7cf] bg-[#f5faff] text-[#5F6C7B]"
-            : "border-[#BA1A1A]/20 bg-[#fff5f5] text-[#BA1A1A]"
+            ? "border-border bg-surface-secondary text-secondary"
+            : "border-error/20 bg-error text-error"
       }`}
     >
       {isValidated ? (
@@ -434,26 +434,26 @@ function componentText(component: KeyboardComponent) {
 function caseFrameClass(tone: "aluminum" | "neutral" | "plastic") {
   switch (tone) {
     case "aluminum":
-      return "border-[#9fb3c5] bg-[#c8d8e6]";
+      return "border-border bg-surface-secondary";
     case "plastic":
-      return "border-[#c2d9ea] bg-[#D8EEFE]";
+      return "border-border bg-accent-subtle";
     case "neutral":
-      return "border-[#c2c7cf] bg-[#e9f5ff]";
+      return "border-border bg-accent-subtle";
   }
 }
 
 function plateClass(tone: "bright" | "deep" | "muted" | "neutral" | "warm") {
   switch (tone) {
     case "bright":
-      return "border-[#3DA9FC]/50 bg-[#eff8ff]";
+      return "border-accent/50 bg-surface-secondary";
     case "deep":
-      return "border-[#094067]/25 bg-[#dfeefa]";
+      return "border-accent/25 bg-surface-secondary";
     case "muted":
-      return "border-[#b7c6d1] bg-[#eef5f8]";
+      return "border-border bg-surface-secondary";
     case "warm":
       return "border-[#e2c8aa] bg-[#fff7ed]";
     case "neutral":
-      return "border-[#c2c7cf] bg-[#f5faff]";
+      return "border-border bg-surface-secondary";
   }
 }
 
@@ -462,43 +462,43 @@ function keycapClass(
   keyTone: KeySpec["tone"],
 ) {
   if (keycapTone === "ghost") {
-    return "border-[#c2c7cf]/50 bg-[#fffffe]/50 text-[#5F6C7B]/50";
+    return "border-border/50 bg-surface/50 text-secondary/50";
   }
 
   if (keyTone === "accent") {
-    return "border-[#3DA9FC]/60 bg-[#D8EEFE] text-[#094067]";
+    return "border-accent/60 bg-accent-subtle text-primary";
   }
 
   if (keyTone === "modifier") {
-    return "border-[#c2c7cf] bg-[#f5faff] text-[#42474E]";
+    return "border-border bg-surface-secondary text-secondary";
   }
 
   switch (keycapTone) {
     case "blue":
-      return "border-[#9ed2f7] bg-[#e4f4ff] text-[#094067]";
+      return "border-border bg-surface-secondary text-primary";
     case "dark":
-      return "border-[#3e4b56] bg-[#071E29] text-[#FFFFFE]";
+      return "border-border bg-accent text-on-accent";
     case "light":
-      return "border-[#d7dde4] bg-[#FFFFFE] text-[#42474E]";
+      return "border-border bg-surface text-secondary";
     case "warm":
       return "border-[#e8c7df] bg-[#fff1fb] text-[#5c2d52]";
     case "neutral":
-      return "border-[#c2c7cf] bg-[#FFFFFE] text-[#42474E]";
+      return "border-border bg-surface text-secondary";
   }
 }
 
 function soundBadgeClass(tone: "bright" | "deep" | "muted" | "neutral" | "warm") {
   switch (tone) {
     case "bright":
-      return "border border-[#3DA9FC]/50 bg-[#e8f6ff] text-[#094067]";
+      return "border border-accent/50 bg-surface-secondary text-primary";
     case "deep":
-      return "border border-[#094067]/30 bg-[#e5eef5] text-[#094067]";
+      return "border border-accent/30 bg-surface-secondary text-primary";
     case "muted":
-      return "border border-[#b8c9d4] bg-[#f1f6f8] text-[#5F6C7B]";
+      return "border border-border bg-surface-secondary text-secondary";
     case "warm":
       return "border border-[#e2c8aa] bg-[#fff7ed] text-[#7b4a1f]";
     case "neutral":
-      return "border border-[#c2c7cf] bg-[#f5faff] text-[#5F6C7B]";
+      return "border border-border bg-surface-secondary text-secondary";
   }
 }
 

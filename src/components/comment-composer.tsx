@@ -17,7 +17,7 @@ export function CommentComposer({ postId }: { postId: string }) {
     <form action={formAction} className="flex flex-col gap-3">
       <input name="postId" type="hidden" value={postId} />
       <textarea
-        className="min-h-20 rounded-xl border border-[#c2c7cf] bg-white px-3 py-2 text-sm font-medium focus:border-[#093C5D] focus:outline-none focus:ring-2 focus:ring-[#6FD1D7]/30"
+        className="min-h-20 rounded-xl border border-border bg-white px-3 py-2 text-sm font-medium focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
         maxLength={1200}
         name="body"
         placeholder="Add a comment… tag @keybot for grounded advice."
@@ -30,7 +30,7 @@ export function CommentComposer({ postId }: { postId: string }) {
         </p>
       ) : null}
       <button
-        className="inline-flex h-11 w-fit items-center justify-center rounded-full bg-[#093C5D] px-5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#00263e] disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex h-11 w-fit items-center justify-center rounded-full bg-accent px-5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
         disabled={pending}
         type="submit"
       >

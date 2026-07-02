@@ -1,39 +1,114 @@
 @import url("https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,300,400&display=swap");
 @import "tailwindcss";
 
+/* ===========================================================================
+   sharkeys foundations — Phase 1
+   Neutral spine + one accent. Replaces the blue "Stitch" system.
+   =========================================================================== */
+
 :root {
-  --background: #f5faff;
-  --foreground: #071e29;
-  --sharkeys-surface: #f5faff;
-  --sharkeys-surface-lowest: #ffffff;
-  --sharkeys-surface-low: #e9f5ff;
-  --sharkeys-surface-container: #ddf1ff;
-  --sharkeys-surface-high: #d5ebfb;
-  --sharkeys-surface-highest: #d0e6f5;
-  --sharkeys-on-surface: #071e29;
-  --sharkeys-on-surface-variant: #42474e;
-  --sharkeys-primary: #002a47;
-  --sharkeys-primary-container: #094067;
-  --sharkeys-on-primary: #ffffff;
-  --sharkeys-secondary: #00639d;
-  --sharkeys-secondary-container: #43acff;
-  --sharkeys-tertiary: #1c2936;
-  --sharkeys-outline: #72777f;
-  --sharkeys-outline-variant: #c2c7cf;
-  --sharkeys-error: #ba1a1a;
+  /* --- Neutral spine ----------------------------------------------------- */
+  --surface: #ffffff;
+  --surface-secondary: #f5f5f7;   /* the one signature off-white */
+  --surface-tertiary: #fafafc;
+  --text-primary: #1d1d1f;        /* near-black ink, no blue tint */
+  --text-secondary: #6e6e73;
+  --text-muted: #86868b;
+  --border: #d2d2d7;              /* hairline */
+  --border-strong: #b0b0b8;
+
+  /* --- One accent -------------------------------------------------------- */
+  --accent: #0071e3;
+  --accent-hover: #0060c7;
+  --accent-subtle: #e8f1fd;       /* selected / subtle fills */
+  --on-accent: #ffffff;
+
+  /* --- Functional (used sparingly) -------------------------------------- */
+  --error: #d70015;
+  --success: #248a3d;
+
+  /* --- Elevation --------------------------------------------------------- */
+  --shadow-raised: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-overlay: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* --- Colours -> utilities (bg-surface, text-primary, border-*, etc.) --- */
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  /* Short aliases so `text-primary` / `text-secondary` compile as written. */
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-on-accent: var(--on-accent);
+  --color-error: var(--error);
+  --color-success: var(--success);
+
+  /* Keep background/foreground utilities working. */
+  --color-background: var(--surface);
+  --color-foreground: var(--text-primary);
+
+  /* --- Type family ------------------------------------------------------- */
   --font-sans: "Satoshi", Inter, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
+
+  /* --- Type scale (text-display, text-h1 ... text-caption) --------------- */
+  --text-display: 3.75rem;              /* 60px */
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 700;
+
+  --text-h1: 2.75rem;                   /* 44px */
+  --text-h1--line-height: 1.1;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h1--font-weight: 700;
+
+  --text-h2: 2rem;                      /* 32px */
+  --text-h2--line-height: 1.15;
+  --text-h2--letter-spacing: -0.015em;
+  --text-h2--font-weight: 700;
+
+  --text-h3: 1.4375rem;                 /* 23px */
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h3--font-weight: 500;
+
+  --text-body-lg: 1.1875rem;            /* 19px */
+  --text-body-lg--line-height: 1.5;
+
+  --text-body: 1rem;                    /* 16px */
+  --text-body--line-height: 1.6;
+
+  --text-caption: 0.8125rem;            /* 13px */
+  --text-caption--line-height: 1.4;
+  --text-caption--font-weight: 500;
+
+  /* --- Radius (rounded-xs ... rounded-xl, rounded-pill) ------------------ */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 980px;
 }
 
+/* Spacing: Tailwind v4's default 0.25rem (4px) scale already matches the
+   8-point system (p-2=8, p-4=16, p-6=24, p-8=32, p-12=48...). No override. */
+
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--surface);
+  color: var(--text-primary);
   font-family: "Satoshi", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -41,28 +116,25 @@ input,
 textarea,
 select,
 a {
-  outline-color: var(--sharkeys-secondary);
+  outline-color: var(--accent);
 }
 
 ::selection {
-  background: var(--sharkeys-secondary-container);
-  color: var(--sharkeys-primary);
+  background: var(--accent-subtle);
+  color: var(--accent-hover);
 }
 
+/* --- Neutralised helper classes (were blue-tinted) ----------------------- */
 .sharkeys-soft-shadow {
-  box-shadow:
-    0 24px 70px rgba(9, 64, 103, 0.08),
-    0 8px 24px rgba(9, 64, 103, 0.06);
+  box-shadow: var(--shadow-raised);
 }
 
 .sharkeys-keyboard-preview {
-  background:
-    radial-gradient(circle at 18% 20%, rgba(67, 172, 255, 0.18), transparent 34%),
-    linear-gradient(135deg, #ffffff 0%, #ddf1ff 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f5f5f7 100%);
 }
 
 .sharkeys-keycap {
   box-shadow:
-    inset 0 -2px 0 rgba(9, 64, 103, 0.12),
-    0 1px 2px rgba(9, 64, 103, 0.08);
+    inset 0 -2px 0 rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.06);
 }

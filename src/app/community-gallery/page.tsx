@@ -12,7 +12,7 @@ export default async function CommunityGalleryPage() {
   ]);
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#f4f8fb] text-[#071e29]">
+    <main className="relative min-h-screen overflow-x-hidden bg-surface-secondary text-primary">
       {/* Ambient Deep Ocean glow — soft frosted-blue backdrop */}
       <div
         aria-hidden
@@ -25,23 +25,23 @@ export default async function CommunityGalleryPage() {
         {/* Hero */}
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-[#3B7597] shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#3DA9FC]" />
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-primary shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               Community
             </p>
-            <h1 className="mt-5 bg-gradient-to-br from-[#001d32] via-[#093C5D] to-[#3B7597] bg-clip-text text-5xl font-black leading-[1.05] tracking-[-0.02em] text-transparent sm:text-6xl">
+            <h1 className="mt-5 text-5xl font-black leading-[1.05] tracking-[-0.02em] text-primary sm:text-6xl">
               Community Gallery
             </h1>
-            <p className="mt-5 text-base leading-7 text-[#42474e]">
+            <p className="mt-5 text-base leading-7 text-secondary">
               Published builds from the community. Open one and tag{" "}
-              <span className="font-bold text-[#093C5D]">@keybot</span> in a
+              <span className="font-bold text-primary">@keybot</span> in a
               comment for grounded advice.
             </p>
           </div>
 
           {/* Glowing premium CTA */}
           <Link
-            className="group relative inline-flex h-12 items-center justify-center gap-2 overflow-hidden rounded-full bg-[#093C5D] px-7 text-sm font-bold text-white shadow-[0_12px_30px_rgba(9,60,93,0.35)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(9,60,93,0.5)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#3DA9FC]/40 before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-gradient-to-r before:from-[#3DA9FC] before:to-[#093C5D] before:opacity-0 before:blur-md before:transition-opacity before:duration-300 hover:before:opacity-70"
+            className="group relative inline-flex h-12 items-center justify-center gap-2 overflow-hidden rounded-full bg-accent px-7 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-gradient-to-r before:from-accent before:to-accent before:opacity-0 before:blur-md before:transition-opacity before:duration-300 hover:before:opacity-70"
             href={
               user
                 ? "/community-gallery/new"
@@ -54,7 +54,7 @@ export default async function CommunityGalleryPage() {
         </div>
 
         {posts.length === 0 ? (
-          <p className="mt-12 rounded-3xl border border-white/60 bg-white/80 p-10 text-center text-sm text-[#42474e] shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
+          <p className="mt-12 rounded-3xl border border-white/60 bg-white/80 p-10 text-center text-sm text-secondary shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
             No published builds yet. Be the first to share one.
           </p>
         ) : (
@@ -63,14 +63,14 @@ export default async function CommunityGalleryPage() {
               const valid = post.validationSnapshot?.isValid ?? null;
               return (
                 <Link
-                  className="group flex flex-col rounded-3xl border border-white/50 bg-white/90 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-[#3DA9FC]/40 hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-[#3DA9FC]/30"
+                  className="group flex flex-col rounded-3xl border border-white/50 bg-white/90 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30"
                   href={`/community-gallery/${post.id}`}
                   key={post.id}
                 >
                   {/* Card header — username + validation tag */}
                   <div className="flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-tight text-[#3B7597]">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#E8F4FA] text-[10px] font-black uppercase text-[#093C5D]">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-tight text-primary">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-subtle text-[10px] font-black uppercase text-primary">
                         {(post.author?.username ?? "?").charAt(0)}
                       </span>
                       @{post.author?.username ?? "unknown"}
@@ -87,22 +87,22 @@ export default async function CommunityGalleryPage() {
                   </div>
 
                   {/* Card content */}
-                  <h2 className="mt-4 text-lg font-black leading-6 tracking-[-0.01em] text-[#001d32]">
+                  <h2 className="mt-4 text-lg font-black leading-6 tracking-[-0.01em] text-primary">
                     {post.title}
                   </h2>
                   {post.description ? (
-                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-[#42474e]">
+                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-secondary">
                       {post.description}
                     </p>
                   ) : null}
 
                   {/* View Build affordance */}
-                  <div className="mt-auto flex items-center gap-1.5 pt-5 text-sm font-bold text-[#093C5D]">
-                    <span className="transition-colors group-hover:text-[#3DA9FC]">
+                  <div className="mt-auto flex items-center gap-1.5 pt-5 text-sm font-bold text-primary">
+                    <span className="transition-colors group-hover:text-accent">
                       Explore build
                     </span>
                     <ArrowRight
-                      className="h-4 w-4 text-[#3DA9FC] transition-transform duration-300 group-hover:translate-x-1"
+                      className="h-4 w-4 text-accent transition-transform duration-300 group-hover:translate-x-1"
                       aria-hidden
                     />
                   </div>
