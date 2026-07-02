@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Keyboard, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 const categories = ["Kits", "Switches", "Keycaps", "Stabilizers"] as const;
 
@@ -71,12 +72,14 @@ function SimpleNav({ active }: { active: string }) {
           className="flex items-center gap-3 text-primary focus:outline-none focus:ring-4 focus:ring-accent/30"
           href="/"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-subtle text-primary">
-            <Keyboard className="h-5 w-5" aria-hidden />
-          </span>
-          <span className="text-base font-black tracking-[-0.01em]">
-            sharkeys.
-          </span>
+          <Image
+            alt="Sharkeys"
+            className="h-8 w-auto object-contain sm:h-10"
+            height={40}
+            priority
+            src="/logo.png"
+            width={150}
+          />
         </Link>
 
         <div className="hidden min-h-16 items-center gap-7 md:flex lg:gap-9">
@@ -110,7 +113,13 @@ function SimpleFooter() {
   return (
     <footer className="border-t border-border bg-surface-secondary px-4 py-10 sm:px-8 lg:px-16">
       <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between gap-4 text-sm text-secondary">
-        <p className="font-black text-primary">sharkeys.</p>
+        <Image
+          alt="Sharkeys"
+          className="h-7 w-auto object-contain"
+          height={28}
+          src="/logo.png"
+          width={130}
+        />
         <div className="flex gap-5">
           <Link href="/">About</Link>
           <Link href="/">Privacy</Link>

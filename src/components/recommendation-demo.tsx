@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -2822,7 +2823,13 @@ function SharkeysFooter() {
     <footer className="border-t border-white/60 bg-white/40 px-4 py-12 backdrop-blur sm:px-8 lg:px-6">
       <div className="mx-auto flex max-w-[1280px] flex-col justify-between gap-8 md:flex-row md:items-center">
         <div>
-          <div className="text-base font-black text-primary">sharkeys.</div>
+          <Image
+            alt="Sharkeys"
+            className="h-8 w-auto object-contain"
+            height={32}
+            src="/logo.png"
+            width={140}
+          />
           <p className="mt-3 text-sm text-primary/60">
             © 2024 sharkeys. build your sound.
           </p>
