@@ -36,12 +36,12 @@ function makeIntent(
 }
 
 const validCandidateIds: ComponentCandidateIdsByCategory = {
-  case: ["case_keychron_v2_max_65_abs"],
-  pcb: ["pcb_keychron_v2_max_65_hotswap"],
-  plate: ["plate_keychron_v2_max_65_pc"],
+  case: ["case_lucky65_v3_65_aluminum"],
+  pcb: ["pcb_lucky65_v3_65_hotswap"],
+  plate: ["plate_lucky65_v3_65_fr4"],
   switch: ["switch_gateron_milky_yellow_pro"],
   keycap: ["keycap_unknown_pudding_oem_pbt"],
-  stabilizer: ["stab_keychron_v2_max_screw_in"],
+  stabilizer: ["stab_lucky65_v3_screw_in"],
 };
 
 async function withMissingOpenAiKey<T>(callback: () => Promise<T>) {
@@ -98,7 +98,7 @@ describe("recommendation service", () => {
         ...validCandidateIds,
         case: [
           "case_weikav_star80_tkl_aluminum",
-          "case_keychron_v2_max_65_abs",
+          "case_lucky65_v3_65_aluminum",
         ],
       },
       maxRecommendations: 2,
@@ -107,7 +107,7 @@ describe("recommendation service", () => {
     expect(assembly.rejectedBuildCount).toBeGreaterThan(0);
     expect(assembly.recommendations).toHaveLength(1);
     expect(assembly.recommendations[0].componentIds.case).toBe(
-      "case_keychron_v2_max_65_abs",
+      "case_lucky65_v3_65_aluminum",
     );
     expect(assembly.recommendations[0].validation.isValid).toBe(true);
   });
@@ -124,11 +124,11 @@ describe("recommendation service", () => {
       },
       candidateComponentIds: {
         case: ["case_weikav_star80_tkl_aluminum"],
-        pcb: ["pcb_keychron_v2_max_65_hotswap"],
+        pcb: ["pcb_lucky65_v3_65_hotswap"],
         plate: ["plate_weikav_star80_tkl_fr4"],
         switch: ["switch_gateron_milky_yellow_pro"],
         keycap: ["keycap_unknown_pudding_oem_pbt"],
-        stabilizer: ["stab_keychron_v2_max_screw_in"],
+        stabilizer: ["stab_lucky65_v3_screw_in"],
       },
     };
     const result = createRecommendationResult(

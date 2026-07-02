@@ -119,19 +119,19 @@ describe("Keybot service", () => {
         message: "Can I make this cheaper?",
         context: {
           selectedComponentIds: {
-            case: "case_keychron_v2_max_65_abs",
-            pcb: "pcb_keychron_v2_max_65_hotswap",
-            plate: "plate_keychron_v2_max_65_pc",
+            case: "case_lucky65_v3_65_aluminum",
+            pcb: "pcb_lucky65_v3_65_hotswap",
+            plate: "plate_lucky65_v3_65_fr4",
             switch: "switch_akko_penguin_silent",
             keycap: "keycap_unknown_standard_white_jp_cherry",
-            stabilizer: "stab_keychron_v2_max_screw_in",
+            stabilizer: "stab_lucky65_v3_screw_in",
           },
         },
       });
 
       expect(result.source).toBe("fallback_missing_api_key");
       expect(result.answer).toContain("current build context");
-      expect(result.answer).toContain("Keychron V2 Max 65% ABS Case");
+      expect(result.answer).toContain("Lucky65 V3 65% CNC Aluminum Case");
       expect(result.answer).toContain("Akko Penguin Silent Tactile Switch");
       expect(result.answer).toContain("lower budget");
       expect(result.answer).toContain("kit-locked structural parts");
@@ -150,18 +150,18 @@ describe("Keybot service", () => {
         message: "why that one?",
         context: {
           selectedComponentIds: {
-            case: "case_keychron_v2_max_65_abs",
-            pcb: "pcb_keychron_v2_max_65_hotswap",
-            plate: "plate_keychron_v2_max_65_pc",
+            case: "case_lucky65_v3_65_aluminum",
+            pcb: "pcb_lucky65_v3_65_hotswap",
+            plate: "plate_lucky65_v3_65_fr4",
             switch: "switch_akko_penguin_silent",
             keycap: "keycap_unknown_standard_white_jp_cherry",
-            stabilizer: "stab_keychron_v2_max_screw_in",
+            stabilizer: "stab_lucky65_v3_screw_in",
           },
         },
       });
 
       expect(result.answer).toContain("deterministic compatibility");
-      expect(result.answer).toContain("Keychron V2 Max 65% ABS Case");
+      expect(result.answer).toContain("Lucky65 V3 65% CNC Aluminum Case");
       expect(result.answer).toContain("Akko Penguin Silent Tactile Switch");
       expect(result.answer).not.toContain("FakeBoard");
       expect(result.usedCatalogContext).toBe(true);
@@ -175,12 +175,12 @@ describe("Keybot service", () => {
         message: "why did you choose this switch?",
         context: {
           selectedComponentIds: {
-            case: "case_keychron_v2_max_65_abs",
-            pcb: "pcb_keychron_v2_max_65_hotswap",
-            plate: "plate_keychron_v2_max_65_pc",
+            case: "case_lucky65_v3_65_aluminum",
+            pcb: "pcb_lucky65_v3_65_hotswap",
+            plate: "plate_lucky65_v3_65_fr4",
             switch: "switch_akko_penguin_silent",
             keycap: "keycap_unknown_standard_white_jp_cherry",
-            stabilizer: "stab_keychron_v2_max_screw_in",
+            stabilizer: "stab_lucky65_v3_screw_in",
           },
         },
       });
@@ -214,12 +214,12 @@ describe("Keybot service", () => {
         message: "is this compatible?",
         context: {
           selectedComponentIds: {
-            case: "case_keychron_v2_max_65_abs",
-            pcb: "pcb_keychron_v2_max_65_hotswap",
-            plate: "plate_keychron_v2_max_65_pc",
+            case: "case_lucky65_v3_65_aluminum",
+            pcb: "pcb_lucky65_v3_65_hotswap",
+            plate: "plate_lucky65_v3_65_fr4",
             switch: "switch_akko_penguin_silent",
             keycap: "keycap_unknown_standard_white_jp_cherry",
-            stabilizer: "stab_keychron_v2_max_screw_in",
+            stabilizer: "stab_lucky65_v3_screw_in",
           },
         },
       });
@@ -236,12 +236,12 @@ describe("Keybot service", () => {
         message: "what about quieter?",
         context: {
           selectedComponentIds: {
-            case: "case_keychron_v2_max_65_abs",
-            pcb: "pcb_keychron_v2_max_65_hotswap",
-            plate: "plate_keychron_v2_max_65_pc",
+            case: "case_lucky65_v3_65_aluminum",
+            pcb: "pcb_lucky65_v3_65_hotswap",
+            plate: "plate_lucky65_v3_65_fr4",
             switch: "switch_gateron_seasalt_smoothie",
             keycap: "keycap_unknown_standard_white_jp_cherry",
-            stabilizer: "stab_keychron_v2_max_screw_in",
+            stabilizer: "stab_lucky65_v3_screw_in",
           },
         },
       });

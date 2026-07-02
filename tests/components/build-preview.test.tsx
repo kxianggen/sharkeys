@@ -44,11 +44,11 @@ function validationFor(ids: Record<ComponentCategory, string>) {
 }
 
 const build65Ids = {
-  case: "case_keychron_v2_max_65_abs",
+  case: "case_lucky65_v3_65_aluminum",
   keycap: "keycap_unknown_pudding_oem_pbt",
-  pcb: "pcb_keychron_v2_max_65_hotswap",
-  plate: "plate_keychron_v2_max_65_pc",
-  stabilizer: "stab_keychron_v2_max_screw_in",
+  pcb: "pcb_lucky65_v3_65_hotswap",
+  plate: "plate_lucky65_v3_65_fr4",
+  stabilizer: "stab_lucky65_v3_screw_in",
   switch: "switch_gateron_seasalt_smoothie",
 } satisfies Record<ComponentCategory, string>;
 
@@ -83,7 +83,7 @@ describe("BuildPreview", () => {
     const preview = screen.getByRole("region", { name: /2D build preview/i });
 
     expect(within(preview).getAllByText("65% layout").length).toBeGreaterThan(0);
-    expect(preview).toHaveTextContent("Keychron V2 Max 65% ABS Case");
+    expect(preview).toHaveTextContent("Lucky65 V3 65% CNC Aluminum Case");
     expect(preview).toHaveTextContent("Gateron Sea Salt Smoothie Linear Switch");
     expect(preview).toHaveTextContent("creamy sound");
   });
@@ -124,7 +124,7 @@ describe("BuildPreview", () => {
     render(
       <BuildPreview
         components={{
-          case: component("case_keychron_v2_max_65_abs"),
+          case: component("case_lucky65_v3_65_aluminum"),
         }}
       />,
     );

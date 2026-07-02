@@ -796,7 +796,7 @@ describe("RecommendationDemo", () => {
       recommendationResult.recommendations[0].id,
     );
     expect(requestBody.context?.selectedComponentIds?.case).toBe(
-      "case_keychron_v2_max_65_abs",
+      "case_lucky65_v3_65_aluminum",
     );
   });
 
@@ -810,7 +810,7 @@ describe("RecommendationDemo", () => {
       expect(getSelect("Case")).toBeEnabled();
     });
     fireEvent.change(getSelect("Case"), {
-      target: { value: "case_keychron_v2_max_65_abs" },
+      target: { value: "case_lucky65_v3_65_aluminum" },
     });
     fireEvent.click(
       screen.getByRole("button", {
@@ -833,7 +833,7 @@ describe("RecommendationDemo", () => {
 
     expect(requestBody.message).toBe("Check compatibility for my current build");
     expect(requestBody.context?.selectedComponentIds?.case).toBe(
-      "case_keychron_v2_max_65_abs",
+      "case_lucky65_v3_65_aluminum",
     );
   });
 
@@ -846,12 +846,12 @@ describe("RecommendationDemo", () => {
     expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
     openManualCheck();
 
-    expect(getSelect("Case").value).toBe("case_keychron_v2_max_65_abs");
-    expect(getSelect("PCB").value).toBe("pcb_keychron_v2_max_65_hotswap");
-    expect(getSelect("Plate").value).toBe("plate_keychron_v2_max_65_pc");
+    expect(getSelect("Case").value).toBe("case_lucky65_v3_65_aluminum");
+    expect(getSelect("PCB").value).toBe("pcb_lucky65_v3_65_hotswap");
+    expect(getSelect("Plate").value).toBe("plate_lucky65_v3_65_fr4");
     expect(getSelect("Switch").value).toBe("switch_gateron_seasalt_smoothie");
     expect(getSelect("Keycap").value).toBe("keycap_unknown_pudding_oem_pbt");
-    expect(getSelect("Stabilizer").value).toBe("stab_keychron_v2_max_screw_in");
+    expect(getSelect("Stabilizer").value).toBe("stab_lucky65_v3_screw_in");
     expect(
       screen.getByRole("button", { name: /Validate manual build/i }),
     ).toBeEnabled();
@@ -866,7 +866,7 @@ describe("RecommendationDemo", () => {
     expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
     openManualCheck();
 
-    expect(getSelect("Case").value).toBe("case_keychron_v2_max_65_abs");
+    expect(getSelect("Case").value).toBe("case_lucky65_v3_65_aluminum");
 
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
       target: { value: "beginner friendly creamy 65% keyboard under $50" },
@@ -897,7 +897,7 @@ describe("RecommendationDemo", () => {
     fireEvent.click(screen.getByText("Technical details"));
 
     expect(screen.getByText(/Estimated total/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Keychron V2 Max/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Lucky65 V3/i).length).toBeGreaterThan(0);
     expect(screen.getByText("Open vendor page")).toBeInTheDocument();
   });
 
@@ -913,14 +913,14 @@ describe("RecommendationDemo", () => {
       expect(getSelect("Case")).toBeEnabled();
     });
     fireEvent.change(getSelect("Case"), {
-      target: { value: "case_keychron_v2_max_65_abs" },
+      target: { value: "case_lucky65_v3_65_aluminum" },
     });
 
     fireEvent.change(getSelect("PCB"), {
-      target: { value: "pcb_keychron_v2_max_65_hotswap" },
+      target: { value: "pcb_lucky65_v3_65_hotswap" },
     });
     fireEvent.change(getSelect("Plate"), {
-      target: { value: "plate_keychron_v2_max_65_pc" },
+      target: { value: "plate_lucky65_v3_65_fr4" },
     });
     fireEvent.change(getSelect("Switch"), {
       target: { value: "switch_gateron_seasalt_smoothie" },
@@ -929,7 +929,7 @@ describe("RecommendationDemo", () => {
       target: { value: "keycap_unknown_pudding_oem_pbt" },
     });
     fireEvent.change(getSelect("Stabilizer"), {
-      target: { value: "stab_keychron_v2_max_screw_in" },
+      target: { value: "stab_lucky65_v3_screw_in" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: /Validate manual build/i }));
@@ -968,7 +968,7 @@ describe("RecommendationDemo", () => {
     await waitFor(() => {
       expect(
         window.localStorage.getItem("sharkeys.savedBuilds.v1"),
-      ).toContain("Keychron V2 Max");
+      ).toContain("Lucky65 V3");
     });
   });
 
@@ -1014,7 +1014,7 @@ describe("RecommendationDemo", () => {
     );
 
     expect(navigationMocks.push).toHaveBeenCalledWith(
-      expect.stringContaining("/configurator?case=case_keychron_v2_max_65_abs"),
+      expect.stringContaining("/configurator?case=case_lucky65_v3_65_aluminum"),
     );
   });
 
@@ -1033,10 +1033,10 @@ describe("RecommendationDemo", () => {
     );
 
     expect(
-      await screen.findByText(/Manual build: Keychron V2 Max/i),
+      await screen.findByText(/Manual build: Lucky65 V3/i),
     ).toBeInTheDocument();
     expect(window.localStorage.getItem("sharkeys.savedBuilds.v1")).toContain(
-      "Manual build: Keychron V2 Max",
+      "Manual build: Lucky65 V3",
     );
   });
 

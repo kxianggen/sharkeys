@@ -15,12 +15,12 @@ import type { ComponentCategory, KeyboardBuildSelection } from "@/lib/types";
 
 const validBuildSelection: KeyboardBuildSelection = {
   componentIds: {
-    case: "case_keychron_v2_max_65_abs",
-    pcb: "pcb_keychron_v2_max_65_hotswap",
-    plate: "plate_keychron_v2_max_65_pc",
+    case: "case_lucky65_v3_65_aluminum",
+    pcb: "pcb_lucky65_v3_65_hotswap",
+    plate: "plate_lucky65_v3_65_fr4",
     switch: "switch_gateron_milky_yellow_pro",
     keycap: "keycap_unknown_pudding_oem_pbt",
-    stabilizer: "stab_keychron_v2_max_screw_in",
+    stabilizer: "stab_lucky65_v3_screw_in",
   },
   preferences: {
     layout: "65",
@@ -37,10 +37,10 @@ describe("component repository helpers", () => {
   });
 
   it("looks up a component by ID", () => {
-    const component = getComponentById("pcb_keychron_v2_max_65_hotswap");
+    const component = getComponentById("pcb_lucky65_v3_65_hotswap");
 
     expect(component?.category).toBe("pcb");
-    expect(component?.name).toBe("Keychron V2 Max 65% Tri-Mode Hotswap PCB");
+    expect(component?.name).toBe("Lucky65 V3 65% Tri-Mode Hotswap PCB");
   });
 
   it("filters components by category", () => {

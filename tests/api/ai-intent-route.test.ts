@@ -41,7 +41,7 @@ describe("AI intent API route", () => {
       expect(parsed.data.intent.soundProfile).toBe("creamy");
       expect(parsed.data.intent.clarificationNeeded).toBe(true);
       expect(parsed.data.candidateComponentIds.case).toContain(
-        "case_keychron_v2_max_65_abs",
+        "case_gmk67_65_plastic",
       );
       expect(parsed.data.error).toContain("OPENAI_API_KEY");
     } finally {

@@ -14,14 +14,14 @@ import {
 } from "@/lib/types";
 
 const validKeychronBuild: KeyboardBuildSelection = {
-  name: "Creamy Keychron V2 Max",
+  name: "Thocky Lucky65 V3",
   componentIds: {
-    case: "case_keychron_v2_max_65_abs",
-    pcb: "pcb_keychron_v2_max_65_hotswap",
-    plate: "plate_keychron_v2_max_65_pc",
+    case: "case_lucky65_v3_65_aluminum",
+    pcb: "pcb_lucky65_v3_65_hotswap",
+    plate: "plate_lucky65_v3_65_fr4",
     switch: "switch_gateron_milky_yellow_pro",
     keycap: "keycap_unknown_pudding_oem_pbt",
-    stabilizer: "stab_keychron_v2_max_screw_in",
+    stabilizer: "stab_lucky65_v3_screw_in",
   },
   preferences: {
     layout: "65",
@@ -323,7 +323,7 @@ describe("validateBuildCompatibility", () => {
           plate: pairwiseOnlyPlate.id,
           switch: "switch_gateron_milky_yellow_pro",
           keycap: "keycap_unknown_pudding_oem_pbt",
-          stabilizer: "stab_keychron_v2_max_screw_in",
+          stabilizer: "stab_lucky65_v3_screw_in",
         },
       },
       withTestComponents(pairwiseOnlyCase, pairwiseOnlyPcb, pairwiseOnlyPlate),
@@ -439,7 +439,7 @@ describe("validateBuildCompatibility", () => {
     const result = validateBuildCompatibility(
       {
         componentIds: {
-          case: "case_keychron_v2_max_65_abs",
+          case: "case_lucky65_v3_65_aluminum",
         },
       },
       keyboardComponents,

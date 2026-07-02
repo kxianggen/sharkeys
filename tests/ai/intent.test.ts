@@ -330,10 +330,10 @@ describe("intent preparation", () => {
     });
 
     expect(preparation.candidateComponentIds.case).toContain(
-      "case_keychron_v2_max_65_abs",
+      "case_lucky65_v3_65_aluminum",
     );
     expect(preparation.candidateComponentIds.pcb).toContain(
-      "pcb_keychron_v2_max_65_hotswap",
+      "pcb_lucky65_v3_65_hotswap",
     );
     expect(preparation.candidateComponentIds.switch).toContain(
       "switch_gateron_milky_yellow_pro",
@@ -378,7 +378,7 @@ describe("intent preparation", () => {
       "programming nonexistent foam blend",
     );
     expect(preparation.candidateComponentIds.pcb).toContain(
-      "pcb_keychron_v2_max_65_hotswap",
+      "pcb_lucky65_v3_65_hotswap",
     );
   });
 });
