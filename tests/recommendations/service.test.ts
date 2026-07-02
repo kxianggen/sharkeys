@@ -403,13 +403,13 @@ describe("recommendation service", () => {
     });
   });
 
-  it("returns a validated TKL typing recommendation path", async () => {
+  it("returns a validated 60% typing recommendation path", async () => {
     await withMissingOpenAiKey(async () => {
       const result = await generateRecommendationsFromMessage({
-        message: "TKL typing keyboard",
+        message: "60% typing keyboard",
       });
 
-      expect(result.intent.layout).toBe("tkl");
+      expect(result.intent.layout).toBe("60");
       expect(result.intent.useCase).toBe("typing");
       expectValidatedRecommendations(result);
     });
@@ -418,7 +418,7 @@ describe("recommendation service", () => {
   it("does not recommend cross-kit structural combinations", async () => {
     await withMissingOpenAiKey(async () => {
       const result = await generateRecommendationsFromMessage({
-        message: "TKL typing keyboard",
+        message: "60% typing keyboard",
       });
 
       expectValidatedRecommendations(result);
