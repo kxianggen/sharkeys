@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Bot, ShieldCheck, ShieldAlert } from "lucide-react";
 
 import { CommentComposer } from "@/components/comment-composer";
-import { SiteNav } from "@/components/site-nav";
+import { MainNav } from "@/components/main-nav";
 import { getSessionUser } from "@/lib/auth";
 import { getCatalogComponents } from "@/lib/components";
 import { getPostWithComments } from "@/lib/gallery/service";
@@ -30,7 +30,7 @@ export default async function PostDetailPage({
 
   return (
     <main className="min-h-screen bg-surface-secondary text-primary">
-      <SiteNav active="Community Gallery" />
+      <MainNav active="Gallery" />
 
       <section className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-8">
         <Link

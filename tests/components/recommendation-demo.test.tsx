@@ -400,12 +400,12 @@ describe("RecommendationDemo", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /Creamy 65% under RM500/i,
+        name: /Budget creamy build/i,
       }),
     ).toBeEnabled();
 
     fireEvent.change(screen.getByLabelText("Keyboard request"), {
-      target: { value: "Creamy 65% under RM500" },
+      target: { value: "Budget creamy build" },
     });
 
     await waitFor(() => {
@@ -444,11 +444,11 @@ describe("RecommendationDemo", () => {
     render(<RecommendationDemo />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: /Quiet office keyboard/i }),
+      screen.getByRole("button", { name: /Thocky 65% build/i }),
     );
 
     expect(navigationMocks.push).toHaveBeenCalledWith(
-      "/configurator?prompt=Quiet+office+keyboard",
+      "/configurator?prompt=Thocky+65%25+build",
     );
     expect(getRecommendationRequestBodies()).toHaveLength(0);
   });

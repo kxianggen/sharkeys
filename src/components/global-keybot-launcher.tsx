@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { RotateCcw, Send, Sparkles, X } from "lucide-react";
+import { RotateCcw, Send, X } from "lucide-react";
 
 import type { KeybotApiResponse } from "@/lib/keybot/schemas";
 
@@ -160,7 +160,13 @@ export function GlobalKeybotLauncher() {
           aria-hidden
           className="absolute inset-0 rounded-full ring-1 ring-inset ring-white/20"
         />
-        <Sparkles className="relative h-6 w-6 transition-transform duration-300 group-hover:scale-110" aria-hidden />
+        <Image
+          alt=""
+          className="relative h-full w-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-105"
+          height={64}
+          src="/meg-avatar.png"
+          width={64}
+        />
         <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-accent bg-accent" />
       </button>
     );
@@ -186,7 +192,7 @@ export function GlobalKeybotLauncher() {
           >
             <Image
               alt="Meg"
-              className="h-full w-full rounded-2xl object-cover"
+              className="h-full w-full rounded-2xl object-contain"
               height={44}
               src="/meg-avatar.png"
               width={44}
@@ -237,7 +243,7 @@ export function GlobalKeybotLauncher() {
                 >
                   <Image
                     alt="Meg"
-                    className="h-full w-full rounded-full object-cover"
+                    className="h-full w-full rounded-full object-contain"
                     height={28}
                     src="/meg-avatar.png"
                     width={28}
@@ -290,7 +296,7 @@ export function GlobalKeybotLauncher() {
               >
                 <Image
                   alt="Meg"
-                  className="h-full w-full rounded-full object-cover"
+                  className="h-full w-full rounded-full object-contain"
                   height={28}
                   src="/meg-avatar.png"
                   width={28}

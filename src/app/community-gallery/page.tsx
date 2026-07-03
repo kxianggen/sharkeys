@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles, ShieldCheck, ShieldAlert } from "lucide-react";
 
-import { SiteNav } from "@/components/site-nav";
+import { MainNav } from "@/components/main-nav";
 import { getSessionUser } from "@/lib/auth";
 import { listPublishedPosts } from "@/lib/gallery/service";
 
@@ -19,7 +19,7 @@ export default async function CommunityGalleryPage() {
         className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[520px] bg-[radial-gradient(120%_80%_at_50%_-20%,rgba(61,169,252,0.18),transparent_60%)]"
       />
 
-      <SiteNav active="Community Gallery" />
+      <MainNav active="Gallery" />
 
       <section className="relative z-10 mx-auto w-full max-w-screen-xl px-4 py-12 sm:px-8 lg:px-16">
         {/* Hero */}

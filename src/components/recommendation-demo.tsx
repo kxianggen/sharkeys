@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -35,6 +34,7 @@ import {
 } from "lucide-react";
 
 import { ImageDrop } from "@/components/image-drop";
+import { MainNav } from "@/components/main-nav";
 import type { CompatibilityResult, KeyboardComponent } from "@/lib/types";
 import type {
   AiIntentApiResponse,
@@ -124,10 +124,12 @@ const categorySummaries: Record<ComponentCategory, string> = {
   stabilizer: "Large-key support and PCB fit",
 };
 
+// Each prompt is verified to resolve to validated, non-empty builds from the
+// seed catalog via the local fallback pipeline (see repo eval expectations).
 const quickPrompts = [
-  "Quiet office keyboard",
-  "Creamy 65% under RM500",
-  "TKL typing build",
+  "Thocky 65% build",
+  "Budget creamy build",
+  "Clacky gaming keyboard",
 ] as const;
 
 const configuratorQuickPrompts = [
@@ -145,10 +147,6 @@ const configuratorQuickPrompts = [
   },
 ] as const;
 
-const smokePromptExamples = [
-  "creamy 65% beginner keyboard under RM500",
-  "optical 60% clacky gaming build",
-] as const;
 
 const keybotQuickActions = [
   {
@@ -909,7 +907,7 @@ export function RecommendationDemo({
 
     return (
       <div className="flex h-screen flex-col overflow-hidden bg-surface-secondary text-primary">
-        <LandingNav onStartBuilding={focusPrompt} />
+        <MainNav active="Configurator" />
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 lg:flex-row lg:gap-6 lg:p-6">
           {/* LEFT PANE — Ask Meg control center */}
@@ -921,7 +919,7 @@ export function RecommendationDemo({
               >
                 <Image
                   alt="Meg"
-                  className="h-full w-full rounded-2xl object-cover"
+                  className="h-full w-full rounded-2xl object-contain"
                   height={44}
                   src="/meg-avatar.png"
                   width={44}
@@ -1251,8 +1249,12 @@ export function RecommendationDemo({
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-surface-secondary text-primary">
-      <LandingNav onStartBuilding={focusPrompt} />
+    <div
+      className={`min-h-screen overflow-x-hidden text-primary ${
+        isLanding ? "bg-surface" : "bg-surface-secondary"
+      }`}
+    >
+      <MainNav />
 
       <section
         className={`mx-auto flex w-full flex-col items-center px-4 text-center sm:px-8 ${
@@ -1263,97 +1265,80 @@ export function RecommendationDemo({
         id="configurator"
       >
         <h1
-          className={`max-w-4xl font-black leading-[1.08] tracking-[-0.01em] text-primary ${
+          className={`max-w-4xl text-primary ${
             isLanding
-              ? "text-[42px] sm:text-5xl lg:text-[64px] lg:leading-[1.08]"
-              : "text-4xl sm:text-5xl"
+              ? "text-h1 sm:text-display"
+              : "text-4xl font-black leading-[1.08] tracking-[-0.01em] sm:text-5xl"
           }`}
         >
           {isLanding
-            ? "Build your dream keyboard in words"
+            ? "Build your dream keyboard in words."
             : "Configurator workspace"}
         </h1>
-        <p className="mt-6 max-w-2xl text-base leading-7 text-primary/70 sm:text-lg">
+        <p className="mt-6 max-w-xl text-base leading-7 text-secondary">
           {isLanding
-            ? "Tell sharkeys your sound, layout, budget, and use case. We’ll turn it into compatible keyboard build options."
+            ? "Describe your sound, layout, and budget — sharkeys turns it into compatible builds."
             : "Generate validated recommendations, compare builds, and inspect grounded catalog parts."}
         </p>
 
         <form
           aria-label="AI keyboard prompt form"
-          className="sharkeys-soft-shadow mt-10 w-full max-w-3xl rounded-[28px] border border-white/80 bg-white/80 p-4 text-left backdrop-blur transition focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/20 sm:p-5"
+          className="mt-10 flex w-full max-w-2xl items-center gap-2 rounded-pill border-[0.5px] border-border bg-surface py-1.5 pl-2 pr-1.5 text-left transition focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/15"
           onSubmit={handleSubmit}
         >
+          <div className="flex flex-none gap-1 text-secondary">
+            <button
+              aria-label="Voice input is not available yet"
+              className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-accent-subtle disabled:cursor-not-allowed disabled:opacity-55"
+              disabled
+              type="button"
+            >
+              <Mic className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              aria-label="Image input is not available yet"
+              className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-accent-subtle disabled:cursor-not-allowed disabled:opacity-55"
+              disabled
+              type="button"
+            >
+              <ImageIcon className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+
           <label className="sr-only" htmlFor="keyboard-request">
             Keyboard request
           </label>
           <textarea
-            className="min-h-[84px] w-full resize-none border-none bg-transparent p-0 text-base leading-7 text-primary outline-none placeholder:text-primary/45 focus:ring-0 sm:min-h-[88px]"
+            className="h-10 min-w-0 flex-1 resize-none border-none bg-transparent px-1 py-2 text-sm leading-6 text-primary outline-none placeholder:text-secondary/70 focus:ring-0"
             id="keyboard-request"
             maxLength={2000}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="Build me a keyboard under 300 ringgit that is quiet and suitable for office..."
+            placeholder="Quiet office board under RM300..."
             ref={promptRef}
+            rows={1}
             value={message}
           />
 
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex gap-2 text-primary/65">
-              <button
-                aria-label="Voice input is not available yet"
-                className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-accent-subtle disabled:cursor-not-allowed disabled:opacity-55"
-                disabled
-                type="button"
-              >
-                <Mic className="h-5 w-5" aria-hidden />
-              </button>
-              <button
-                aria-label="Image input is not available yet"
-                className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-accent-subtle disabled:cursor-not-allowed disabled:opacity-55"
-                disabled
-                type="button"
-              >
-                <ImageIcon className="h-5 w-5" aria-hidden />
-              </button>
-            </div>
-            <button
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-accent px-6 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:translate-y-0 disabled:bg-border-strong sm:px-7"
-              disabled={isSubmitDisabled}
-              type="submit"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-                  <span>Starting...</span>
-                </>
-              ) : (
-                <>
-                  <span>Start Building</span>
-                  <Sparkles className="h-4 w-4" aria-hidden />
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            className="inline-flex h-10 flex-none items-center justify-center gap-2 rounded-pill bg-accent px-5 text-sm font-bold text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:bg-border-strong"
+            disabled={isSubmitDisabled}
+            type="submit"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                <span>Starting...</span>
+              </>
+            ) : (
+              <span>Start Building</span>
+            )}
+          </button>
         </form>
 
         <div className="mt-5 flex max-w-4xl flex-wrap justify-center gap-3">
           {quickPrompts.map((prompt) => (
             <button
-              className="inline-flex min-h-9 items-center rounded-full border border-white/90 bg-white/70 px-5 py-2 text-sm font-bold text-primary shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={hasMounted && isSubmitting}
-              key={prompt}
-              onClick={() => void handleQuickPrompt(prompt)}
-              type="button"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-4 flex flex-wrap justify-center gap-2 text-xs text-secondary">
-          {smokePromptExamples.map((prompt) => (
-            <button
-              className="rounded-full px-3 py-1.5 transition hover:bg-accent-subtle hover:text-primary focus:outline-none focus:ring-4 focus:ring-accent/20"
+              className="inline-flex min-h-9 items-center rounded-pill border-[0.5px] border-border bg-surface px-5 py-2 text-sm font-medium text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={hasMounted && isSubmitting}
               key={prompt}
               onClick={() => void handleQuickPrompt(prompt)}
@@ -1584,7 +1569,7 @@ export function MyBuildsPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-surface-secondary text-primary">
-      <LandingNav onStartBuilding={() => router.push("/configurator")} />
+      <MainNav active="Builds" />
 
       <main className="mx-auto w-full max-w-screen-xl px-4 py-12 sm:px-8 lg:px-16">
         <div className="rounded-[32px] border border-white/80 bg-white/70 p-8 shadow-sm backdrop-blur">
@@ -1933,60 +1918,6 @@ function formatLayoutChip(layout: string | undefined) {
   }
 
   return layout === "tkl" ? "TKL Layout" : `${layout}% Layout`;
-}
-
-function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
-  const navLinks = [
-    ["Configurator", "/configurator"],
-    ["Browse", "/browse"],
-    ["Community Gallery", "/community-gallery"],
-    ["My Builds", "/my-builds"],
-  ] as const;
-
-  return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-surface-secondary/95 backdrop-blur">
-      <div className="mx-auto flex min-h-16 w-full max-w-[1280px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <Link
-          className="flex items-center gap-3 text-primary focus:outline-none focus:ring-4 focus:ring-accent/30"
-          href="/"
-        >
-          <Image
-            alt="Sharkeys"
-            className="h-8 w-auto object-contain sm:h-10"
-            height={40}
-            priority
-            src="/logo.png"
-            width={150}
-          />
-        </Link>
-
-        <div className="hidden min-h-16 items-center gap-7 md:flex lg:gap-9">
-          {navLinks.map(([label, href], index) => (
-            <Link
-              className={`flex min-h-16 items-center border-b-2 text-xs font-bold transition lg:text-sm ${
-                index === 0
-                  ? "border-accent text-primary"
-                  : "border-transparent text-secondary hover:text-primary"
-              }`}
-              href={href}
-              key={label}
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-
-        <button
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-accent px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 sm:px-6"
-          onClick={onStartBuilding}
-          type="button"
-        >
-          Get Started
-          <ArrowRight className="h-4 w-4" aria-hidden />
-        </button>
-      </div>
-    </nav>
-  );
 }
 
 type KeybotPanelProps = {
@@ -2343,7 +2274,7 @@ function KeybotAvatar({ small = false }: { small?: boolean }) {
     >
       <Image
         alt="Meg"
-        className="h-full w-full rounded-full object-cover"
+        className="h-full w-full rounded-full object-contain"
         height={44}
         src="/meg-avatar.png"
         width={44}
@@ -2740,7 +2671,7 @@ function FeatureBento() {
             <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-accent text-white">
               <Image
                 alt="Meg"
-                className="h-full w-full rounded-full object-cover"
+                className="h-full w-full rounded-full object-contain"
                 height={24}
                 src="/meg-avatar.png"
                 width={24}
@@ -2848,7 +2779,7 @@ function SharkeysFooter() {
             className="h-8 w-auto object-contain"
             height={32}
             src="/logo.png"
-            width={140}
+            width={111}
           />
           <p className="mt-3 text-sm text-primary/60">
             © 2024 sharkeys. build your sound.

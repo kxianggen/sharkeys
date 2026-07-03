@@ -1,4 +1,4 @@
-import { SiteNav } from "@/components/site-nav";
+import { MainNav } from "@/components/main-nav";
 import { NewPostForm } from "@/components/new-post-form";
 import { requireUser } from "@/lib/auth";
 import { getCatalogComponents } from "@/lib/components";
@@ -24,7 +24,7 @@ export default async function NewPostPage() {
 
   return (
     <main className="min-h-screen bg-surface-secondary text-primary">
-      <SiteNav active="Community Gallery" />
+      <MainNav active="Gallery" />
 
       <section className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-8">
         <h1 className="text-3xl font-black tracking-[-0.01em] text-primary">
