@@ -1950,12 +1950,14 @@ function LandingNav({ onStartBuilding }: { onStartBuilding: () => void }) {
           className="flex items-center gap-3 text-primary focus:outline-none focus:ring-4 focus:ring-accent/30"
           href="/"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-subtle text-primary">
-            <Keyboard className="h-5 w-5" aria-hidden />
-          </span>
-          <span className="text-base font-black tracking-[-0.01em]">
-            sharkeys.
-          </span>
+          <Image
+            alt="Sharkeys"
+            className="h-8 w-auto object-contain sm:h-10"
+            height={40}
+            priority
+            src="/logo.png"
+            width={150}
+          />
         </Link>
 
         <div className="hidden min-h-16 items-center gap-7 md:flex lg:gap-9">
