@@ -162,12 +162,11 @@ export function GlobalKeybotLauncher() {
         />
         <Image
           alt=""
-          className="relative h-full w-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-105"
+          className="relative h-full w-full rounded-full object-cover transition-transform duration-300 group-hover:scale-105"
           height={64}
           src="/meg-avatar.png"
           width={64}
         />
-        <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-accent bg-accent" />
       </button>
     );
   }
@@ -188,24 +187,20 @@ export function GlobalKeybotLauncher() {
         <header className="flex items-center gap-3 bg-accent px-4 py-4 text-white">
           <span
             aria-hidden
-            className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20"
+            className="flex h-12 w-12 flex-none items-center justify-center"
           >
             <Image
               alt="Meg"
-              className="h-full w-full rounded-2xl object-contain"
-              height={44}
+              className="h-full w-full rounded-full object-cover"
+              height={48}
               src="/meg-avatar.png"
-              width={44}
+              width={48}
             />
           </span>
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-bold leading-5 tracking-tight">
               Ask Meg
             </h2>
-            <p className="flex items-center gap-1.5 text-xs font-medium text-on-accent/80">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#7CE7AC]" />
-              Grounded Assistant
-            </p>
           </div>
           <button
             aria-label="Clear conversation"
@@ -239,14 +234,14 @@ export function GlobalKeybotLauncher() {
               {message.role === "assistant" ? (
                 <span
                   aria-hidden
-                  className="mb-1 flex h-7 w-7 flex-none items-center justify-center overflow-hidden rounded-full bg-accent text-white shadow-sm"
+                  className="mb-1 flex h-8 w-8 flex-none items-center justify-center"
                 >
                   <Image
                     alt="Meg"
-                    className="h-full w-full rounded-full object-contain"
-                    height={28}
+                    className="h-full w-full rounded-full object-cover"
+                    height={32}
                     src="/meg-avatar.png"
-                    width={28}
+                    width={32}
                   />
                 </span>
               ) : null}
@@ -292,14 +287,14 @@ export function GlobalKeybotLauncher() {
             <div className="flex items-end gap-2">
               <span
                 aria-hidden
-                className="mb-1 flex h-7 w-7 flex-none items-center justify-center overflow-hidden rounded-full bg-accent text-white shadow-sm"
+                className="mb-1 flex h-8 w-8 flex-none items-center justify-center"
               >
                 <Image
                   alt="Meg"
-                  className="h-full w-full rounded-full object-contain"
-                  height={28}
+                  className="h-full w-full rounded-full object-cover"
+                  height={32}
                   src="/meg-avatar.png"
-                  width={28}
+                  width={32}
                 />
               </span>
               <div className="inline-flex items-center gap-2 rounded-3xl rounded-bl-md bg-white px-4 py-3 text-sm font-medium text-primary shadow-sm ring-1 ring-accent/5">
@@ -341,7 +336,7 @@ export function GlobalKeybotLauncher() {
             />
             <button
               aria-label="Send message to Meg"
-              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent text-white transition hover:bg-accent-hover hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:bg-surface-secondary"
+              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent text-white transition hover:bg-accent-hover hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-45"
               disabled={isSending || input.trim().length === 0}
               type="submit"
             >

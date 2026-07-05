@@ -2,6 +2,7 @@ import {
   componentCategorySchema,
   type ComponentCategory,
 } from "@/lib/types";
+import { keyboardComponents } from "@/data";
 import {
   searchComponents,
   type ComponentSearchCriteria,
@@ -90,13 +91,58 @@ function searchCandidateIds(
     switchTechnology: criteria.switchTechnology,
   }, components);
 
-  return (strictMatches.length > 0
+  const matches = strictMatches.length > 0
     ? strictMatches
     : relaxedMatches.length > 0
       ? relaxedMatches
-      : coreMatches)
+      : coreMatches;
+
+  return excludeIncompleteKitStructures(matches, category, components)
     .slice(0, maxCandidatesPerCategory)
     .map((component) => component.id);
+}
+
+// Defense-in-depth: a kit-locked case or plate can only ever validate if its
+// kit also ships a PCB (the rule engine requires case/pcb/plate to share one
+// kitId). If a kit is missing its PCB — bad or partial catalog data — every
+// build using its case/plate is dead on arrival and would crowd complete kits
+// out of the capped candidate window, silently yielding zero validated builds.
+// Drop those structural parts up front so an incomplete kit cannot poison
+// assembly. With a clean catalog this filters nothing.
+function excludeIncompleteKitStructures(
+  matches: readonly KeyboardComponent[],
+  category: ComponentCategory,
+  components?: readonly KeyboardComponent[],
+) {
+  if (category !== "case" && category !== "plate") {
+    return matches;
+  }
+
+  const catalog = components ?? keyboardComponents;
+  const kitIdsWithPcb = new Set<string>();
+
+  for (const component of catalog) {
+    if (component.category === "pcb") {
+      const kitId = getKitId(component);
+
+      if (kitId) {
+        kitIdsWithPcb.add(kitId);
+      }
+    }
+  }
+
+  return matches.filter((component) => {
+    const kitId = getKitId(component);
+
+    // Only guard kit-locked structural parts; free (non-kit) parts pass.
+    return !kitId || kitIdsWithPcb.has(kitId);
+  });
+}
+
+function getKitId(component: KeyboardComponent) {
+  const kitId = component.metadata?.["kitId"];
+
+  return typeof kitId === "string" ? kitId : undefined;
 }
 
 // Async variant: augments switch candidates with semantic (pgvector) search when

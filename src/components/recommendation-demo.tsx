@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
-  ArrowRight,
   BookmarkPlus,
   Bot,
   CheckCircle2,
@@ -14,6 +13,7 @@ import {
   Cpu,
   ExternalLink,
   Eye,
+  Heart,
   Info,
   Image as ImageIcon,
   Keyboard,
@@ -132,14 +132,36 @@ const quickPrompts = [
   "Clacky gaming keyboard",
 ] as const;
 
+// Apple-style rail sections: bold label + secondary prompt, mapped onto the
+// deterministic component categories.
+const configuratorSections: Array<{
+  categories: ComponentCategory[];
+  prompt: string;
+  title: string;
+}> = [
+  { title: "Case", prompt: "Start with the board.", categories: ["case"] },
+  {
+    title: "Internals",
+    prompt: "PCB and plate, matched by the kit.",
+    categories: ["pcb", "plate"],
+  },
+  { title: "Switches", prompt: "Pick your feel.", categories: ["switch"] },
+  { title: "Keycaps", prompt: "Finish the look.", categories: ["keycap"] },
+  {
+    title: "Stabilizers",
+    prompt: "Keep the big keys steady.",
+    categories: ["stabilizer"],
+  },
+];
+
 const configuratorQuickPrompts = [
   {
     label: "Thocky",
     prompt: "A deep thocky build for coding in a quiet office",
   },
   {
-    label: "Quiet Office",
-    prompt: "Quiet office keyboard under RM500",
+    label: "Quiet office build",
+    prompt: "Quiet office keyboard",
   },
   {
     label: "65% Layout",
@@ -196,6 +218,13 @@ function formatMoney(amount: number, currency: string) {
     currency,
     maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
   }).format(amount);
+}
+
+// A build total is an estimate, not a firm quote: it sums catalog part prices
+// and assumes ~70 switches per board. Prefix "~" so it never reads as a
+// confirmed price. Exact single-part catalog prices stay unprefixed.
+function formatEstimatedTotal(amount: number, currency: string) {
+  return `~${formatMoney(amount, currency)}`;
 }
 
 function formatComponentPrice(component: KeyboardComponent) {
@@ -479,6 +508,7 @@ export function RecommendationDemo({
   const isConfigurator = mode === "configurator";
   const [message, setMessage] = useState(initialPrompt ?? "");
   const [isManualCheckOpen, setIsManualCheckOpen] = useState(false);
+  const [isImagePanelOpen, setIsImagePanelOpen] = useState(false);
   const [keybotOpenSignal, setKeybotOpenSignal] = useState(0);
   const [result, setResult] = useState<RecommendationResult | null>(null);
   const [selectedRecommendationId, setSelectedRecommendationId] = useState<
@@ -898,44 +928,124 @@ export function RecommendationDemo({
     const buildErrorCount = activeBuild?.validation.errors.length ?? 0;
     const buildPrice =
       activeBuild && activeBuild.estimatedPrice !== null
-        ? formatMoney(
+        ? formatEstimatedTotal(
             activeBuild.estimatedPrice,
             activeBuild.estimatedPriceCurrency ?? "MYR",
           )
         : null;
     const isDesigning = isSubmitting || visionLoading;
+    const activeKitId = activeBuild
+      ? getMetadataString(activeBuild.components.case.metadata, "kitId") ?? null
+      : null;
+
+    // Alternatives are drawn only from rule-engine-validated recommendations;
+    // choosing one selects that validated build (never bypasses the engine).
+    const getCategoryOptions = (category: ComponentCategory) => {
+      if (!result) {
+        return [];
+      }
+
+      const seen = new Set<string>();
+      const options: Array<{
+        component: KeyboardComponent;
+        recommendation: RecommendationBuild;
+      }> = [];
+
+      for (const recommendation of result.recommendations) {
+        const component = recommendation.components[category];
+
+        if (!seen.has(component.id)) {
+          seen.add(component.id);
+          options.push({ component, recommendation });
+        }
+      }
+
+      return options;
+    };
+
+    const selectRecommendation = (recommendation: RecommendationBuild) => {
+      setSelectedRecommendationId(recommendation.id);
+      loadRecommendationIntoManualPanel(recommendation);
+    };
 
     return (
-      <div className="flex h-screen flex-col overflow-hidden bg-surface-secondary text-primary">
+      <div className="min-h-screen bg-surface text-primary">
         <MainNav active="Configurator" />
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 lg:flex-row lg:gap-6 lg:p-6">
-          {/* LEFT PANE — Ask Meg control center */}
-          <aside className="flex min-h-0 w-full flex-col overflow-hidden rounded-3xl border border-white/60 bg-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.06)] backdrop-blur-xl lg:w-[34%] lg:max-w-md">
-            <header className="flex items-center gap-3 border-b border-accent/10 px-5 py-4">
+        <div className="mx-auto grid w-full max-w-[1200px] gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12 lg:py-10">
+          {/* LEFT — product visual */}
+          <section
+            aria-label="Build visual"
+            className="min-w-0 lg:sticky lg:top-16 lg:self-start"
+          >
+            <KitVisual
+              key={activeKitId ?? "empty"}
+              kitId={activeKitId}
+              kitName={activeBuild?.title ?? "Keyboard build"}
+            />
+
+            {activeBuild ? (
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <h1 className="truncate text-h3 text-primary">
+                    {activeBuild.title}
+                  </h1>
+                  {buildPrice ? (
+                    <p className="mt-0.5 text-sm text-secondary">
+                      From{" "}
+                      <span className="font-semibold text-primary">
+                        {buildPrice}
+                      </span>
+                    </p>
+                  ) : null}
+                </div>
+
+                {buildValid === null ? null : buildValid ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-pill bg-success/10 px-3 py-1.5 text-xs font-semibold text-success">
+                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                    Validated · every part compatible
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-pill bg-error/10 px-3 py-1.5 text-xs font-semibold text-error">
+                    <ShieldAlert className="h-3.5 w-3.5" aria-hidden />
+                    {buildErrorCount > 0
+                      ? `${buildErrorCount} blocker${buildErrorCount > 1 ? "s" : ""}`
+                      : "Blocked"}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <p className="mt-5 text-sm leading-6 text-secondary">
+                Ask Meg to resolve a validated build — it appears here with the
+                kit it is based on.
+              </p>
+            )}
+          </section>
+
+          {/* RIGHT — configuration rail */}
+          <section className="flex min-w-0 flex-col">
+            <header className="flex items-center gap-3">
               <span
                 aria-hidden
-                className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-2xl bg-accent text-white shadow-sm"
+                className="flex h-10 w-10 flex-none items-center justify-center overflow-hidden rounded-full bg-accent-subtle"
               >
                 <Image
                   alt="Meg"
-                  className="h-full w-full rounded-2xl object-contain"
-                  height={44}
+                  className="h-full w-full rounded-full object-cover"
+                  height={40}
                   src="/meg-avatar.png"
-                  width={44}
+                  width={40}
                 />
               </span>
               <div className="min-w-0 flex-1">
-                <h2 className="text-base font-black tracking-[-0.01em] text-primary">
+                <h2 className="text-base font-semibold text-primary">
                   Ask Meg
                 </h2>
-                <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">
-                  AI build control
-                </p>
+                <p className="text-xs text-secondary">AI build control</p>
               </div>
               <button
                 aria-label="Open Meg assistant"
-                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-primary transition hover:bg-accent-subtle hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/25"
+                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-secondary transition hover:bg-accent-subtle hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/25"
                 onClick={() => setKeybotOpenSignal((current) => current + 1)}
                 type="button"
               >
@@ -943,47 +1053,89 @@ export function RecommendationDemo({
               </button>
             </header>
 
-            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
-              <p className="text-sm leading-6 text-secondary">
-                Describe the sound, feel, budget, or layout you want. Meg returns
-                compatible builds from the grounded catalog — every result is
-                validated by the deterministic rule engine.
-              </p>
+            <form
+              aria-label="AI keyboard prompt form"
+              className="mt-4 flex items-center gap-1.5 rounded-pill border-[0.5px] border-border bg-surface py-1.5 pl-2 pr-1.5 transition focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/15"
+              onSubmit={handleSubmit}
+            >
+              <button
+                aria-expanded={isImagePanelOpen}
+                aria-label="Add an inspiration photo"
+                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-secondary transition hover:bg-accent-subtle hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20"
+                onClick={() => setIsImagePanelOpen((current) => !current)}
+                type="button"
+              >
+                <ImageIcon className="h-4 w-4" aria-hidden />
+              </button>
+              <button
+                aria-label="Voice input is not available yet"
+                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-secondary transition disabled:cursor-not-allowed disabled:opacity-55"
+                disabled
+                type="button"
+              >
+                <Mic className="h-4 w-4" aria-hidden />
+              </button>
 
-              <div>
-                <p className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-primary">
-                  Try a starting point
-                </p>
-                <div className="flex flex-col gap-2">
-                  {configuratorQuickPrompts.map((prompt) => (
-                    <button
-                      className="group inline-flex items-center justify-between gap-2 rounded-2xl border border-border bg-white px-4 py-2.5 text-left text-sm font-bold text-secondary shadow-sm transition hover:-translate-y-0.5 hover:border-accent hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
-                      disabled={hasMounted && isSubmitting}
-                      key={prompt.label}
-                      onClick={() => void handleQuickPrompt(prompt.prompt)}
-                      type="button"
-                    >
-                      {prompt.label}
-                      <ArrowRight
-                        className="h-4 w-4 flex-none text-accent transition-transform group-hover:translate-x-1"
-                        aria-hidden
-                      />
-                    </button>
-                  ))}
-                </div>
+              <label className="sr-only" htmlFor="keyboard-request">
+                Keyboard request
+              </label>
+              <textarea
+                className="h-10 min-w-0 flex-1 resize-none border-none bg-transparent px-1 py-2 text-sm leading-6 text-primary outline-none placeholder:text-secondary/70 focus:ring-0"
+                id="keyboard-request"
+                maxLength={2000}
+                onChange={(event) => setMessage(event.target.value)}
+                placeholder="A deep thocky build for a quiet office..."
+                ref={promptRef}
+                rows={1}
+                value={message}
+              />
+
+              <button
+                className="inline-flex h-10 flex-none items-center justify-center gap-2 rounded-pill bg-accent px-4 text-sm font-bold text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-45"
+                disabled={isSubmitDisabled}
+                type="submit"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    <span>Designing…</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Design my build</span>
+                    <Sparkles className="h-4 w-4" aria-hidden />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {isImagePanelOpen || imageDataUrl ? (
+              <div className="mt-3">
+                <ImageDrop
+                  disabled={isSubmitting || visionLoading}
+                  onChange={(value) => void handleImageChange(value)}
+                  value={imageDataUrl}
+                />
               </div>
+            ) : null}
 
-              {visionNote ? (
-                <p className="rounded-2xl bg-accent-subtle px-4 py-3 text-sm font-medium text-primary">
-                  {visionNote}
-                </p>
-              ) : null}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {configuratorQuickPrompts.map((prompt) => (
+                <button
+                  className="inline-flex min-h-9 items-center rounded-pill border-[0.5px] border-border bg-surface px-4 py-1.5 text-sm font-medium text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={hasMounted && isSubmitting}
+                  key={prompt.label}
+                  onClick={() => void handleQuickPrompt(prompt.prompt)}
+                  type="button"
+                >
+                  {prompt.label}
+                </button>
+              ))}
             </div>
 
-            {/* Loaders / error sit directly above the premium input */}
-            <div className="space-y-3 border-t border-accent/10 p-4">
+            <div className="mt-4 space-y-3">
               {isDesigning ? (
-                <div className="inline-flex w-full items-center gap-2 rounded-2xl bg-accent px-4 py-3 text-sm font-bold text-white">
+                <div className="inline-flex w-full items-center gap-2 rounded-lg bg-accent px-4 py-3 text-sm font-bold text-white">
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   {visionLoading
                     ? "Reading your image…"
@@ -991,93 +1143,16 @@ export function RecommendationDemo({
                 </div>
               ) : null}
 
+              {visionNote ? (
+                <p className="rounded-lg bg-accent-subtle px-4 py-3 text-sm font-medium text-primary">
+                  {visionNote}
+                </p>
+              ) : null}
+
               {error ? (
                 <Notice icon={AlertCircle} message={error} tone="red" />
               ) : null}
 
-              <form
-                aria-label="AI keyboard prompt form"
-                className="space-y-3"
-                onSubmit={handleSubmit}
-              >
-                <ImageDrop
-                  disabled={isSubmitting || visionLoading}
-                  onChange={(value) => void handleImageChange(value)}
-                  value={imageDataUrl}
-                />
-
-                <div className="rounded-2xl border border-border bg-white p-2 shadow-sm transition focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/20">
-                  <label className="sr-only" htmlFor="keyboard-request">
-                    Keyboard request
-                  </label>
-                  <textarea
-                    className="min-h-[64px] w-full resize-none border-none bg-transparent px-2 py-1.5 text-sm leading-6 text-primary outline-none placeholder:text-secondary/70 focus:ring-0"
-                    id="keyboard-request"
-                    maxLength={2000}
-                    onChange={(event) => setMessage(event.target.value)}
-                    placeholder="e.g., 'A deep thocky build for coding in a quiet office'"
-                    ref={promptRef}
-                    value={message}
-                  />
-                  <button
-                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 text-sm font-black text-white shadow-sm transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:bg-border-strong"
-                    disabled={isSubmitDisabled}
-                    type="submit"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-                        <span>Designing…</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Design my build</span>
-                        <Sparkles className="h-4 w-4" aria-hidden />
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </aside>
-
-          {/* RIGHT PANE — Active build / garage */}
-          <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/80 shadow-2xl backdrop-blur-xl">
-            <header className="flex flex-wrap items-center justify-between gap-4 border-b border-accent/10 px-6 py-5">
-              <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.12em] text-primary">
-                  Active build
-                </p>
-                <h1 className="mt-1 truncate text-xl font-black tracking-[-0.01em] text-primary sm:text-2xl">
-                  {activeBuild?.title ?? "Your build appears here"}
-                </h1>
-                {buildPrice ? (
-                  <p className="mt-1 text-sm font-bold text-secondary">
-                    Est. total{" "}
-                    <span className="text-primary">{buildPrice}</span>
-                  </p>
-                ) : null}
-              </div>
-
-              {buildValid === null ? null : buildValid ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3.5 py-1.5 text-sm font-bold text-emerald-700 shadow-[0_0_20px_rgba(16,185,129,0.25)] ring-1 ring-inset ring-emerald-500/30">
-                  <ShieldCheck className="h-4 w-4" aria-hidden /> Compatible
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-3.5 py-1.5 text-sm font-bold text-rose-700 shadow-[0_0_20px_rgba(244,63,94,0.2)] ring-1 ring-inset ring-rose-500/30">
-                  <ShieldAlert className="h-4 w-4" aria-hidden />
-                  {buildErrorCount > 0
-                    ? `${buildErrorCount} blocker${buildErrorCount > 1 ? "s" : ""}`
-                    : "Blocked"}
-                </span>
-              )}
-            </header>
-
-            <section
-              className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-6"
-              id="results"
-              ref={resultsRef}
-            >
               {savedBuildMessage ? (
                 <Notice
                   icon={Info}
@@ -1093,122 +1168,95 @@ export function RecommendationDemo({
                   tone="sky"
                 />
               ) : null}
+            </div>
 
+            <section
+              aria-label="Resolved build configuration"
+              className="mt-6 flex-1 space-y-8"
+              id="results"
+              ref={resultsRef}
+            >
               {activeBuild ? (
                 <>
-                  {/* Component tabs — active category pops navy */}
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {componentCategories.map((category) => {
-                      const component = activeBuild.components[category];
-                      const isActive = activeCategory === category;
-                      return (
-                        <button
-                          className={`flex flex-col rounded-2xl border p-3 text-left transition ${
-                            isActive
-                              ? "border-accent bg-accent text-white shadow-lg"
-                              : "border-border bg-white text-primary shadow-sm hover:-translate-y-0.5 hover:border-accent"
-                          }`}
-                          key={category}
-                          onClick={() => setActiveCategory(category)}
-                          type="button"
-                        >
-                          <span
-                            className={`text-[11px] font-black uppercase tracking-[0.1em] ${
-                              isActive ? "text-white/70" : "text-primary"
-                            }`}
-                          >
-                            {categoryLabels[category]}
-                          </span>
-                          <span className="mt-1 line-clamp-2 text-sm font-bold leading-5">
-                            {component?.name ?? "—"}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Active component detail */}
-                  {selectedComponent ? (
-                    <div className="rounded-2xl border border-border bg-white/70 p-5 shadow-sm">
-                      <p className="text-xs font-black uppercase tracking-[0.12em] text-primary">
-                        {categoryLabels[activeCategory]}
-                      </p>
-                      <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
-                        <h2 className="text-lg font-black tracking-[-0.01em] text-primary">
-                          {selectedComponent.name}
-                        </h2>
-                        <span className="text-sm font-bold text-secondary">
-                          {formatComponentPrice(selectedComponent)}
+                  {configuratorSections.map((section) => (
+                    <section key={section.title}>
+                      <h3 className="text-base font-semibold text-primary">
+                        {section.title}.{" "}
+                        <span className="font-normal text-secondary">
+                          {section.prompt}
                         </span>
+                      </h3>
+
+                      <div className="mt-3 space-y-2.5">
+                        {section.categories.flatMap((category) => {
+                          const selectedPart = activeBuild.components[category];
+                          const options = getCategoryOptions(category);
+
+                          return options.map(({ component, recommendation }) => {
+                            const selected = component.id === selectedPart.id;
+
+                            return (
+                              <button
+                                aria-pressed={selected}
+                                className={`flex w-full items-center justify-between gap-4 rounded-lg p-4 text-left transition ${
+                                  selected
+                                    ? "border-[1.5px] border-accent bg-accent-subtle/50"
+                                    : "border-[0.5px] border-border hover:border-border-strong"
+                                }`}
+                                key={`${category}-${component.id}`}
+                                onClick={() =>
+                                  selectRecommendation(recommendation)
+                                }
+                                type="button"
+                              >
+                                <span className="min-w-0">
+                                  <span className="block text-sm font-medium text-primary">
+                                    {component.name}
+                                  </span>
+                                  <span className="mt-0.5 line-clamp-1 block text-xs leading-5 text-secondary">
+                                    {component.description}
+                                  </span>
+                                </span>
+                                <span className="flex-none text-sm text-secondary">
+                                  {formatComponentPrice(component)}
+                                </span>
+                              </button>
+                            );
+                          });
+                        })}
                       </div>
-                      <p className="mt-2 text-sm leading-6 text-secondary">
-                        {categorySummaries[activeCategory]}
-                      </p>
-                    </div>
-                  ) : null}
+                    </section>
+                  ))}
 
-                  {/* Alternate build paths */}
                   {result && result.recommendations.length > 0 ? (
-                    <div>
-                      <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-primary">
-                        Build paths
-                      </p>
-                      <CompactRecommendationGrid
-                        onSaveRecommendation={saveRecommendationBuild}
-                        onSelect={(recommendation) => {
-                          setSelectedRecommendationId(recommendation.id);
-                          loadRecommendationIntoManualPanel(recommendation);
-                        }}
-                        recommendations={result.recommendations}
-                        selectedId={selectedRecommendation?.id ?? null}
-                      />
-                    </div>
+                    <CompactRecommendationGrid
+                      onSaveRecommendation={saveRecommendationBuild}
+                      onSelect={selectRecommendation}
+                      recommendations={result.recommendations}
+                      selectedId={selectedRecommendation?.id ?? null}
+                    />
                   ) : null}
-
                 </>
               ) : result && result.recommendations.length === 0 ? (
                 <EmptyRecommendationState result={result} />
-              ) : (
-                <div className="flex min-h-[20rem] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-white/50 px-6 py-12 text-center">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-subtle text-primary">
-                    <Keyboard className="h-7 w-7" aria-hidden />
-                  </span>
-                  <h2 className="mt-4 text-lg font-black tracking-[-0.01em] text-primary">
-                    No build yet
-                  </h2>
-                  <p className="mt-2 max-w-sm text-sm leading-6 text-secondary">
-                    Ask Meg on the left — describe your dream sound and she will
-                    assemble a validated build here.
-                  </p>
-                </div>
-              )}
+              ) : null}
 
-              {/* Manual compatibility check — always available */}
-              <section className="rounded-2xl border border-dashed border-border bg-white/60 p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h2 className="text-base font-black text-primary">
-                      Manual check
-                    </h2>
-                    <p className="mt-1 text-sm leading-6 text-secondary">
-                      Hand-pick components and validate them against the rule
-                      engine.
-                    </p>
-                  </div>
-                  <button
-                    aria-expanded={isManualCheckOpen}
-                    className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-white px-4 text-sm font-bold text-primary transition hover:border-accent hover:bg-surface-secondary focus:outline-none focus:ring-4 focus:ring-accent/20"
-                    onClick={() => setIsManualCheckOpen((current) => !current)}
-                    type="button"
-                  >
-                    {isManualCheckOpen
-                      ? "Hide manual check"
-                      : "Open manual check"}
-                  </button>
-                </div>
+              {/* Manual compatibility check — quiet secondary path */}
+              <div className="border-t-[0.5px] border-border pt-4">
+                <button
+                  aria-expanded={isManualCheckOpen}
+                  aria-label={
+                    isManualCheckOpen ? "Hide manual check" : "Open manual check"
+                  }
+                  className="text-sm font-medium text-secondary underline-offset-4 transition hover:text-primary hover:underline focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20"
+                  onClick={() => setIsManualCheckOpen((current) => !current)}
+                  type="button"
+                >
+                  {isManualCheckOpen ? "Hide manual picker" : "Hand-pick manually"}
+                </button>
 
                 {isManualCheckOpen ? (
-                  <div className="mt-5">
+                  <div className="mt-4">
                     <ManualSelectionPanel
                       catalogByCategory={catalogByCategory}
                       catalogError={catalogError}
@@ -1232,8 +1280,40 @@ export function RecommendationDemo({
                     />
                   </div>
                 ) : null}
-              </section>
+              </div>
             </section>
+
+            {activeBuild ? (
+              <div className="sticky bottom-0 mt-8 border-t-[0.5px] border-border bg-surface/95 py-4 backdrop-blur">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-primary">
+                      {activeBuild.title}
+                    </p>
+                    {buildPrice ? (
+                      <p className="text-sm text-secondary">From {buildPrice}</p>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-none items-center gap-2">
+                    <button
+                      aria-label="Save to favourites"
+                      className="flex h-10 w-10 items-center justify-center rounded-full border-[0.5px] border-border text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20"
+                      onClick={() => saveRecommendationBuild(activeBuild)}
+                      type="button"
+                    >
+                      <Heart className="h-4 w-4" aria-hidden />
+                    </button>
+                    <button
+                      className="inline-flex h-10 items-center justify-center rounded-pill bg-accent px-5 text-sm font-bold text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-45"
+                      onClick={() => saveRecommendationBuild(activeBuild)}
+                      type="button"
+                    >
+                      Save build
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </section>
         </div>
 
@@ -1320,7 +1400,7 @@ export function RecommendationDemo({
           />
 
           <button
-            className="inline-flex h-10 flex-none items-center justify-center gap-2 rounded-pill bg-accent px-5 text-sm font-bold text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:bg-border-strong"
+            className="inline-flex h-10 flex-none items-center justify-center gap-2 rounded-pill bg-accent px-5 text-sm font-bold text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-45"
             disabled={isSubmitDisabled}
             type="submit"
           >
@@ -1806,7 +1886,7 @@ function CompactRecommendationGrid({
           const price =
             recommendation.estimatedPrice === null
               ? "Estimate unavailable"
-              : formatMoney(
+              : formatEstimatedTotal(
                   recommendation.estimatedPrice,
                   recommendation.estimatedPriceCurrency ?? "MYR",
                 );
@@ -1920,6 +2000,42 @@ function formatLayoutChip(layout: string | undefined) {
   return layout === "tkl" ? "TKL Layout" : `${layout}% Layout`;
 }
 
+// Large product visual for the configurator: the resolved build's kit image
+// on surface-secondary, falling back to a calm keyboard mark when the kit has
+// no image (or none is resolved yet). Parent passes key={kitId} so the error
+// state resets when the kit changes.
+function KitVisual({
+  kitId,
+  kitName,
+}: {
+  kitId: string | null;
+  kitName: string;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  if (!kitId || imageFailed) {
+    return (
+      <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-surface-secondary">
+        <Keyboard className="h-16 w-16 text-secondary/50" aria-hidden />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-secondary p-6 sm:p-10">
+      <Image
+        alt={`${kitName} kit`}
+        className="h-full w-full object-contain"
+        height={480}
+        onError={() => setImageFailed(true)}
+        priority
+        src={`/kits/${kitId}.webp`}
+        width={640}
+      />
+    </div>
+  );
+}
+
 type KeybotPanelProps = {
   catalogById: Map<string, KeyboardComponent>;
   floating?: boolean;
@@ -1950,18 +2066,20 @@ function FloatingKeybot({
     return (
       <button
         aria-label="Open Keybot assistant"
-        className="sharkeys-soft-shadow fixed bottom-4 right-4 z-40 inline-flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-full border border-border bg-surface px-4 py-3 text-left text-primary transition hover:-translate-y-0.5 hover:border-accent hover:bg-surface-secondary focus:outline-none focus:ring-4 focus:ring-accent/30 sm:bottom-6 sm:right-6"
+        className="group fixed bottom-5 right-5 z-40 flex h-16 w-16 items-center justify-center rounded-full bg-accent text-white shadow-xl outline-none transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:ring-4 focus-visible:ring-accent/40 sm:bottom-6 sm:right-6"
         onClick={() => setIsOpen(true)}
         type="button"
       >
-        <KeybotAvatar />
-        <span className="min-w-0">
-          <span className="block text-sm font-bold leading-4">Ask Keybot</span>
-          <span className="mt-0.5 hidden items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary sm:flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#2F8F46]" />
-            Grounded
-          </span>
-        </span>
+        <span aria-hidden className="absolute inset-0 rounded-full bg-accent/40 motion-safe:animate-ping" />
+        <span aria-hidden className="absolute inset-0 rounded-full ring-1 ring-inset ring-white/20" />
+        <Image
+          alt="Meg"
+          className="relative h-full w-full rounded-full object-cover transition-transform duration-300 group-hover:scale-105"
+          height={64}
+          src="/meg-avatar.png"
+          width={64}
+        />
+        <span className="sr-only">Ask Keybot</span>
       </button>
     );
   }
@@ -2241,7 +2359,7 @@ function KeybotPanel({
             />
             <button
               aria-label="Send Keybot question"
-              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent text-primary transition hover:bg-accent-hover hover:text-white focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:bg-surface-secondary disabled:text-white"
+              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-45"
               disabled={isSending || input.trim().length === 0}
               type="submit"
             >
@@ -2268,18 +2386,17 @@ function KeybotAvatar({ small = false }: { small?: boolean }) {
   return (
     <span
       aria-hidden
-      className={`relative flex flex-none items-center justify-center rounded-full border border-border/80 bg-accent-subtle text-primary ${
-        small ? "h-8 w-8" : "h-11 w-11"
+      className={`relative flex flex-none items-center justify-center ${
+        small ? "h-9 w-9" : "h-12 w-12"
       }`}
     >
       <Image
         alt="Meg"
-        className="h-full w-full rounded-full object-contain"
-        height={44}
+        className="h-full w-full rounded-full object-cover"
+        height={48}
         src="/meg-avatar.png"
-        width={44}
+        width={48}
       />
-      <span className="absolute -right-0.5 top-1 h-2.5 w-2.5 rounded-full border-2 border-border bg-accent" />
     </span>
   );
 }
@@ -2671,7 +2788,7 @@ function FeatureBento() {
             <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-accent text-white">
               <Image
                 alt="Meg"
-                className="h-full w-full rounded-full object-contain"
+                className="h-full w-full rounded-full object-cover"
                 height={24}
                 src="/meg-avatar.png"
                 width={24}
@@ -2828,7 +2945,7 @@ function WorkspaceHeader({
           <div className="rounded-full border border-accent/40 bg-surface-secondary px-4 py-2 text-sm font-bold text-primary">
             {selected.estimatedPrice === null
               ? "Estimate unavailable"
-              : formatMoney(
+              : formatEstimatedTotal(
                   selected.estimatedPrice,
                   selected.estimatedPriceCurrency ?? "MYR",
                 )}
@@ -2920,7 +3037,7 @@ function RecommendationList({
           const price =
             recommendation.estimatedPrice === null
               ? "No estimate"
-              : formatMoney(
+              : formatEstimatedTotal(
                   recommendation.estimatedPrice,
                   recommendation.estimatedPriceCurrency ?? "MYR",
                 );
@@ -2997,7 +3114,7 @@ function RecommendationInspector({
             <p className="mt-1 text-3xl font-bold text-primary">
               {recommendation.estimatedPrice === null
                 ? "Unavailable"
-                : formatMoney(
+                : formatEstimatedTotal(
                     recommendation.estimatedPrice,
                     recommendation.estimatedPriceCurrency ?? "MYR",
                   )}
@@ -3248,7 +3365,7 @@ function ManualSelectionPanel({
       </div>
 
       <button
-        className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-sm font-bold text-white transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-border-strong"
+        className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-sm font-bold text-white transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-45"
         disabled={hasMounted && shouldDisableManualValidation}
         onClick={onValidate}
         type="button"
@@ -3418,7 +3535,10 @@ function SavedBuildCard({
 }) {
   const price =
     savedBuild.estimatedPrice !== null && savedBuild.estimatedPriceCurrency
-      ? formatMoney(savedBuild.estimatedPrice, savedBuild.estimatedPriceCurrency)
+      ? formatEstimatedTotal(
+          savedBuild.estimatedPrice,
+          savedBuild.estimatedPriceCurrency,
+        )
       : "No estimate";
 
   return (

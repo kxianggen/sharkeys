@@ -358,10 +358,9 @@ function parseLayout(text: string) {
 }
 
 function parseSoundProfile(text: string) {
-  if (/\b(silent|quiet)\b/.test(text)) {
-    return "silent";
-  }
-
+  // Explicit sound descriptors win first. Ambient/context words like "quiet"
+  // or "office" must not override a stated profile — "a deep thocky build for
+  // a quiet office" is thocky, not silent.
   if (/\bcreamy\b/.test(text)) {
     return "creamy";
   }
@@ -372,6 +371,12 @@ function parseSoundProfile(text: string) {
 
   if (/\b(clacky|clicky)\b/.test(text)) {
     return "clacky";
+  }
+
+  // "silent" is itself an explicit profile; "quiet" only implies it when no
+  // other descriptor is present.
+  if (/\b(silent|quiet)\b/.test(text)) {
+    return "silent";
   }
 
   return null;

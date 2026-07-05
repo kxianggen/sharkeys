@@ -465,7 +465,7 @@ describe("RecommendationDemo", () => {
       screen.getByRole("button", { name: /Open Meg assistant/i }),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Thocky/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Quiet Office/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Quiet office build/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /65% Layout/i })).toBeInTheDocument();
     expect(screen.queryByText("Manual build check")).not.toBeInTheDocument();
     expect(screen.queryByText("Request summary")).not.toBeInTheDocument();
@@ -501,14 +501,14 @@ describe("RecommendationDemo", () => {
     render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: /Quiet Office/i }),
+      screen.getByRole("button", { name: /Quiet office build/i }),
     );
 
     expect(
       await screen.findByText("Recommended for you"),
     ).toBeInTheDocument();
     expect(getRecommendationRequestBodies().at(-1)?.message).toBe(
-      "Quiet office keyboard under RM500",
+      "Quiet office keyboard",
     );
   });
 
