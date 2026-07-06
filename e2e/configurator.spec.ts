@@ -40,8 +40,9 @@ test("configurator resolves a validated build from a starting point", async ({
   await page.getByRole("button", { name: "Thocky", exact: true }).click();
 
   // (a) Build title (short kit name) renders as the page h1, above the image.
+  // Live-key intent extraction can be slow; allow a generous resolve window.
   const buildTitle = page.getByRole("heading", { level: 1 });
-  await expect(buildTitle).toBeVisible({ timeout: 20_000 });
+  await expect(buildTitle).toBeVisible({ timeout: 45_000 });
 
   // (b) Short kit name fits on one line — no ellipsis truncation.
   const isTruncated = await buildTitle.evaluate(
@@ -97,6 +98,8 @@ test("configurator resolves a validated build from a starting point", async ({
   await expect(buildSummary).toBeVisible();
   const firstSummary = (await buildSummary.textContent()) ?? "";
   expect(firstSummary.length).toBeGreaterThan(0);
+  // Keycap palette dots render inside the summary line.
+  await expect(buildSummary.getByTestId("keycap-swatch")).toBeVisible();
   await expect(carousel.getByText("1 of 3")).toBeVisible();
   await carousel.screenshot({
     animations: "disabled",
@@ -115,6 +118,16 @@ test("configurator resolves a validated build from a starting point", async ({
 
   // (b) Kit-locked internals/stabilizers render as included, not pick-steps.
   await expect(page.getByText("Included with this kit").first()).toBeVisible();
+
+  // Keycap option cards show their stored 3-colour palette swatch.
+  const keycapSection = page.locator("#configurator-section-keycaps");
+  await expect(
+    keycapSection.getByTestId("keycap-swatch").first(),
+  ).toBeVisible();
+  await keycapSection.screenshot({
+    animations: "disabled",
+    path: "screenshots/configurator-keycap-swatches.png",
+  });
 
   // (c) Switches and keycaps start deselected — no pressed option cards.
   await expect(

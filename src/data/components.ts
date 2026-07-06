@@ -568,7 +568,7 @@ const rawKeyboardComponents = [
     name: "C3 Equalz Screw-In Stabilizers V3",
     brand: "C3 Equalz",
     description:
-      "Screw-in stabilizer kit from MKB.MY with 6.25u and 7u wire support.",
+      "Screw-in stabilizer kit with 6.25u and 7u wire support.",
     beginnerFriendly: false,
     stabilizerType: "screw_in",
     supportedLayouts: ["60", "65", "75", "tkl"],
@@ -591,7 +591,7 @@ const rawKeyboardComponents = [
     name: "FLCMMK Fulin V3 Plate-Mounted Stabilizers",
     brand: "FLCMMK",
     description:
-      "Plate-mounted stabilizer kit from MKB.MY with extra 2u stabilizers for larger layout coverage.",
+      "Plate-mounted stabilizer kit with extra 2u stabilizers for larger layout coverage.",
     beginnerFriendly: true,
     stabilizerType: "plate_mount",
     supportedLayouts: ["60", "65", "75", "tkl", "full"],
@@ -614,7 +614,7 @@ const rawKeyboardComponents = [
     name: "Owlab V3 Screw-In Stabilizers",
     brand: "Owlab",
     description:
-      "Premium screw-in stabilizer kit from MKB.MY for 60%, 65%, 75%, and TKL builds.",
+      "Premium screw-in stabilizer kit for 60%, 65%, 75%, and TKL builds.",
     beginnerFriendly: false,
     stabilizerType: "screw_in",
     supportedLayouts: ["60", "65", "75", "tkl"],
@@ -637,7 +637,7 @@ const rawKeyboardComponents = [
     name: "SP-Star Plate-Mounted Stabilizers",
     brand: "SP-Star",
     description:
-      "Budget plate-mounted stabilizer set from MKB.MY with 6.25u support.",
+      "Budget plate-mounted stabilizer set with 6.25u support.",
     beginnerFriendly: true,
     stabilizerType: "plate_mount",
     supportedLayouts: ["60", "65", "75", "tkl"],
@@ -688,7 +688,7 @@ const rawKeyboardComponents = [
     name: "MMD Princess Linear V3 Switch",
     brand: "MMD",
     description:
-      "Budget smooth linear mechanical switch from MKB.MY for creamy and clacky builds.",
+      "Budget smooth linear mechanical switch for creamy and clacky builds.",
     beginnerFriendly: true,
     switchTechnology: "mechanical",
     pinCount: 5,
@@ -713,7 +713,7 @@ const rawKeyboardComponents = [
     name: "Akko Lavender Purple V3 Pro Tactile Switch",
     brand: "Akko",
     description:
-      "5-pin mechanical tactile switch from MKB.MY for neutral typing builds.",
+      "5-pin mechanical tactile switch for neutral typing builds.",
     beginnerFriendly: true,
     switchTechnology: "mechanical",
     pinCount: 5,
@@ -738,7 +738,7 @@ const rawKeyboardComponents = [
     name: "Akko Penguin Silent Tactile Switch",
     brand: "Akko",
     description:
-      "Silent 5-pin mechanical tactile switch from KeebsProject for quiet office keyboards.",
+      "Silent 5-pin mechanical tactile switch for quiet office keyboards.",
     beginnerFriendly: true,
     switchTechnology: "mechanical",
     pinCount: 5,
@@ -768,7 +768,7 @@ const rawKeyboardComponents = [
     name: "Pudding OEM PBT Keycaps",
     brand: "Unknown",
     description:
-      "Budget shine-through OEM profile PBT keycaps from MKB.MY for RGB-friendly beginner builds.",
+      "Budget shine-through OEM profile PBT keycaps for RGB-friendly beginner builds.",
     beginnerFriendly: true,
     keycapProfile: "oem",
     layoutSupport: ["60", "65", "75", "tkl", "full"],
@@ -778,6 +778,7 @@ const rawKeyboardComponents = [
     vendorUrl: "https://mkb.gg/products/pudding",
     metadata: {
       sourceUrl: "https://mkb.gg/products/pudding",
+      swatch: ["#232326", "#F2F3F5", "#C9CCD2"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",
       sourceVendor: "MKB.MY",
@@ -791,7 +792,7 @@ const rawKeyboardComponents = [
     name: "Retro 9009 PBT Cherry Keycaps",
     brand: "Unknown",
     description:
-      "Cherry profile PBT keycap set from KeebsProject with broad 60%, 65%, 75%, TKL, and full-size compatibility.",
+      "Cherry profile PBT keycap set with broad 60%, 65%, 75%, TKL, and full-size compatibility.",
     beginnerFriendly: true,
     keycapProfile: "cherry",
     layoutSupport: ["60", "65", "75", "tkl", "full"],
@@ -802,6 +803,7 @@ const rawKeyboardComponents = [
       "https://www.keebsproject.com/product/ready-stock-gmk-icon-retro-9009-keycaps-pbt-cherry-profile-all-layouts-keebsproject",
     metadata: {
       sourceUrl: "https://www.keebsproject.com/product/ready-stock-gmk-icon-retro-9009-keycaps-pbt-cherry-profile-all-layouts-keebsproject",
+      swatch: ["#DFD6C2", "#7C9082", "#C67E70"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",
       sourceVendor: "KeebsProject",
@@ -818,7 +820,7 @@ const rawKeyboardComponents = [
     name: "Seasonic Sea Themed XDA PBT Keycaps",
     brand: "Unknown",
     description:
-      "Sea-themed XDA profile PBT dye-sub keycaps from KeebsProject for maritime-themed builds.",
+      "Sea-themed XDA profile PBT dye-sub keycaps for maritime-themed builds.",
     beginnerFriendly: true,
     keycapProfile: "xda",
     layoutSupport: ["60", "65", "75", "tkl", "full"],
@@ -829,6 +831,7 @@ const rawKeyboardComponents = [
       "https://www.keebsproject.com/product/ready-stock-seasonic-sea-themed-keycap-set-xda-profile-pbt-dye-sub-blue-keycaps-keebs-project",
     metadata: {
       sourceUrl: "https://www.keebsproject.com/product/ready-stock-seasonic-sea-themed-keycap-set-xda-profile-pbt-dye-sub-blue-keycaps-keebs-project",
+      swatch: ["#1F5F8B", "#7FB6D9", "#F0E9D8"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",
       sourceVendor: "KeebsProject",
@@ -842,7 +845,7 @@ const rawKeyboardComponents = [
     name: "Illusion Sky Blue Cherry PBT Keycaps",
     brand: "Unknown",
     description:
-      "Cherry profile double-shot PBT keycap set from KeebsProject with broad layout support for clean productivity builds.",
+      "Cherry profile double-shot PBT keycap set with broad layout support for clean productivity builds.",
     beginnerFriendly: true,
     keycapProfile: "cherry",
     layoutSupport: ["60", "65", "75", "tkl", "full"],
@@ -853,6 +856,7 @@ const rawKeyboardComponents = [
       "https://www.keebsproject.com/product/ready-stock-gmk-illusion-sky-blue-cherry-profile-doubleshot-pbt-keycaps",
     metadata: {
       sourceUrl: "https://www.keebsproject.com/product/ready-stock-gmk-illusion-sky-blue-cherry-profile-doubleshot-pbt-keycaps",
+      swatch: ["#9CC3E5", "#4E7699", "#F4F6F8"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",
       sourceVendor: "KeebsProject",
@@ -869,7 +873,7 @@ const rawKeyboardComponents = [
     name: "Gradient Cherry Shine-Through Keycaps",
     brand: "Unknown",
     description:
-      "Cherry profile shine-through gradient keycap set from MKB.MY for RGB-oriented compact and TKL builds.",
+      "Cherry profile shine-through gradient keycap set for RGB-oriented compact and TKL builds.",
     beginnerFriendly: true,
     keycapProfile: "cherry",
     layoutSupport: ["60", "65", "75", "tkl", "full"],
@@ -879,6 +883,7 @@ const rawKeyboardComponents = [
     vendorUrl: "https://mkb.gg/products/mkb-gradient-keycap",
     metadata: {
       sourceUrl: "https://mkb.gg/products/mkb-gradient-keycap",
+      swatch: ["#3D6BDD", "#7A5AE0", "#B36AE2"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",
       sourceVendor: "MKB.MY",

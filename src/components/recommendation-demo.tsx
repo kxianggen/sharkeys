@@ -257,6 +257,27 @@ function isKitLockedComponent(component: KeyboardComponent | undefined) {
   return component?.metadata?.kitLock === true;
 }
 
+function getMetadataStringArray(
+  metadata: KeyboardComponent["metadata"],
+  key: string,
+) {
+  const value = metadata?.[key];
+
+  return Array.isArray(value) &&
+    value.every((entry): entry is string => typeof entry === "string")
+    ? value
+    : undefined;
+}
+
+// Interim keycap visual: the set's real 3-colour palette stored as
+// metadata.swatch on the catalog record. No colours are generated or
+// invented at runtime — no swatch data, no swatch.
+function getComponentSwatch(component: KeyboardComponent | undefined) {
+  return component
+    ? getMetadataStringArray(component.metadata, "swatch")
+    : undefined;
+}
+
 function getComponentLayouts(component: KeyboardComponent) {
   switch (component.category) {
     case "case":
@@ -1185,6 +1206,12 @@ export function RecommendationDemo({
     // lead (the AI's picks), then the remaining pipeline candidates from the
     // real catalog. Whatever the user assembles still goes through
     // /api/builds/validate before it can be saved — never an engine bypass.
+    //
+    // Kit ownership rule (data-driven, not a product allow-list): a part that
+    // is kit-locked to a DIFFERENT kit ships only with that kit, so it is
+    // never offered on this build. The active kit's own kit-locked part is
+    // always offered (it comes in the box), listed first; aftermarket parts
+    // follow as upgrades sorted by price low→high.
     const getChoiceOptions = (category: ComponentCategory) => {
       if (!result) {
         return [];
@@ -1193,29 +1220,63 @@ export function RecommendationDemo({
       const seen = new Set<string>();
       const options: KeyboardComponent[] = [];
 
-      for (const recommendation of result.recommendations) {
-        const component = recommendation.components[category];
-
-        if (!seen.has(component.id)) {
+      const pushOption = (component: KeyboardComponent | undefined) => {
+        if (
+          component &&
+          component.category === category &&
+          !seen.has(component.id)
+        ) {
           seen.add(component.id);
           options.push(component);
         }
+      };
+
+      const kitIdOf = (component: KeyboardComponent) =>
+        getMetadataString(component.metadata, "kitId");
+
+      // The kit's own part for this category always leads the list.
+      if (activeKitId) {
+        for (const component of catalog) {
+          if (
+            component.category === category &&
+            isKitLockedComponent(component) &&
+            kitIdOf(component) === activeKitId
+          ) {
+            pushOption(component);
+          }
+        }
+      }
+
+      for (const recommendation of result.recommendations) {
+        pushOption(recommendation.components[category]);
       }
 
       for (const componentId of result.candidateComponentIds[category] ?? []) {
-        if (seen.has(componentId)) {
-          continue;
-        }
-
-        const component = catalogById.get(componentId);
-
-        if (component && component.category === category) {
-          seen.add(componentId);
-          options.push(component);
-        }
+        pushOption(catalogById.get(componentId));
       }
 
-      return options;
+      // Never offer a part locked to another kit.
+      const offerable = options.filter(
+        (component) =>
+          !isKitLockedComponent(component) ||
+          kitIdOf(component) === activeKitId,
+      );
+
+      const ownKitParts = offerable.filter(isKitLockedComponent);
+
+      if (ownKitParts.length === 0) {
+        return offerable;
+      }
+
+      const aftermarketParts = offerable
+        .filter((component) => !isKitLockedComponent(component))
+        .sort(
+          (a, b) =>
+            (a.price ?? Number.POSITIVE_INFINITY) -
+            (b.price ?? Number.POSITIVE_INFINITY),
+        );
+
+      return [...ownKitParts, ...aftermarketParts];
     };
 
     const selectRecommendation = (recommendation: RecommendationBuild) => {
@@ -1554,23 +1615,35 @@ export function RecommendationDemo({
                           // AI's pick leads the list but is never pre-selected
                           // for free-choice categories. Choice sections also
                           // surface the wider candidate pool from the catalog.
-                          const options = (
-                            isChoice
-                              ? getChoiceOptions(category).map((component) => ({
-                                  component,
-                                  recommendation: null,
-                                }))
-                              : getCategoryOptions(category)
-                          ).sort(
-                            (a, b) =>
-                              Number(b.component.id === recommendedPart.id) -
-                              Number(a.component.id === recommendedPart.id),
-                          );
+                          const choiceOptions = isChoice
+                            ? getChoiceOptions(category).map((component) => ({
+                                component,
+                                recommendation: null,
+                              }))
+                            : getCategoryOptions(category);
+                          // When the kit's own part leads the list its order
+                          // is already Apple-style (included first, upgrades
+                          // by price); otherwise float the AI's pick to top.
+                          const hasOwnKitOption =
+                            isChoice &&
+                            choiceOptions.some(({ component }) =>
+                              isKitLockedComponent(component),
+                            );
+                          const options = hasOwnKitOption
+                            ? choiceOptions
+                            : [...choiceOptions].sort(
+                                (a, b) =>
+                                  Number(b.component.id === recommendedPart.id) -
+                                  Number(a.component.id === recommendedPart.id),
+                              );
 
                           return options.map(({ component, recommendation }) => {
                             const selected = isChoice
                               ? component.id === chosenId
                               : component.id === recommendedPart.id;
+                            const isOwnKitPart =
+                              isChoice && isKitLockedComponent(component);
+                            const swatch = getComponentSwatch(component);
 
                             return (
                               <button
@@ -1591,12 +1664,20 @@ export function RecommendationDemo({
                                 type="button"
                               >
                                 <span className="min-w-0">
-                                  <span className="block text-base font-semibold text-primary">
-                                    {component.name}
+                                  <span className="flex min-w-0 items-center gap-2">
+                                    {swatch ? <SwatchDots colors={swatch} /> : null}
+                                    <span className="block text-base font-semibold text-primary">
+                                      {component.name}
+                                    </span>
                                   </span>
                                   <span className="mt-0.5 line-clamp-1 block text-sm leading-6 text-secondary">
                                     {component.description}
                                   </span>
+                                  {isOwnKitPart ? (
+                                    <span className="mt-2 inline-flex items-center rounded-pill bg-accent-subtle px-2.5 py-0.5 text-xs font-semibold text-primary">
+                                      Included with this kit
+                                    </span>
+                                  ) : null}
                                 </span>
                                 <span className="flex-none text-sm font-semibold text-primary">
                                   {formatComponentPrice(component)}
@@ -2244,6 +2325,7 @@ function RecommendationCarousel({
   ]
     .filter(Boolean)
     .join(" · ");
+  const keycapSwatch = getComponentSwatch(recommendation.components.keycap);
   const price =
     recommendation.estimatedPrice === null
       ? "Estimate unavailable"
@@ -2312,10 +2394,11 @@ function RecommendationCarousel({
 
             {partSummary ? (
               <span
-                className="mt-1 block truncate text-sm text-secondary"
+                className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-secondary"
                 data-testid="carousel-build-summary"
               >
-                {partSummary}
+                <span className="truncate">{partSummary}</span>
+                {keycapSwatch ? <SwatchDots colors={keycapSwatch} /> : null}
               </span>
             ) : null}
 
@@ -2342,6 +2425,26 @@ function RecommendationCarousel({
         </div>
       </article>
     </section>
+  );
+}
+
+// Three ~10px circles showing a keycap set's stored palette. Hairline border
+// ring keeps light colours visible on white; the hex values are catalog data.
+function SwatchDots({ colors }: { colors: string[] }) {
+  return (
+    <span
+      aria-hidden
+      className="flex flex-none items-center gap-1"
+      data-testid="keycap-swatch"
+    >
+      {colors.slice(0, 3).map((color, index) => (
+        <span
+          className="h-2.5 w-2.5 rounded-full border-[0.5px] border-border"
+          key={`${color}-${index}`}
+          style={{ backgroundColor: color }}
+        />
+      ))}
+    </span>
   );
 }
 
