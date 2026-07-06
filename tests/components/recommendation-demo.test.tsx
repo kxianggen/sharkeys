@@ -490,7 +490,7 @@ describe("RecommendationDemo", () => {
     });
     fireEvent.click(getPromptSubmitButton());
 
-    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
     expect(getRecommendationRequestBodies().at(-1)?.message).toBe(
       "quiet office keyboard under RM500",
     );
@@ -505,7 +505,7 @@ describe("RecommendationDemo", () => {
     );
 
     expect(
-      await screen.findByText("Recommended for you"),
+      await screen.findByText(/Start from a build/),
     ).toBeInTheDocument();
     expect(getRecommendationRequestBodies().at(-1)?.message).toBe(
       "Quiet office keyboard",
@@ -727,7 +727,7 @@ describe("RecommendationDemo", () => {
 
     submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", {
         name: /Open Keybot assistant/i,
@@ -766,7 +766,7 @@ describe("RecommendationDemo", () => {
 
     submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", {
         name: /Open Keybot assistant/i,
@@ -843,7 +843,7 @@ describe("RecommendationDemo", () => {
 
     submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
     openManualCheck();
 
     expect(getSelect("Case").value).toBe("case_lucky65_v3_65_aluminum");
@@ -863,7 +863,7 @@ describe("RecommendationDemo", () => {
 
     submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
     openManualCheck();
 
     expect(getSelect("Case").value).toBe("case_lucky65_v3_65_aluminum");
@@ -893,7 +893,7 @@ describe("RecommendationDemo", () => {
 
     submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
     fireEvent.click(screen.getByText("Technical details"));
 
     expect(screen.getByText(/Estimated total/i)).toBeInTheDocument();
@@ -957,7 +957,7 @@ describe("RecommendationDemo", () => {
 
     submitConfiguratorPrompt("Creamy 65% under RM500");
 
-    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole("button", { name: /^Save build$/i })[0]);
 
     expect(
@@ -1023,7 +1023,7 @@ describe("RecommendationDemo", () => {
     render(<RecommendationDemo mode="configurator" />);
 
     submitConfiguratorPrompt("Creamy 65% under RM500");
-    expect(await screen.findByText("Recommended for you")).toBeInTheDocument();
+    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
     openManualCheck();
 
     fireEvent.click(screen.getByRole("button", { name: /Validate manual build/i }));

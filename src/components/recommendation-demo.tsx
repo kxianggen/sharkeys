@@ -9,6 +9,8 @@ import {
   Bot,
   CheckCircle2,
   CheckCircle,
+  ChevronLeft,
+  ChevronRight,
   CopyPlus,
   Cpu,
   ExternalLink,
@@ -248,6 +250,13 @@ function getMetadataString(
   return typeof value === "string" ? value : undefined;
 }
 
+// Kit-derived structural parts carry metadata.kitLock in the real catalog; the
+// rule engine already enforces that they stay with their kit, so the UI treats
+// them as auto-included rather than user pick-steps.
+function isKitLockedComponent(component: KeyboardComponent | undefined) {
+  return component?.metadata?.kitLock === true;
+}
+
 function getComponentLayouts(component: KeyboardComponent) {
   switch (component.category) {
     case "case":
@@ -416,14 +425,18 @@ function resolveCompleteComponents(
   };
 }
 
-function estimateSavedBuildPrice(
-  components: CompleteComponentSelection,
+// Running estimate over whichever parts are resolved so far: kit-locked parts
+// from the start, switches/keycaps once chosen. Same estimate semantics as the
+// saved-build total (switch price × ~70).
+function estimateAssemblyPrice(
+  components: Partial<Record<ComponentCategory, KeyboardComponent>>,
 ): PriceEstimate | null {
   const prices = componentCategories
     .map((category) => {
       const component = components[category];
 
       if (
+        !component ||
         component.price === undefined ||
         component.priceCurrency === undefined
       ) {
@@ -454,8 +467,51 @@ function estimateSavedBuildPrice(
   };
 }
 
+function estimateSavedBuildPrice(
+  components: CompleteComponentSelection,
+): PriceEstimate | null {
+  return estimateAssemblyPrice(components);
+}
+
 function buildSavedBuildTitle(components: CompleteComponentSelection) {
   return `${components.case.name} with ${components.switch.name}`;
+}
+
+// Short display name for a whole build: the kit it is based on, never the
+// concatenated component string. Prefers the catalog's observedKitName; when
+// absent, the kit-derived case name follows "<Kit> <layout> <material> Case"
+// (e.g. "Lucky65 V3 65% CNC Aluminum Case"), so everything from the layout
+// token onward is descriptor, not kit name.
+function getKitDisplayName(caseComponent: KeyboardComponent) {
+  const observedKitName = getMetadataString(
+    caseComponent.metadata,
+    "observedKitName",
+  );
+
+  if (observedKitName) {
+    return observedKitName;
+  }
+
+  const name = caseComponent.name;
+  const layoutToken = name.match(/\s+(\d{2,3}%|Full[- ]Size|TKL|1800)\b/i);
+
+  if (layoutToken?.index) {
+    return name.slice(0, layoutToken.index).trim();
+  }
+
+  const stripped = name
+    .replace(
+      /\b(CNC|Aluminum|Aluminium|ABS|Plastic|Polycarbonate|Acrylic|Case)\b/gi,
+      "",
+    )
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return stripped || name;
+}
+
+function sectionDomId(title: string) {
+  return `configurator-section-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 }
 
 type RecommendationDemoMode = "configurator" | "landing";
@@ -535,6 +591,12 @@ export function RecommendationDemo({
   const [visionNote, setVisionNote] = useState<string | null>(null);
   const [isCatalogLoading, setIsCatalogLoading] = useState(true);
   const [isManualValidating, setIsManualValidating] = useState(false);
+  // Progressive assembly: switches/keycaps start deselected and are chosen by
+  // the user; kit-locked parts are auto-included with the case.
+  const [chosenParts, setChosenParts] = useState<ManualSelection>({});
+  const [assemblyValidation, setAssemblyValidation] =
+    useState<CompatibilityResult | null>(null);
+  const [isAssemblyValidating, setIsAssemblyValidating] = useState(false);
 
   const selectedRecommendation = useMemo(() => {
     if (!result) {
@@ -568,6 +630,130 @@ export function RecommendationDemo({
   const manualSelectionComplete = componentCategories.every(
     (category) => manualSelection[category],
   );
+
+  // Free-choice categories are derived from the real catalog: anything not
+  // kit-locked (and not the case anchor) is a genuine user pick-step.
+  const choiceCategories = useMemo(() => {
+    if (!selectedRecommendation) {
+      return [] as ComponentCategory[];
+    }
+
+    return componentCategories.filter(
+      (category) =>
+        category !== "case" &&
+        !isKitLockedComponent(selectedRecommendation.components[category]),
+    );
+  }, [selectedRecommendation]);
+
+  // Full component-id set once every free choice is made; null while the
+  // assembly is still incomplete.
+  const assembledComponentIds = useMemo(() => {
+    if (!selectedRecommendation) {
+      return null;
+    }
+
+    const ids: Partial<Record<ComponentCategory, string>> = {};
+
+    for (const category of componentCategories) {
+      const id = choiceCategories.includes(category)
+        ? chosenParts[category]
+        : selectedRecommendation.componentIds[category];
+
+      if (!id) {
+        return null;
+      }
+
+      ids[category] = id;
+    }
+
+    return ids as CompleteComponentIdSelection;
+  }, [selectedRecommendation, choiceCategories, chosenParts]);
+
+  // Parts resolved so far (kit-locked always; choices once selected) — drives
+  // the running price estimate.
+  const assembledParts = useMemo(() => {
+    if (!selectedRecommendation) {
+      return null;
+    }
+
+    const parts: Partial<Record<ComponentCategory, KeyboardComponent>> = {};
+
+    for (const category of componentCategories) {
+      if (choiceCategories.includes(category)) {
+        const id = chosenParts[category];
+        const component = id ? catalogById.get(id) : undefined;
+
+        if (component?.category === category) {
+          parts[category] = component;
+        }
+      } else {
+        parts[category] = selectedRecommendation.components[category];
+      }
+    }
+
+    return parts;
+  }, [selectedRecommendation, choiceCategories, chosenParts, catalogById]);
+
+  // The assembled build must pass the same deterministic engine as every other
+  // path before it can be saved — the AI never gets the last word.
+  useEffect(() => {
+    if (!isConfigurator || !assembledComponentIds) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function validateAssembly() {
+      setIsAssemblyValidating(true);
+
+      try {
+        const response = await fetch("/api/builds/validate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            componentIds: assembledComponentIds,
+            preferences: {
+              layout: result?.intent.layout ?? undefined,
+              soundProfile: result?.intent.soundProfile ?? undefined,
+              beginnerFriendly: result?.intent.beginnerFriendly ?? undefined,
+              maxPrice: result?.criteria.maxPrice ?? undefined,
+            },
+          }),
+          signal: controller.signal,
+        });
+        const body = (await response.json()) as
+          | ValidateBuildApiResponse
+          | ApiErrorResponse;
+
+        if (!response.ok || !body.success) {
+          throw new Error(
+            body.success ? "Build validation failed." : body.error.message,
+          );
+        }
+
+        setAssemblyValidation(body.data.result);
+      } catch (caughtError) {
+        if (
+          caughtError instanceof DOMException &&
+          caughtError.name === "AbortError"
+        ) {
+          return;
+        }
+
+        setAssemblyValidation(null);
+      } finally {
+        setIsAssemblyValidating(false);
+      }
+    }
+
+    void validateAssembly();
+
+    return () => controller.abort();
+    // Intent preferences only refine warnings; the id set is the trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConfigurator, assembledComponentIds]);
 
   const shouldDisableSubmit =
     isSubmitting || message.trim().length === 0;
@@ -682,6 +868,8 @@ export function RecommendationDemo({
       setActiveCategory("case");
       setManualValidation(null);
       setSavedBuildMessage(null);
+      setChosenParts({});
+      setAssemblyValidation(null);
 
       if (firstRecommendation) {
         setManualSelection(firstRecommendation.componentIds);
@@ -926,17 +1114,47 @@ export function RecommendationDemo({
     const activeBuild = selectedRecommendation;
     const buildValid = activeBuild?.validation.isValid ?? null;
     const buildErrorCount = activeBuild?.validation.errors.length ?? 0;
-    const buildPrice =
-      activeBuild && activeBuild.estimatedPrice !== null
-        ? formatEstimatedTotal(
-            activeBuild.estimatedPrice,
-            activeBuild.estimatedPriceCurrency ?? "MYR",
-          )
-        : null;
+    // Running total: kit-locked parts from the start, choices as they land.
+    const runningPriceEstimate = assembledParts
+      ? estimateAssemblyPrice(assembledParts)
+      : null;
+    const buildPrice = runningPriceEstimate
+      ? formatEstimatedTotal(
+          runningPriceEstimate.amount,
+          runningPriceEstimate.currency,
+        )
+      : null;
     const isDesigning = isSubmitting || visionLoading;
     const activeKitId = activeBuild
       ? getMetadataString(activeBuild.components.case.metadata, "kitId") ?? null
       : null;
+    const buildDisplayName = activeBuild
+      ? getKitDisplayName(activeBuild.components.case)
+      : null;
+    const isBuildComplete = assembledComponentIds !== null;
+    const canSaveAssembly =
+      isBuildComplete &&
+      !isAssemblyValidating &&
+      Boolean(assemblyValidation?.isValid);
+    // A section is resolved when none of its categories still awaits a user
+    // choice — kit-locked sections resolve as soon as the case is set.
+    const reviewSections = activeBuild
+      ? configuratorSections
+          .filter((section) =>
+            section.categories.some(
+              (category) => activeBuild.components[category],
+            ),
+          )
+          .map((section) => ({
+            id: sectionDomId(section.title),
+            title: section.title,
+            resolved: section.categories.every(
+              (category) =>
+                !choiceCategories.includes(category) ||
+                Boolean(chosenParts[category]),
+            ),
+          }))
+      : [];
 
     // Alternatives are drawn only from rule-engine-validated recommendations;
     // choosing one selects that validated build (never bypasses the engine).
@@ -963,9 +1181,120 @@ export function RecommendationDemo({
       return options;
     };
 
+    // Options for free-choice sections: engine-validated recommendation parts
+    // lead (the AI's picks), then the remaining pipeline candidates from the
+    // real catalog. Whatever the user assembles still goes through
+    // /api/builds/validate before it can be saved — never an engine bypass.
+    const getChoiceOptions = (category: ComponentCategory) => {
+      if (!result) {
+        return [];
+      }
+
+      const seen = new Set<string>();
+      const options: KeyboardComponent[] = [];
+
+      for (const recommendation of result.recommendations) {
+        const component = recommendation.components[category];
+
+        if (!seen.has(component.id)) {
+          seen.add(component.id);
+          options.push(component);
+        }
+      }
+
+      for (const componentId of result.candidateComponentIds[category] ?? []) {
+        if (seen.has(componentId)) {
+          continue;
+        }
+
+        const component = catalogById.get(componentId);
+
+        if (component && component.category === category) {
+          seen.add(componentId);
+          options.push(component);
+        }
+      }
+
+      return options;
+    };
+
     const selectRecommendation = (recommendation: RecommendationBuild) => {
       setSelectedRecommendationId(recommendation.id);
       loadRecommendationIntoManualPanel(recommendation);
+      // A new kit anchor restarts the progressive assembly: free choices
+      // return to their deselected state.
+      setChosenParts({});
+      setAssemblyValidation(null);
+      setSavedBuildMessage(null);
+    };
+
+    const choosePart = (category: ComponentCategory, componentId: string) => {
+      setChosenParts((current) => ({ ...current, [category]: componentId }));
+      // Stale result must not enable saving while the new combination is
+      // re-validated by the engine.
+      setAssemblyValidation(null);
+      setSavedBuildMessage(null);
+    };
+
+    // "Start from a build": adopting a recommendation fills every free-choice
+    // section with that build's parts (kit-locked parts follow the case
+    // automatically). The completed assembly then re-validates through the
+    // same engine effect as a manual assembly — no bypass. Sections stay
+    // editable afterwards.
+    const adoptRecommendation = (recommendation: RecommendationBuild) => {
+      setSelectedRecommendationId(recommendation.id);
+      loadRecommendationIntoManualPanel(recommendation);
+
+      const nextChosenParts: ManualSelection = {};
+
+      for (const category of componentCategories) {
+        if (
+          category !== "case" &&
+          !isKitLockedComponent(recommendation.components[category])
+        ) {
+          nextChosenParts[category] = recommendation.componentIds[category];
+        }
+      }
+
+      setChosenParts(nextChosenParts);
+      setAssemblyValidation(null);
+      setSavedBuildMessage(null);
+    };
+
+    // Saving requires the full assembly to have passed the deterministic
+    // engine (assemblyValidation) — completeness alone is not enough.
+    const saveAssembledBuild = () => {
+      if (!assembledComponentIds || !assemblyValidation?.isValid) {
+        setSavedBuildMessage(
+          "Choose switches and keycaps to complete the build before saving.",
+        );
+        return;
+      }
+
+      const components = resolveCompleteComponents(
+        assembledComponentIds,
+        catalogById,
+      );
+
+      if (!components) {
+        setSavedBuildMessage(
+          "Build parts could not be resolved from the catalog.",
+        );
+        return;
+      }
+
+      const priceEstimate = estimateAssemblyPrice(components);
+
+      prependSavedBuild({
+        id: createSavedBuildId("recommendation"),
+        title: buildSavedBuildTitle(components),
+        createdAt: new Date().toISOString(),
+        source: "recommendation",
+        componentIds: assembledComponentIds,
+        estimatedPrice: priceEstimate?.amount ?? null,
+        estimatedPriceCurrency: priceEstimate?.currency ?? null,
+        validation: assemblyValidation,
+      });
     };
 
     return (
@@ -978,48 +1307,37 @@ export function RecommendationDemo({
             aria-label="Build visual"
             className="min-w-0 lg:sticky lg:top-16 lg:self-start"
           >
-            <KitVisual
-              key={activeKitId ?? "empty"}
-              kitId={activeKitId}
-              kitName={activeBuild?.title ?? "Keyboard build"}
-            />
-
             {activeBuild ? (
-              <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <h1 className="truncate text-h3 text-primary">
-                    {activeBuild.title}
-                  </h1>
-                  {buildPrice ? (
-                    <p className="mt-0.5 text-sm text-secondary">
-                      From{" "}
-                      <span className="font-semibold text-primary">
-                        {buildPrice}
-                      </span>
-                    </p>
-                  ) : null}
-                </div>
-
-                {buildValid === null ? null : buildValid ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-pill bg-success/10 px-3 py-1.5 text-xs font-semibold text-success">
-                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
-                    Validated · every part compatible
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-pill bg-error/10 px-3 py-1.5 text-xs font-semibold text-error">
+              <div className="mb-6 min-w-0">
+                <h1 className="text-h1 text-primary">{buildDisplayName}</h1>
+                {buildPrice ? (
+                  <p className="mt-2 text-base text-secondary">
+                    From {buildPrice}
+                  </p>
+                ) : null}
+                {buildValid === false ? (
+                  <span className="mt-3 inline-flex items-center gap-1.5 rounded-pill bg-error/10 px-3 py-1.5 text-xs font-semibold text-error">
                     <ShieldAlert className="h-3.5 w-3.5" aria-hidden />
                     {buildErrorCount > 0
                       ? `${buildErrorCount} blocker${buildErrorCount > 1 ? "s" : ""}`
                       : "Blocked"}
                   </span>
-                )}
+                ) : null}
               </div>
-            ) : (
+            ) : null}
+
+            <KitVisual
+              key={activeKitId ?? "empty"}
+              kitId={activeKitId}
+              kitName={buildDisplayName ?? "Keyboard build"}
+            />
+
+            {!activeBuild ? (
               <p className="mt-5 text-sm leading-6 text-secondary">
                 Ask Meg to resolve a validated build — it appears here with the
                 kit it is based on.
               </p>
-            )}
+            ) : null}
           </section>
 
           {/* RIGHT — configuration rail */}
@@ -1178,22 +1496,81 @@ export function RecommendationDemo({
             >
               {activeBuild ? (
                 <>
+                  {result && result.recommendations.length > 0 ? (
+                    <RecommendationCarousel
+                      onSaveRecommendation={saveRecommendationBuild}
+                      onSelect={adoptRecommendation}
+                      recommendations={result.recommendations}
+                      selectedId={selectedRecommendation?.id ?? null}
+                    />
+                  ) : null}
+
                   {configuratorSections.map((section) => (
-                    <section key={section.title}>
-                      <h3 className="text-base font-semibold text-primary">
+                    <section id={sectionDomId(section.title)} key={section.title}>
+                      <h3 className="text-h2 text-primary">
                         {section.title}.{" "}
-                        <span className="font-normal text-secondary">
+                        <span className="text-secondary">
                           {section.prompt}
                         </span>
                       </h3>
 
-                      <div className="mt-3 space-y-2.5">
+                      <div className="mt-4 space-y-2.5">
                         {section.categories.flatMap((category) => {
-                          const selectedPart = activeBuild.components[category];
-                          const options = getCategoryOptions(category);
+                          const recommendedPart =
+                            activeBuild.components[category];
+
+                          // Kit-locked parts (and the case anchor's siblings)
+                          // are resolved by the kit, not picked: render them
+                          // as included, without a pick affordance.
+                          if (
+                            category !== "case" &&
+                            !choiceCategories.includes(category)
+                          ) {
+                            return [
+                              <div
+                                className="flex w-full items-center justify-between gap-4 rounded-lg border-[0.5px] border-border bg-surface-secondary/60 p-4"
+                                key={`${category}-${recommendedPart.id}`}
+                              >
+                                <div className="min-w-0">
+                                  <p className="text-base font-semibold text-primary">
+                                    {recommendedPart.name}
+                                  </p>
+                                  <p className="mt-0.5 line-clamp-1 text-sm leading-6 text-secondary">
+                                    {recommendedPart.description}
+                                  </p>
+                                  <p className="mt-2 inline-flex items-center rounded-pill bg-accent-subtle px-2.5 py-0.5 text-xs font-semibold text-primary">
+                                    Included with this kit
+                                  </p>
+                                </div>
+                                <span className="flex-none text-sm font-semibold text-primary">
+                                  {formatComponentPrice(recommendedPart)}
+                                </span>
+                              </div>,
+                            ];
+                          }
+
+                          const isChoice = category !== "case";
+                          const chosenId = chosenParts[category] ?? null;
+                          // AI's pick leads the list but is never pre-selected
+                          // for free-choice categories. Choice sections also
+                          // surface the wider candidate pool from the catalog.
+                          const options = (
+                            isChoice
+                              ? getChoiceOptions(category).map((component) => ({
+                                  component,
+                                  recommendation: null,
+                                }))
+                              : getCategoryOptions(category)
+                          ).sort(
+                            (a, b) =>
+                              Number(b.component.id === recommendedPart.id) -
+                              Number(a.component.id === recommendedPart.id),
+                          );
 
                           return options.map(({ component, recommendation }) => {
-                            const selected = component.id === selectedPart.id;
+                            const selected = isChoice
+                              ? component.id === chosenId
+                              : component.id === recommendedPart.id;
 
                             return (
                               <button
@@ -1204,20 +1581,24 @@ export function RecommendationDemo({
                                     : "border-[0.5px] border-border hover:border-border-strong"
                                 }`}
                                 key={`${category}-${component.id}`}
-                                onClick={() =>
-                                  selectRecommendation(recommendation)
-                                }
+                                onClick={() => {
+                                  if (isChoice) {
+                                    choosePart(category, component.id);
+                                  } else if (recommendation) {
+                                    selectRecommendation(recommendation);
+                                  }
+                                }}
                                 type="button"
                               >
                                 <span className="min-w-0">
-                                  <span className="block text-sm font-medium text-primary">
+                                  <span className="block text-base font-semibold text-primary">
                                     {component.name}
                                   </span>
-                                  <span className="mt-0.5 line-clamp-1 block text-xs leading-5 text-secondary">
+                                  <span className="mt-0.5 line-clamp-1 block text-sm leading-6 text-secondary">
                                     {component.description}
                                   </span>
                                 </span>
-                                <span className="flex-none text-sm text-secondary">
+                                <span className="flex-none text-sm font-semibold text-primary">
                                   {formatComponentPrice(component)}
                                 </span>
                               </button>
@@ -1227,15 +1608,6 @@ export function RecommendationDemo({
                       </div>
                     </section>
                   ))}
-
-                  {result && result.recommendations.length > 0 ? (
-                    <CompactRecommendationGrid
-                      onSaveRecommendation={saveRecommendationBuild}
-                      onSelect={selectRecommendation}
-                      recommendations={result.recommendations}
-                      selectedId={selectedRecommendation?.id ?? null}
-                    />
-                  ) : null}
                 </>
               ) : result && result.recommendations.length === 0 ? (
                 <EmptyRecommendationState result={result} />
@@ -1287,25 +1659,39 @@ export function RecommendationDemo({
               <div className="sticky bottom-0 mt-8 border-t-[0.5px] border-border bg-surface/95 py-4 backdrop-blur">
                 <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-primary">
-                      {activeBuild.title}
+                    <p className="text-sm font-semibold text-primary">
+                      {buildDisplayName}
                     </p>
                     {buildPrice ? (
                       <p className="text-sm text-secondary">From {buildPrice}</p>
+                    ) : null}
+                    {!isBuildComplete ? (
+                      <p className="text-xs text-secondary">
+                        Choose{" "}
+                        {choiceCategories
+                          .filter((category) => !chosenParts[category])
+                          .map((category) =>
+                            categoryLabels[category].toLowerCase(),
+                          )
+                          .join(", ")}{" "}
+                        to finish
+                      </p>
                     ) : null}
                   </div>
                   <div className="flex flex-none items-center gap-2">
                     <button
                       aria-label="Save to favourites"
-                      className="flex h-10 w-10 items-center justify-center rounded-full border-[0.5px] border-border text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20"
-                      onClick={() => saveRecommendationBuild(activeBuild)}
+                      className="flex h-10 w-10 items-center justify-center rounded-full border-[0.5px] border-border text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-45"
+                      disabled={!canSaveAssembly}
+                      onClick={saveAssembledBuild}
                       type="button"
                     >
                       <Heart className="h-4 w-4" aria-hidden />
                     </button>
                     <button
                       className="inline-flex h-10 items-center justify-center rounded-pill bg-accent px-5 text-sm font-bold text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-45"
-                      onClick={() => saveRecommendationBuild(activeBuild)}
+                      disabled={!canSaveAssembly}
+                      onClick={saveAssembledBuild}
                       type="button"
                     >
                       Save build
@@ -1316,6 +1702,10 @@ export function RecommendationDemo({
             ) : null}
           </section>
         </div>
+
+        {activeBuild && reviewSections.length > 1 ? (
+          <ResolutionProgress sections={reviewSections} />
+        ) : null}
 
         <FloatingKeybot
           catalogById={catalogById}
@@ -1784,67 +2174,39 @@ function ConfiguratorSidebar({ onAskKeybot }: { onAskKeybot: () => void }) {
   );
 }
 
-function getCompactBuildName(
-  recommendation: RecommendationBuild,
-  index: number,
-) {
-  const layout = recommendation.components.case.layouts[0];
-  const soundProfile = recommendation.components.switch.soundProfile;
-
-  if (soundProfile === "silent") {
-    return ["The Quiet Desk", "The Office Calm", "The Soft Focus"][index % 3];
-  }
-
-  if (soundProfile === "thocky") {
-    return ["The Midnight Typer", "The Deep Studio", "The Warm Board"][
-      index % 3
-    ];
-  }
-
-  if (soundProfile === "creamy") {
-    return ["The Smooth Studio", "The Creamy Coder", "The Soft Linear"][
-      index % 3
-    ];
-  }
-
-  if (soundProfile === "clacky") {
-    return ["The Crisp Writer", "The Bright Desk", "The Sharp Typist"][
-      index % 3
-    ];
-  }
-
-  if (layout?.toLowerCase() === "tkl") {
-    return ["The TKL Typist", "The Studio TKL", "The Workhorse"][
-      index % 3
-    ];
-  }
-
-  return ["The Daily Driver", "The Alpine Studio", "The Focus Board"][
-    index % 3
-  ];
-}
-
-function shortenCaseName(name: string) {
-  return name
-    .replace(/\bCNC\b/gi, "")
-    .replace(/\bAluminum\b/gi, "")
-    .replace(/\bABS\b/gi, "")
-    .replace(/\bPlastic\b/gi, "")
-    .replace(/\bCase\b/gi, "")
-    .replace(/\s+/g, " ")
+// Card summary helpers: reduce real catalog part names to their core so the
+// one-line "{switch} · {keycap}" summary stays scannable. Only redundant
+// category suffixes are stripped — never invented or reworded.
+function coreSwitchName(name: string) {
+  const core = name
+    .replace(/\s+(linear|tactile|clicky|silent)?\s*switch(es)?$/i, "")
     .trim();
+
+  return core || name;
 }
 
-function shortenSwitchName(name: string) {
-  return name
-    .replace(/\b(Gateron|Akko|MMD|HMX|Outemu)\b/gi, "")
-    .replace(/\b(Linear|Tactile|Clicky|Silent)\b/gi, "")
-    .replace(/\bSwitch(?:es)?\b/gi, "")
-    .replace(/\s+/g, " ")
-    .trim();
+function coreKeycapName(name: string) {
+  const core = name.replace(/\s+keycaps?(\s+set)?$/i, "").trim();
+
+  return core ? `${core} keycaps` : name;
 }
 
-function CompactRecommendationGrid({
+// Clamp a long part name at a word boundary — no mid-word ellipsis.
+function clampPartName(name: string, maxLength = 30) {
+  if (name.length <= maxLength) {
+    return name;
+  }
+
+  const cut = name.slice(0, maxLength + 1);
+  const lastSpace = cut.lastIndexOf(" ");
+
+  return `${cut.slice(0, lastSpace > 0 ? lastSpace : maxLength).trim()}…`;
+}
+
+// One recommendation at a time: full-width card with arrow controls, so the
+// short kit name, price, and tags all fit without truncation. Cards remain
+// rule-engine-validated builds; selecting one never bypasses the engine.
+function RecommendationCarousel({
   onSaveRecommendation,
   onSelect,
   recommendations,
@@ -1855,140 +2217,226 @@ function CompactRecommendationGrid({
   recommendations: RecommendationBuild[];
   selectedId: string | null;
 }) {
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const index = Math.min(carouselIndex, recommendations.length - 1);
+  const recommendation = recommendations[index];
+
+  if (!recommendation) {
+    return null;
+  }
+
+  const selected = recommendation.id === selectedId;
+  const kitName = getKitDisplayName(recommendation.components.case);
+  const kitId =
+    getMetadataString(recommendation.components.case.metadata, "kitId") ?? null;
+  const layout = recommendation.components.case.layouts[0];
+  const soundProfile =
+    recommendation.components.switch.soundProfile ?? "neutral";
+  // Defining parts straight from the build's resolved components — the pieces
+  // that make builds on the same kit feel different.
+  const partSummary = [
+    recommendation.components.switch
+      ? clampPartName(coreSwitchName(recommendation.components.switch.name))
+      : null,
+    recommendation.components.keycap
+      ? clampPartName(coreKeycapName(recommendation.components.keycap.name))
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const price =
+    recommendation.estimatedPrice === null
+      ? "Estimate unavailable"
+      : formatEstimatedTotal(
+          recommendation.estimatedPrice,
+          recommendation.estimatedPriceCurrency ?? "MYR",
+        );
+
   return (
-    <section aria-label="Recommended builds" className="mx-auto w-full max-w-3xl">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1">
-        <div>
-          <h2 className="text-xl font-black text-primary">
-            Recommended for you
-          </h2>
-        </div>
-        <div className="hidden gap-2 text-secondary sm:flex">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-secondary text-sm">
-            ‹
-          </span>
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-secondary text-sm">
-            ›
-          </span>
+    <section aria-label="Start from a build" className="w-full">
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3 px-1">
+        <h2 className="text-h2 text-primary">
+          Start from a build.{" "}
+          <span className="text-secondary">Pick one, then make it yours.</span>
+        </h2>
+        <div className="flex items-center gap-2">
+          <p aria-live="polite" className="text-sm text-secondary">
+            {index + 1} of {recommendations.length}
+          </p>
+          <button
+            aria-label="Previous recommendation"
+            className="flex h-8 w-8 items-center justify-center rounded-full border-[0.5px] border-border text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={index === 0}
+            onClick={() => setCarouselIndex(Math.max(0, index - 1))}
+            type="button"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+          </button>
+          <button
+            aria-label="Next recommendation"
+            className="flex h-8 w-8 items-center justify-center rounded-full border-[0.5px] border-border text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={index === recommendations.length - 1}
+            onClick={() =>
+              setCarouselIndex(Math.min(recommendations.length - 1, index + 1))
+            }
+            type="button"
+          >
+            <ChevronRight className="h-4 w-4" aria-hidden />
+          </button>
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        {recommendations.slice(0, 3).map((recommendation, index) => {
-          const selected = recommendation.id === selectedId;
-          const layout = recommendation.components.case.layouts[0];
-          const soundProfile =
-            recommendation.components.switch.soundProfile ?? "neutral";
-          const displayName = getCompactBuildName(recommendation, index);
-          const summary = `${shortenCaseName(
-            recommendation.components.case.name,
-          )} • ${shortenSwitchName(recommendation.components.switch.name)}`;
-          const price =
-            recommendation.estimatedPrice === null
-              ? "Estimate unavailable"
-              : formatEstimatedTotal(
-                  recommendation.estimatedPrice,
-                  recommendation.estimatedPriceCurrency ?? "MYR",
-                );
+      <article
+        className={`rounded-lg border bg-surface shadow-sm transition ${
+          selected
+            ? "border-accent ring-4 ring-accent/15"
+            : "border-border hover:border-border-strong"
+        }`}
+      >
+        <button
+          aria-label={`Select ${kitName}`}
+          aria-pressed={selected}
+          className="flex w-full items-center gap-5 p-4 text-left"
+          onClick={() => onSelect(recommendation)}
+          type="button"
+        >
+          <CarouselKitThumbnail key={kitId ?? recommendation.id} kitId={kitId} />
 
-          return (
-            <article
-              className={`rounded-lg border bg-white p-2 shadow-sm transition ${
-                selected
-                  ? "border-accent ring-4 ring-accent/20"
-                  : "border-border hover:border-border"
-              }`}
-              key={recommendation.id}
-            >
-              <button
-                aria-label={`Select Build ${index + 1}: ${displayName}`}
-                className="flex w-full items-center gap-3 text-left"
-                onClick={() => onSelect(recommendation)}
-                type="button"
+          <span className="min-w-0 flex-1">
+            <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+              <span className="text-lg font-black leading-6 text-primary">
+                {kitName}
+              </span>
+              <span className="text-sm font-black text-primary">{price}</span>
+            </span>
+
+            {partSummary ? (
+              <span
+                className="mt-1 block truncate text-sm text-secondary"
+                data-testid="carousel-build-summary"
               >
-                <CompactBuildThumbnail index={index} selected={selected} />
+                {partSummary}
+              </span>
+            ) : null}
 
-                <span className="min-w-0 flex-1 py-1">
-                  <span className="flex items-start justify-between gap-2">
-                    <span className="min-w-0">
-                      <span className="block truncate pr-2 text-sm font-black leading-5 text-primary">
-                        {displayName}
-                      </span>
-                      <span className="mt-1 block truncate text-[11px] leading-4 text-secondary">
-                        {summary}
-                      </span>
-                    </span>
-                    <span className="shrink-0 text-xs font-black text-primary">
-                      {price}
-                    </span>
-                  </span>
+            <span className="mt-3 flex flex-wrap gap-1.5">
+              <span className="rounded border border-border bg-surface px-2 py-0.5 text-[11px] font-bold text-secondary">
+                {formatLayoutChip(layout)}
+              </span>
+              <span className="rounded border border-border bg-surface px-2 py-0.5 text-[11px] font-bold capitalize text-secondary">
+                {soundProfile}
+              </span>
+            </span>
+          </span>
+        </button>
 
-                  <span className="mt-3 flex flex-wrap gap-1.5">
-                    <span className="rounded border border-border bg-surface px-2 py-0.5 text-[10px] font-bold text-secondary">
-                      {formatLayoutChip(layout)}
-                    </span>
-                    <span className="rounded border border-border bg-surface px-2 py-0.5 text-[10px] font-bold capitalize text-secondary">
-                      {soundProfile}
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded border border-accent/60 bg-surface-secondary px-2 py-0.5 text-[10px] font-bold text-primary">
-                      <CheckCircle2 className="h-3 w-3" aria-hidden />
-                      Validated
-                    </span>
-                  </span>
-                </span>
-              </button>
-
-              <div className="mt-2 flex items-center gap-2 border-t border-border pt-2">
-                <button
-                  aria-label="Save build"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white text-primary transition hover:border-accent hover:bg-surface-secondary focus:outline-none focus:ring-4 focus:ring-accent/20"
-                  onClick={() => onSaveRecommendation(recommendation)}
-                  type="button"
-                >
-                  <BookmarkPlus className="h-4 w-4" aria-hidden />
-                </button>
-              </div>
-            </article>
-          );
-        })}
-      </div>
+        <div className="flex items-center gap-2 border-t-[0.5px] border-border px-4 py-2.5">
+          <button
+            aria-label="Save recommended build"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border-[0.5px] border-border bg-surface text-primary transition hover:border-accent hover:bg-surface-secondary focus:outline-none focus:ring-4 focus:ring-accent/20"
+            onClick={() => onSaveRecommendation(recommendation)}
+            type="button"
+          >
+            <BookmarkPlus className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+      </article>
     </section>
   );
 }
 
-function CompactBuildThumbnail({
-  index,
-  selected,
-}: {
-  index: number;
-  selected: boolean;
-}) {
+function CarouselKitThumbnail({ kitId }: { kitId: string | null }) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  if (!kitId || imageFailed) {
+    return (
+      <span
+        aria-hidden
+        className="flex h-24 w-32 flex-none items-center justify-center rounded-lg bg-surface-secondary"
+      >
+        <Keyboard className="h-8 w-8 text-secondary/50" aria-hidden />
+      </span>
+    );
+  }
+
   return (
     <span
       aria-hidden
-      className={`relative block h-24 w-24 flex-none overflow-hidden rounded-md border ${
-        selected ? "border-accent" : "border-border"
-      } bg-surface-secondary`}
+      className="flex h-24 w-32 flex-none items-center justify-center overflow-hidden rounded-lg bg-surface-secondary p-2"
     >
-      <span className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(9,60,93,0.14)_1px,transparent_0)] [background-size:14px_14px]" />
-      <span
-        className={`absolute inset-x-3 bottom-4 rounded-lg p-2.5 shadow-sm ${
-          index % 2 === 0 ? "bg-accent-subtle" : "bg-surface"
-        }`}
-      >
-        <span className="mb-2 grid grid-cols-[1fr_1fr_1fr_2fr] gap-1">
-          <span className="h-3.5 rounded bg-white/80" />
-          <span className="h-3.5 rounded bg-white/80" />
-          <span className="h-3.5 rounded bg-white/80" />
-          <span className="h-3.5 rounded bg-white/80" />
-        </span>
-        <span className="grid grid-cols-[1.4fr_3fr_1.4fr] gap-1">
-          <span className="h-3.5 rounded bg-white/80" />
-          <span className="h-3.5 rounded bg-white/80" />
-          <span className="h-3.5 rounded bg-white/80" />
-        </span>
-      </span>
+      <Image
+        alt=""
+        className="h-full w-full object-contain"
+        height={120}
+        onError={() => setImageFailed(true)}
+        src={`/kits/${kitId}.webp`}
+        width={160}
+      />
     </span>
+  );
+}
+
+// Height of one section's step cell on the vertical progress track.
+const progressStepPx = 30;
+
+// Apple-style resolution progress: ONE continuous vertical track. The filled
+// portion is a single solid ink bar with rounded caps whose height maps to
+// resolved/total sections — not per-section dot+connector pairs, so there are
+// no seams. Pending sections read as faint dots sitting on the remaining
+// length of the same axis; the fill grows over them as sections resolve
+// (kit-locked sections with the case, free choices on selection). Purely
+// visual — it never gates saving beyond the completeness rule and never
+// alters the resolved build.
+function ResolutionProgress({
+  sections,
+}: {
+  sections: Array<{ id: string; title: string; resolved: boolean }>;
+}) {
+  const resolvedCount = sections.filter((section) => section.resolved).length;
+
+  if (sections.length <= 1) {
+    return null;
+  }
+
+  const trackHeight = sections.length * progressStepPx;
+  const filledHeight = Math.round(
+    (resolvedCount / sections.length) * trackHeight,
+  );
+
+  return (
+    <div
+      aria-label="Build sections complete"
+      aria-valuemax={sections.length}
+      aria-valuemin={0}
+      aria-valuenow={resolvedCount}
+      className="fixed right-4 top-1/2 z-30 hidden -translate-y-1/2 lg:block xl:right-7"
+      data-testid="review-progress"
+      role="progressbar"
+    >
+      <div className="relative w-1.5" style={{ height: trackHeight }}>
+        {/* Pending steps: faint dots on the track axis. Dots inside the filled
+            region fade out so the fill reads as one unbroken bar. */}
+        {sections.map((section, sectionIndex) => (
+          <span
+            className={`absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-border transition-opacity duration-300 ${
+              sectionIndex < resolvedCount ? "opacity-0" : "opacity-100"
+            }`}
+            key={section.id}
+            style={{ top: (sectionIndex + 0.5) * progressStepPx }}
+            title={section.title}
+          />
+        ))}
+
+        {/* The single filled segment: one solid bar, rounded caps. */}
+        <span
+          className="absolute inset-x-0 top-0 rounded-full bg-primary transition-all duration-500"
+          style={{ height: filledHeight }}
+        />
+      </div>
+      <span className="sr-only">
+        {resolvedCount} of {sections.length} complete
+      </span>
+    </div>
   );
 }
 
@@ -2015,14 +2463,20 @@ function KitVisual({
 
   if (!kitId || imageFailed) {
     return (
-      <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-surface-secondary">
+      <div
+        className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-surface-secondary"
+        data-testid="kit-visual"
+      >
         <Keyboard className="h-16 w-16 text-secondary/50" aria-hidden />
       </div>
     );
   }
 
   return (
-    <div className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-secondary p-6 sm:p-10">
+    <div
+      className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-secondary p-6 sm:p-10"
+      data-testid="kit-visual"
+    >
       <Image
         alt={`${kitName} kit`}
         className="h-full w-full object-contain"

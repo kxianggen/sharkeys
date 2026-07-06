@@ -59,6 +59,17 @@ export function prepareIntentMatches(
   });
 }
 
+// Aesthetic categories are exempt from the free-text strict tier: use-case
+// words like "office" or "gaming" describe how the keyboard is used, not what
+// a keycap set or case is called, so a description that happens to contain the
+// word would otherwise collapse the candidate pool to near-one (observed with
+// keycaps). Structured criteria (layout, sound, budget) still apply, and the
+// rule engine remains the only compatibility authority downstream.
+const textQueryExemptCategories: ReadonlySet<ComponentCategory> = new Set([
+  "keycap",
+  "case",
+]);
+
 function searchCandidateIds(
   category: ComponentCategory,
   criteria: IntentMatchingCriteria,
@@ -66,7 +77,7 @@ function searchCandidateIds(
 ) {
   const categoryCriteria: ComponentSearchCriteria = {
     category,
-    query: criteria.query,
+    query: textQueryExemptCategories.has(category) ? undefined : criteria.query,
     layout: criteria.layout,
     switchTechnology: criteria.switchTechnology,
     soundProfile: criteria.soundProfile,

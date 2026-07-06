@@ -55,8 +55,13 @@ type AssemblyResult = {
   rejectionExplanations: string[];
 };
 
-const maxCandidatesPerCategoryForAssembly = 4;
-const maxAssemblyAttempts = 300;
+// Assembly must be able to enumerate the full prepared candidate space
+// (intent preparation already caps each category at 6): a tighter slice can
+// drop a kit's own PCB while keeping its case, making that kit — and with few
+// enough survivors, every build — unassemblable. 6^6 bounds the worst case;
+// each attempt is a cheap in-memory rule-engine validation.
+const maxCandidatesPerCategoryForAssembly = 6;
+const maxAssemblyAttempts = 6 ** 6;
 const defaultMaxRecommendations = 3;
 const estimatedSwitchCount = 70;
 
