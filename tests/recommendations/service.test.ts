@@ -403,6 +403,33 @@ describe("recommendation service", () => {
     });
   });
 
+  it("anchors every recommendation to the requested kit", async () => {
+    await withMissingOpenAiKey(async () => {
+      const result = await generateRecommendationsFromMessage({
+        message: "Start from the GMK67 barebones kit",
+        kitId: "gmk67",
+      });
+
+      expectValidatedRecommendations(result);
+      expect(result.recommendations.length).toBeGreaterThan(0);
+      for (const recommendation of result.recommendations) {
+        expect(recommendation.components.case.metadata?.kitId).toBe("gmk67");
+      }
+    });
+  });
+
+  it("ignores an unknown kit anchor instead of failing", async () => {
+    await withMissingOpenAiKey(async () => {
+      const result = await generateRecommendationsFromMessage({
+        message: "beginner friendly 65% keyboard",
+        kitId: "does_not_exist",
+      });
+
+      expectValidatedRecommendations(result);
+      expect(result.recommendations.length).toBeGreaterThan(0);
+    });
+  });
+
   it("returns a validated 60% typing recommendation path", async () => {
     await withMissingOpenAiKey(async () => {
       const result = await generateRecommendationsFromMessage({

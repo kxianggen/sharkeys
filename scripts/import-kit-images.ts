@@ -1,14 +1,19 @@
 /**
  * scripts/import-kit-images.ts
  * ---------------------------------------------------------------------------
- * Turns raw, inconsistent kit photos into a clean, uniform lineup of image
- * assets stored at:  public/kits/<kitId>.webp
+ * Turns raw, inconsistent product photos into a clean, uniform lineup of image
+ * assets. Two modes:
+ *
+ *   KITS  (default):  ./kit-images-inbox/   →  public/kits/<kitId>.webp
+ *   PARTS (--parts):  ./part-images-inbox/  →  public/parts/<componentId>.webp
  *
  * WHY IT'S SAFE:
- *   - It reads the REAL kit list from your catalog (metadata.kitId), so it can
- *     only place an image for a kit that actually exists. Unknown or ambiguous
- *     files are reported and skipped — never guessed into place. This keeps the
- *     "never fabricate a product" principle intact down at the asset layer.
+ *   - It reads the REAL catalog. Kits mode matches against metadata.kitId;
+ *     parts mode matches against switch/keycap/stabilizer component ids AND
+ *     names. It can only place an image for a kit or component that actually
+ *     exists. Unknown or ambiguous files are reported and skipped — never
+ *     guessed into place. This keeps the "never fabricate a product" principle
+ *     intact down at the asset layer.
  *   - Every output is forced to the SAME canvas, aspect ratio, and format, so
  *     your lineup stays visually consistent (the thing that makes it read as
  *     "Apple") even if your source photos are all over the place.
@@ -17,15 +22,19 @@
  *   - It does not remove/replace backgrounds (that's an ML task). Paste images
  *     that already sit on clean/consistent backgrounds for the best result.
  *
- * USAGE:
- *   1. Create a folder ./kit-images-inbox/ at the repo root.
- *   2. Drop your photos in. Name each file loosely after the kit, e.g.
- *        "keychron v2 max.png", "weikav star 80.jpg", "yunzii b87.webp"
- *      (fuzzy-matched — exact spelling not required).
- *   3. Preview the plan (writes nothing):
- *        npx tsx scripts/import-kit-images.ts
- *   4. Commit the assets:
- *        npx tsx scripts/import-kit-images.ts --commit
+ * USAGE — KITS:
+ *   1. Create ./kit-images-inbox/ at the repo root and drop your photos in.
+ *      Name each file loosely after the kit, e.g. "weikav star 80.png".
+ *   2. Preview (writes nothing):   npx tsx scripts/import-kit-images.ts
+ *   3. Commit:                     npx tsx scripts/import-kit-images.ts --commit
+ *      Add --overwrite to replace images that already exist.
+ *
+ * USAGE — PARTS:
+ *   1. Create ./part-images-inbox/ at the repo root and drop your photos in.
+ *      Name each file loosely after the switch/keycap/stabilizer, e.g.
+ *      "gateron oil king.png", "pudding pbt.png", "c3 equalz screw-in.png".
+ *   2. Preview:  npx tsx scripts/import-kit-images.ts --parts
+ *   3. Commit:   npx tsx scripts/import-kit-images.ts --parts --commit
  *      Add --overwrite to replace images that already exist.
  *
  * ONE-TIME SETUP:
@@ -47,9 +56,6 @@ import { keyboardComponents } from "@/data";
 
 // --- Config -----------------------------------------------------------------
 
-const INBOX_DIR = path.resolve("kit-images-inbox");
-const OUTPUT_DIR = path.resolve("public/kits");
-
 // 4:3 landscape at 2x retina (renders crisp at 800x600 CSS px). Every asset is
 // forced to this, so the lineup can never end up with mismatched framing.
 const CANVAS = { width: 1600, height: 1200 };
@@ -61,8 +67,13 @@ const WEBP_QUALITY = 90;
 // to 1 and set r/g/b for a uniform solid background instead.
 const BACKGROUND = { r: 255, g: 255, b: 255, alpha: 0 };
 
-// Minimum filename<->kit similarity (0..1) required to auto-accept a match.
+// Minimum filename<->target similarity (0..1) required to auto-accept a match.
 const MATCH_THRESHOLD = 0.45;
+
+// Component categories treated as "parts" (aftermarket-selectable pieces that
+// render at public/parts/<componentId>.webp). Structural kit pieces
+// (case/pcb/plate) are represented by the kit hero image instead.
+const PART_CATEGORIES = new Set(["switch", "keycap", "stabilizer"]);
 
 const SUPPORTED_INPUT = new Set([
   ".png",
@@ -73,17 +84,29 @@ const SUPPORTED_INPUT = new Set([
   ".avif",
 ]);
 
-// --- Catalog: the single source of truth for valid kits ---------------------
+// --- Mode: kits vs parts ----------------------------------------------------
 
-type KnownKit = { kitId: string; displayName: string };
+// A match target: a real, existing id plus the strings we fuzzy-match against.
+type Target = { id: string; displayName: string; matchStrings: string[] };
 
-function getKnownKits(): KnownKit[] {
+type ModeConfig = {
+  noun: string; // singular, for messages ("kit" / "part")
+  inboxDir: string;
+  outputDir: string;
+  targets: Target[];
+};
+
+type CatalogRecord = {
+  id?: string;
+  name?: string;
+  category?: string;
+  metadata?: { kitId?: string; observedKitName?: string };
+};
+
+// Kits: one target per distinct metadata.kitId. Matched against the kit's
+// display name and the kitId itself.
+function getKitTargets(): Target[] {
   const map = new Map<string, string>();
-
-  type CatalogRecord = {
-    name?: string;
-    metadata?: { kitId?: string; observedKitName?: string };
-  };
 
   for (const component of keyboardComponents as ReadonlyArray<CatalogRecord>) {
     const kitId = component?.metadata?.kitId;
@@ -98,9 +121,50 @@ function getKnownKits(): KnownKit[] {
   }
 
   return [...map.entries()].map(([kitId, displayName]) => ({
-    kitId,
+    id: kitId,
     displayName,
+    matchStrings: [displayName, kitId.replace(/_/g, " ")],
   }));
+}
+
+// Parts: one target per switch/keycap/stabilizer component. Matched against
+// the component name and the component id.
+function getPartTargets(): Target[] {
+  const targets: Target[] = [];
+
+  for (const component of keyboardComponents as ReadonlyArray<CatalogRecord>) {
+    const id = component?.id;
+    const category = component?.category;
+    if (!id || !category || !PART_CATEGORIES.has(category)) continue;
+
+    const displayName = component?.name ?? id;
+
+    targets.push({
+      id,
+      displayName: String(displayName),
+      matchStrings: [String(displayName), id.replace(/_/g, " ")],
+    });
+  }
+
+  return targets;
+}
+
+function resolveMode(isParts: boolean): ModeConfig {
+  if (isParts) {
+    return {
+      noun: "part",
+      inboxDir: path.resolve("part-images-inbox"),
+      outputDir: path.resolve("public/parts"),
+      targets: getPartTargets(),
+    };
+  }
+
+  return {
+    noun: "kit",
+    inboxDir: path.resolve("kit-images-inbox"),
+    outputDir: path.resolve("public/kits"),
+    targets: getKitTargets(),
+  };
 }
 
 // --- Fuzzy filename matching (dependency-free) ------------------------------
@@ -135,15 +199,17 @@ function similarity(a: string, b: string): number {
   return (2 * overlap) / (setA.size + setB.size);
 }
 
-function bestMatch(filename: string, kits: KnownKit[]) {
-  let best: { kit: KnownKit | null; score: number } = { kit: null, score: 0 };
+function bestMatch(filename: string, targets: Target[]) {
+  let best: { target: Target | null; score: number } = {
+    target: null,
+    score: 0,
+  };
 
-  for (const kit of kits) {
+  for (const target of targets) {
     const score = Math.max(
-      similarity(filename, kit.displayName),
-      similarity(filename, kit.kitId.replace(/_/g, " ")),
+      ...target.matchStrings.map((candidate) => similarity(filename, candidate)),
     );
-    if (score > best.score) best = { kit, score };
+    if (score > best.score) best = { target, score };
   }
 
   return best;
@@ -151,8 +217,12 @@ function bestMatch(filename: string, kits: KnownKit[]) {
 
 // --- Image processing -------------------------------------------------------
 
-async function processImage(inputPath: string, kitId: string): Promise<string> {
-  const outputPath = path.join(OUTPUT_DIR, `${kitId}.${OUTPUT_FORMAT}`);
+async function processImage(
+  inputPath: string,
+  outputDir: string,
+  id: string,
+): Promise<string> {
+  const outputPath = path.join(outputDir, `${id}.${OUTPUT_FORMAT}`);
 
   await sharp(inputPath)
     .resize(CANVAS.width, CANVAS.height, {
@@ -171,21 +241,25 @@ async function main() {
   const args = new Set(process.argv.slice(2));
   const commit = args.has("--commit");
   const overwrite = args.has("--overwrite");
+  const isParts = args.has("--parts");
 
-  const kits = getKnownKits();
-  if (kits.length === 0) {
+  const mode = resolveMode(isParts);
+
+  if (mode.targets.length === 0) {
     console.error(
-      "No kit-derived records found in the catalog (metadata.kitId). Nothing to match against.",
+      isParts
+        ? "No switch/keycap/stabilizer components found in the catalog. Nothing to match against."
+        : "No kit-derived records found in the catalog (metadata.kitId). Nothing to match against.",
     );
     process.exit(1);
   }
 
   let inboxEntries: string[];
   try {
-    inboxEntries = await fs.readdir(INBOX_DIR);
+    inboxEntries = await fs.readdir(mode.inboxDir);
   } catch {
     console.error(
-      `Inbox folder not found. Create it and drop your images in:\n  ${INBOX_DIR}`,
+      `Inbox folder not found. Create it and drop your ${mode.noun} images in:\n  ${mode.inboxDir}`,
     );
     process.exit(1);
   }
@@ -195,68 +269,80 @@ async function main() {
   );
 
   if (files.length === 0) {
-    console.log(`No supported images in ${INBOX_DIR}. Supported: ${[
+    console.log(`No supported images in ${mode.inboxDir}. Supported: ${[
       ...SUPPORTED_INPUT,
     ].join(", ")}`);
     return;
   }
 
-  // Resolve each file to a kit (or not).
+  // Resolve each file to a target (or not).
   type Plan = {
     file: string;
-    kit: KnownKit | null;
+    target: Target | null;
     score: number;
     status: "match" | "low-confidence" | "conflict";
   };
 
   const plans: Plan[] = files.map((file) => {
-    const { kit, score } = bestMatch(file, kits);
+    const { target, score } = bestMatch(file, mode.targets);
     return {
       file,
-      kit,
+      target,
       score,
       status: score >= MATCH_THRESHOLD ? "match" : "low-confidence",
     };
   });
 
-  // Flag two files targeting the same kit — resolve manually rather than guess.
+  // Flag two files targeting the same id — resolve manually rather than guess.
   const targetCounts = new Map<string, number>();
   for (const plan of plans) {
-    if (plan.status === "match" && plan.kit) {
-      targetCounts.set(plan.kit.kitId, (targetCounts.get(plan.kit.kitId) ?? 0) + 1);
+    if (plan.status === "match" && plan.target) {
+      targetCounts.set(
+        plan.target.id,
+        (targetCounts.get(plan.target.id) ?? 0) + 1,
+      );
     }
   }
   for (const plan of plans) {
-    if (plan.kit && (targetCounts.get(plan.kit.kitId) ?? 0) > 1) {
+    if (plan.target && (targetCounts.get(plan.target.id) ?? 0) > 1) {
       plan.status = "conflict";
     }
   }
 
   // Report the plan.
-  console.log(`\nPlan (${commit ? "COMMIT" : "dry run"}):\n`);
+  console.log(`\nPlan (${mode.noun}s, ${commit ? "COMMIT" : "dry run"}):\n`);
   for (const plan of plans) {
     const pct = `${Math.round(plan.score * 100)}%`.padStart(4);
-    if (plan.status === "match" && plan.kit) {
-      console.log(`  ✓ ${plan.file}  →  ${plan.kit.kitId}.webp  (${pct})`);
-    } else if (plan.status === "conflict" && plan.kit) {
+    if (plan.status === "match" && plan.target) {
+      console.log(`  ✓ ${plan.file}  →  ${plan.target.id}.webp  (${pct})`);
+    } else if (plan.status === "conflict" && plan.target) {
       console.log(
-        `  ! ${plan.file}  →  ${plan.kit.kitId}  (CONFLICT: multiple files match this kit — rename to disambiguate)`,
+        `  ! ${plan.file}  →  ${plan.target.id}  (CONFLICT: multiple files match this ${mode.noun} — rename to disambiguate)`,
       );
     } else {
-      const guess = plan.kit ? ` (closest: ${plan.kit.kitId} ${pct})` : "";
+      const guess = plan.target
+        ? ` (closest: ${plan.target.id} ${pct})`
+        : "";
       console.log(`  ? ${plan.file}  →  no confident match${guess} — skipped`);
     }
   }
 
-  // Coverage: which real kits still have no image?
-  const matchedKitIds = new Set(
-    plans.filter((p) => p.status === "match" && p.kit).map((p) => p.kit!.kitId),
+  // Coverage: which real targets still have no image? (Kits: list them all.
+  // Parts: only summarise a count — the full component list is long.)
+  const matchedIds = new Set(
+    plans.filter((p) => p.status === "match" && p.target).map((p) => p.target!.id),
   );
-  const missing = kits.filter((k) => !matchedKitIds.has(k.kitId));
+  const missing = mode.targets.filter((t) => !matchedIds.has(t.id));
   if (missing.length > 0) {
-    console.log(`\nKits still without an image this run:`);
-    for (const kit of missing) {
-      console.log(`  · ${kit.kitId}  (${kit.displayName})`);
+    if (isParts) {
+      console.log(
+        `\n${missing.length} of ${mode.targets.length} parts still have no image (they fall back to a neutral glyph until one is imported).`,
+      );
+    } else {
+      console.log(`\nKits still without an image this run:`);
+      for (const target of missing) {
+        console.log(`  · ${target.id}  (${target.displayName})`);
+      }
     }
   }
 
@@ -268,26 +354,35 @@ async function main() {
   }
 
   // Commit.
-  await fs.mkdir(OUTPUT_DIR, { recursive: true });
+  await fs.mkdir(mode.outputDir, { recursive: true });
   let written = 0;
   let skipped = 0;
 
   for (const plan of plans) {
-    if (plan.status !== "match" || !plan.kit) continue;
+    if (plan.status !== "match" || !plan.target) continue;
 
-    const outputPath = path.join(OUTPUT_DIR, `${plan.kit.kitId}.${OUTPUT_FORMAT}`);
+    const outputPath = path.join(
+      mode.outputDir,
+      `${plan.target.id}.${OUTPUT_FORMAT}`,
+    );
     const exists = await fs
       .access(outputPath)
       .then(() => true)
       .catch(() => false);
 
     if (exists && !overwrite) {
-      console.log(`  ↷ ${plan.kit.kitId}.webp exists — skipped (use --overwrite)`);
+      console.log(
+        `  ↷ ${plan.target.id}.webp exists — skipped (use --overwrite)`,
+      );
       skipped += 1;
       continue;
     }
 
-    await processImage(path.join(INBOX_DIR, plan.file), plan.kit.kitId);
+    await processImage(
+      path.join(mode.inboxDir, plan.file),
+      mode.outputDir,
+      plan.target.id,
+    );
     written += 1;
   }
 

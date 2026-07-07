@@ -71,7 +71,14 @@ export const recommendationResultSchema = z
   })
   .strict();
 
-export const recommendationsRequestSchema = userIntentRequestSchema;
+// `kitId` is an optional anchor: when present, recommendation assembly limits
+// case candidates to that kit so every returned build starts from it. All
+// builds still pass through the same deterministic rule-engine validation.
+export const recommendationsRequestSchema = userIntentRequestSchema
+  .extend({
+    kitId: z.string().trim().min(1).max(120).optional(),
+  })
+  .strict();
 
 export const recommendationsApiResponseSchema = z.object({
   success: z.literal(true),

@@ -11,8 +11,15 @@ export default async function ConfiguratorPage({
 }) {
   const params = searchParams ? await searchParams : {};
   const initialPrompt = getParamValue(params.prompt);
+  const initialKitId = getParamValue(params.kit);
 
-  return <RecommendationDemo initialPrompt={initialPrompt} mode="configurator" />;
+  return (
+    <RecommendationDemo
+      initialKitId={initialKitId}
+      initialPrompt={initialPrompt}
+      mode="configurator"
+    />
+  );
 }
 
 function getParamValue(value: string | string[] | undefined) {

@@ -103,9 +103,15 @@ export async function generateRecommendationsFromMessage(
     catalogComponents,
   );
 
+  // A kit anchor narrows the candidate space before assembly; it never touches
+  // validation, so anchored builds pass the same rule engine as any other.
+  const anchoredPreparation = request.kitId
+    ? anchorPreparationToKit(preparation, request.kitId, catalogComponents)
+    : preparation;
+
   const deterministicResult = createRecommendationResult(extraction, {
     catalogComponents,
-    preparation,
+    preparation: anchoredPreparation,
     maxRecommendations: options.maxRecommendations,
   });
 
@@ -114,6 +120,76 @@ export async function generateRecommendationsFromMessage(
     model: options.explanationModel,
     maxOutputTokens: options.explanationMaxOutputTokens,
   });
+}
+
+// Categories that structurally belong to a kit (metadata.kitLock). Switches
+// and keycaps stay intent-driven — the anchor only pins the kit itself.
+const kitAnchoredCategories: readonly ComponentCategory[] = [
+  "case",
+  "pcb",
+  "plate",
+  "stabilizer",
+];
+
+// Pin recommendation assembly to one kit: the kit's own case becomes the only
+// case candidate, the kit's other locked parts lead their categories, and
+// parts locked to a DIFFERENT kit are dropped (the rule engine would reject
+// them anyway). Unknown kit ids leave the preparation untouched.
+function anchorPreparationToKit(
+  preparation: IntentPreparation,
+  kitId: string,
+  catalogComponents: readonly KeyboardComponent[],
+): IntentPreparation {
+  const kitIdOf = (component: KeyboardComponent | undefined) => {
+    const value = component?.metadata?.kitId;
+
+    return typeof value === "string" ? value : undefined;
+  };
+  const isKitLocked = (component: KeyboardComponent | undefined) =>
+    component?.metadata?.kitLock === true;
+
+  const componentsById = new Map(
+    catalogComponents.map((component) => [component.id, component]),
+  );
+  const kitPartIdsByCategory = new Map<ComponentCategory, string[]>();
+
+  for (const component of catalogComponents) {
+    if (isKitLocked(component) && kitIdOf(component) === kitId) {
+      const ids = kitPartIdsByCategory.get(component.category) ?? [];
+      ids.push(component.id);
+      kitPartIdsByCategory.set(component.category, ids);
+    }
+  }
+
+  if (!kitPartIdsByCategory.has("case")) {
+    return preparation;
+  }
+
+  const candidateComponentIds = { ...preparation.candidateComponentIds };
+
+  for (const category of kitAnchoredCategories) {
+    const ownPartIds = kitPartIdsByCategory.get(category) ?? [];
+
+    if (category === "case") {
+      candidateComponentIds.case = ownPartIds;
+      continue;
+    }
+
+    const remainingIds = (candidateComponentIds[category] ?? []).filter(
+      (candidateId) => {
+        const candidate = componentsById.get(candidateId);
+
+        return (
+          !ownPartIds.includes(candidateId) &&
+          (!isKitLocked(candidate) || kitIdOf(candidate) === kitId)
+        );
+      },
+    );
+
+    candidateComponentIds[category] = [...ownPartIds, ...remainingIds];
+  }
+
+  return { ...preparation, candidateComponentIds };
 }
 
 export function createRecommendationResult(

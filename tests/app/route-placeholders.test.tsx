@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import BrowsePage from "@/app/browse/page";
 import MyBuildsRoute from "@/app/my-builds/page";
 import { keyboardComponents } from "@/data";
 
@@ -67,20 +66,8 @@ describe("route placeholders", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders the Browse Parts placeholder and route navigation", () => {
-    render(<BrowsePage />);
-
-    expect(
-      screen.getByRole("heading", { name: /Browse Parts/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Kits")).toBeInTheDocument();
-    expect(screen.getByText("Switches")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Configurator/i })).toHaveAttribute(
-      "href",
-      "/configurator",
-    );
-  });
-
+  // Browse is no longer a placeholder — it is now an async server component
+  // over the real catalog (covered by tests/app/browse-page.test.tsx).
   // Community Gallery is no longer a static placeholder — it is now an async
   // server component backed by Supabase (covered by the gallery service + build).
 

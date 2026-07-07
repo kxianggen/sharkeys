@@ -193,6 +193,173 @@ test("configurator resolves a validated build from a starting point", async ({
   });
 });
 
+test("'Your build' summary shows enlarged part photos without swapping the hero", async ({
+  page,
+}) => {
+  // Tall viewport so the sticky left panel (hero + summary) fits on screen —
+  // otherwise the lazy-loaded thumbnails stay below the fold and never decode.
+  await page.setViewportSize({ width: 1280, height: 1700 });
+  await page.goto("/configurator");
+  await page.waitForLoadState("networkidle");
+  // The 65% chip resolves a build whose switch, keycap AND stabilizer are all
+  // free choices (aftermarket, not kit-locked), so every part-type gets a row.
+  await page.getByRole("button", { name: "65% Layout", exact: true }).click();
+
+  // Wait for the build (and its stable kit hero) to resolve.
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
+    timeout: 45_000,
+  });
+  const kitVisual = page.getByTestId("kit-visual");
+  await expect(kitVisual).toBeVisible();
+
+  // Record the hero image (kit art) so we can prove it never swaps to a part.
+  const heroImg = kitVisual.locator("img");
+  const hasHeroImage = (await heroImg.count()) > 0;
+  const heroSrcBefore = hasHeroImage
+    ? await heroImg.getAttribute("src")
+    : null;
+
+  const summary = page.getByTestId("build-summary");
+  await expect(summary).toBeVisible();
+
+  // Before any pick, the free-choice rows read as pending.
+  await expect(summary.getByText("Not selected yet").first()).toBeVisible();
+
+  // Pick the first option for switch + keycap (both resolve to parts with
+  // imported photos). For the stabilizer, pick SP-Star specifically — an
+  // aftermarket stab with an imported photo (the kit's own plate-mount stab
+  // has no photo, so it would fall back to the glyph).
+  for (const sectionId of [
+    "configurator-section-switches",
+    "configurator-section-keycaps",
+  ]) {
+    const options = page.locator(`#${sectionId} button[aria-pressed]`);
+    if ((await options.count()) === 0) continue;
+    await options.first().click();
+    await expect(
+      page.locator(`#${sectionId} button[aria-pressed="true"]`),
+    ).toHaveCount(1);
+  }
+
+  const stabOption = page
+    .locator("#configurator-section-stabilizers button[aria-pressed]")
+    .filter({ hasText: /SP-Star/ });
+  await stabOption.first().click();
+  await expect(
+    page.locator(
+      '#configurator-section-stabilizers button[aria-pressed="true"]',
+    ),
+  ).toHaveCount(1);
+
+  // Each selected row's thumbnail shows its real photo, decoded and enlarged.
+  // The 3 expected part ids for this build (switch/keycap/stabilizer). Waiting
+  // in-browser on the specific <img> by src avoids locator re-resolution flake
+  // while the summary re-renders.
+  const expectedPartIds = {
+    switch: "switch_mmd_princess_linear_v3",
+    keycap: "keycap_unknown_pudding_oem_pbt",
+    stabilizer: "stab_sp_star_plate_mount",
+  } as const;
+
+  for (const [category, id] of Object.entries(expectedPartIds)) {
+    const row = page.getByTestId(`build-summary-row-${category}`);
+    await expect(row).toBeVisible();
+    await expect(row.locator("img")).toHaveAttribute("src", new RegExp(id));
+    await page.waitForFunction(
+      (partId) => {
+        const image = [
+          ...document.querySelectorAll<HTMLImageElement>("img"),
+        ].find((element) => element.src.includes(partId));
+
+        return Boolean(image && image.complete && image.naturalWidth > 0);
+      },
+      id,
+      { timeout: 20_000 },
+    );
+  }
+
+  // Keycap row: photo present → NO swatch dots (the photo conveys the colours).
+  await expect(
+    page
+      .getByTestId("build-summary-row-keycap")
+      .getByTestId("keycap-swatch"),
+  ).toHaveCount(0);
+
+  // The hero image must NOT change when parts are selected.
+  if (hasHeroImage) {
+    await expect(heroImg).toHaveAttribute("src", heroSrcBefore ?? "");
+  }
+
+  await page.screenshot({
+    animations: "disabled",
+    fullPage: true,
+    path: "screenshots/configurator-build-summary.png",
+  });
+});
+
+test("stabilizer thumbnail updates from glyph to photo after a no-photo → photo switch", async ({
+  page,
+}) => {
+  // Regression: selecting a no-photo stab first (kit's own plate-mount stab →
+  // glyph fallback) then a photo-backed one (SP-Star) used to leave the
+  // thumbnail stuck on the stale glyph, because the image-load-error state
+  // never reset when the selected part changed.
+  await page.setViewportSize({ width: 1280, height: 1700 });
+  await page.goto("/configurator");
+  await page.waitForLoadState("networkidle");
+  await page.getByRole("button", { name: "65% Layout", exact: true }).click();
+
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
+    timeout: 45_000,
+  });
+
+  const stabSection = page.locator("#configurator-section-stabilizers");
+  const stabOptions = stabSection.locator("button[aria-pressed]");
+  await expect(stabOptions.first()).toBeVisible();
+
+  const stabRow = page.getByTestId("build-summary-row-stabilizer");
+
+  // Step 1: pick the kit's own stab (leads the list) — it has no part photo,
+  // so its thumbnail falls back to the glyph (an <svg>, not an <img>).
+  await stabOptions.first().click();
+  await expect(
+    stabSection.locator('button[aria-pressed="true"]'),
+  ).toHaveCount(1);
+  await expect(stabRow).toBeVisible();
+  await expect(stabRow.locator("img")).toHaveCount(0);
+  await expect(stabRow.locator("svg")).not.toHaveCount(0);
+
+  // Step 2: switch to SP-Star (photo-backed). The thumbnail must now show the
+  // real photo, decoded — not the stale glyph.
+  const spStar = stabOptions.filter({ hasText: /SP-Star/ });
+  await spStar.first().click();
+  await expect(
+    stabSection.locator('button[aria-pressed="true"]'),
+  ).toHaveCount(1);
+
+  const stabId = "stab_sp_star_plate_mount";
+  await expect(stabRow.locator("img")).toHaveAttribute(
+    "src",
+    new RegExp(stabId),
+  );
+  await page.waitForFunction(
+    (partId) => {
+      const image = [
+        ...document.querySelectorAll<HTMLImageElement>("img"),
+      ].find((element) => element.src.includes(partId));
+
+      return Boolean(image && image.complete && image.naturalWidth > 0);
+    },
+    stabId,
+    { timeout: 20_000 },
+  );
+
+  await stabRow.screenshot({
+    animations: "disabled",
+    path: "screenshots/configurator-stabilizer-photo-after-switch.png",
+  });
+});
+
 test("start-from-a-build populates sections and fills the progress track", async ({
   page,
 }) => {

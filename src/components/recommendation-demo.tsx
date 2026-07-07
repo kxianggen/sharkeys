@@ -37,6 +37,7 @@ import {
 
 import { ImageDrop } from "@/components/image-drop";
 import { MainNav } from "@/components/main-nav";
+import { SwatchDots } from "@/components/swatch-dots";
 import type { CompatibilityResult, KeyboardComponent } from "@/lib/types";
 import type {
   AiIntentApiResponse,
@@ -276,6 +277,22 @@ function getComponentSwatch(component: KeyboardComponent | undefined) {
   return component
     ? getMetadataStringArray(component.metadata, "swatch")
     : undefined;
+}
+
+// One-word descriptor for the "Your build" summary rows, drawn straight from
+// catalog fields (never generated). Missing field → no descriptor (the row
+// just shows the category), so nothing is fabricated.
+function getPartDescriptor(component: KeyboardComponent): string | undefined {
+  switch (component.category) {
+    case "switch":
+      return component.soundProfile;
+    case "keycap":
+      return component.keycapProfile;
+    case "stabilizer":
+      return component.stabilizerType.replace(/_/g, " ");
+    default:
+      return undefined;
+  }
 }
 
 function getComponentLayouts(component: KeyboardComponent) {
@@ -538,6 +555,7 @@ function sectionDomId(title: string) {
 type RecommendationDemoMode = "configurator" | "landing";
 
 type RecommendationDemoProps = {
+  initialKitId?: string | null;
   initialPrompt?: string | null;
   mode?: RecommendationDemoMode;
 };
@@ -574,6 +592,7 @@ function intentToPrompt(intent: ExtractedKeyboardIntent): string {
 }
 
 export function RecommendationDemo({
+  initialKitId = null,
   initialPrompt = null,
   mode = "landing",
 }: RecommendationDemoProps = {}) {
@@ -581,6 +600,7 @@ export function RecommendationDemo({
   const promptRef = useRef<HTMLTextAreaElement | null>(null);
   const resultsRef = useRef<HTMLElement | null>(null);
   const initialPromptSubmittedRef = useRef(false);
+  const initialKitSubmittedRef = useRef(false);
   const isLanding = mode === "landing";
   const isConfigurator = mode === "configurator";
   const [message, setMessage] = useState(initialPrompt ?? "");
@@ -860,7 +880,51 @@ export function RecommendationDemo({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialPrompt, isConfigurator]);
 
-  async function runRecommendationRequest(nextMessage = message) {
+  // Browse hands a kit off via ?kit=<kitId>: once the real catalog confirms the
+  // kit exists, run one anchored recommendation request. The result flows
+  // through the normal progressive assembly, so switches/keycaps start
+  // deselected and the engine still validates the final build. An explicit
+  // prompt handoff takes precedence over the kit anchor.
+  useEffect(() => {
+    const trimmedInitialKitId = initialKitId?.trim();
+
+    if (
+      !isConfigurator ||
+      !trimmedInitialKitId ||
+      initialPrompt?.trim() ||
+      initialKitSubmittedRef.current ||
+      catalog.length === 0
+    ) {
+      return;
+    }
+
+    const kitCase = catalog.find(
+      (component) =>
+        component.category === "case" &&
+        isKitLockedComponent(component) &&
+        getMetadataString(component.metadata, "kitId") === trimmedInitialKitId,
+    );
+
+    if (!kitCase) {
+      return;
+    }
+
+    const kitPrompt = `Start from the ${getKitDisplayName(kitCase)} barebones kit`;
+    const timeoutId = window.setTimeout(() => {
+      initialKitSubmittedRef.current = true;
+      setMessage(kitPrompt);
+      void runRecommendationRequest(kitPrompt, trimmedInitialKitId);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+    // One-time route handoff; catalog arrival is the trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialKitId, initialPrompt, isConfigurator, catalog]);
+
+  async function runRecommendationRequest(
+    nextMessage = message,
+    anchorKitId?: string,
+  ) {
     setError(null);
     setManualError(null);
     setIsSubmitting(true);
@@ -871,7 +935,11 @@ export function RecommendationDemo({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: nextMessage }),
+        body: JSON.stringify(
+          anchorKitId
+            ? { message: nextMessage, kitId: anchorKitId }
+            : { message: nextMessage },
+        ),
       });
       const body = (await response.json()) as
         | RecommendationsApiResponse
@@ -1393,12 +1461,18 @@ export function RecommendationDemo({
               kitName={buildDisplayName ?? "Keyboard build"}
             />
 
-            {!activeBuild ? (
+            {activeBuild ? (
+              <BuildSummary
+                catalogById={catalogById}
+                choiceCategories={choiceCategories}
+                chosenParts={chosenParts}
+              />
+            ) : (
               <p className="mt-5 text-sm leading-6 text-secondary">
                 Ask Meg to resolve a validated build — it appears here with the
                 kit it is based on.
               </p>
-            ) : null}
+            )}
           </section>
 
           {/* RIGHT — configuration rail */}
@@ -2428,26 +2502,6 @@ function RecommendationCarousel({
   );
 }
 
-// Three ~10px circles showing a keycap set's stored palette. Hairline border
-// ring keeps light colours visible on white; the hex values are catalog data.
-function SwatchDots({ colors }: { colors: string[] }) {
-  return (
-    <span
-      aria-hidden
-      className="flex flex-none items-center gap-1"
-      data-testid="keycap-swatch"
-    >
-      {colors.slice(0, 3).map((color, index) => (
-        <span
-          className="h-2.5 w-2.5 rounded-full border-[0.5px] border-border"
-          key={`${color}-${index}`}
-          style={{ backgroundColor: color }}
-        />
-      ))}
-    </span>
-  );
-}
-
 function CarouselKitThumbnail({ kitId }: { kitId: string | null }) {
   const [imageFailed, setImageFailed] = useState(false);
 
@@ -2465,11 +2519,11 @@ function CarouselKitThumbnail({ kitId }: { kitId: string | null }) {
   return (
     <span
       aria-hidden
-      className="flex h-24 w-32 flex-none items-center justify-center overflow-hidden rounded-lg bg-surface-secondary p-2"
+      className="flex h-24 w-32 flex-none items-center justify-center overflow-hidden rounded-lg bg-surface-secondary"
     >
       <Image
         alt=""
-        className="h-full w-full object-contain"
+        className="h-full w-full scale-[1.55] object-contain"
         height={120}
         onError={() => setImageFailed(true)}
         src={`/kits/${kitId}.webp`}
@@ -2570,25 +2624,168 @@ function KitVisual({
         className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-surface-secondary"
         data-testid="kit-visual"
       >
-        <Keyboard className="h-16 w-16 text-secondary/50" aria-hidden />
+        <Keyboard className="h-24 w-24 text-secondary/50" aria-hidden />
       </div>
     );
   }
 
   return (
+    // Kit art ships on a 4:3 canvas with wide transparent margins, so the
+    // contained image is zoomed to bring the board to ~80% of the tile; only
+    // transparent canvas is clipped, never the product.
     <div
-      className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-secondary p-6 sm:p-10"
+      className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-secondary"
       data-testid="kit-visual"
     >
       <Image
         alt={`${kitName} kit`}
-        className="h-full w-full object-contain"
+        className="h-full w-full scale-[1.55] object-contain"
         height={480}
         onError={() => setImageFailed(true)}
         priority
         src={`/kits/${kitId}.webp`}
         width={640}
       />
+    </div>
+  );
+}
+
+// Per-category zoom for the "Your build" thumbnails. Part photos ship on a
+// 4:3 canvas with wide transparent margins, and the subjects are framed
+// differently (switches sit small; stabilizer wires are sparse), so each is
+// zoomed to bring the product to ~82% of the square thumbnail. Values are
+// measured against the real assets' non-transparent bounding boxes and stay
+// below each category's clip ceiling in this square frame (switch 4.06,
+// keycap 1.97, stab 2.39), so only transparent canvas is ever cropped.
+// Written as literal strings so the Tailwind JIT can see them.
+const THUMB_ZOOM_CLASS: Partial<Record<ComponentCategory, string>> = {
+  switch: "scale-[3.4]",
+  keycap: "scale-[1.65]",
+  stabilizer: "scale-[1.95]",
+};
+
+// Small square thumbnail for one selected part. Resolves the real part photo
+// at public/parts/<componentId>.webp. When the photo loads it is shown
+// enlarged and alone — the photo conveys the colours. Only when no photo
+// exists does the fallback kick in: a keycap with a real metadata.swatch
+// palette shows its SwatchDots (honest colour identity), any other part shows
+// a neutral glyph. Photo and dots are never doubled up.
+export function PartThumbnail({ component }: { component: KeyboardComponent }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  // Reset the load-error fallback whenever the selected part changes. Without
+  // this, selecting a no-photo part (glyph fallback) first would leave
+  // imageFailed=true, so a subsequently-selected part with a real photo would
+  // keep showing the stale glyph instead of its image. React's render-phase
+  // "adjust state on prop change" pattern — no effect, resets before paint.
+  const [renderedId, setRenderedId] = useState(component.id);
+  if (renderedId !== component.id) {
+    setRenderedId(component.id);
+    setImageFailed(false);
+  }
+  const swatch =
+    component.category === "keycap" ? getComponentSwatch(component) : undefined;
+  const zoomClassName = THUMB_ZOOM_CLASS[component.category] ?? "";
+
+  return (
+    <span className="relative flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-lg bg-surface-secondary">
+      {imageFailed ? (
+        swatch ? (
+          <SwatchDots colors={swatch} />
+        ) : (
+          <Keyboard className="h-5 w-5 text-secondary/50" aria-hidden />
+        )
+      ) : (
+        <Image
+          alt=""
+          aria-hidden
+          className={`h-full w-full object-contain ${zoomClassName}`}
+          height={44}
+          onError={() => setImageFailed(true)}
+          src={`/parts/${component.id}.webp`}
+          width={44}
+        />
+      )}
+    </span>
+  );
+}
+
+// "Your build": a quiet, display-only list of the user's free choices below
+// the stable kit hero. It renders one row per free-choice category present on
+// the build (derived from choiceCategories — kit-locked case/internals are
+// implied by the hero and get no row). It reflects existing selection state
+// only; it never mutates selection, validation, or the resolved build.
+function BuildSummary({
+  catalogById,
+  choiceCategories,
+  chosenParts,
+}: {
+  catalogById: Map<string, KeyboardComponent>;
+  choiceCategories: ComponentCategory[];
+  chosenParts: ManualSelection;
+}) {
+  if (choiceCategories.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-6" data-testid="build-summary">
+      <h2 className="text-sm font-semibold text-primary">Your build</h2>
+      <ul className="mt-3 flex flex-col gap-1.5">
+        {choiceCategories.map((category) => {
+          const chosenId = chosenParts[category];
+          const chosen = chosenId ? catalogById.get(chosenId) : undefined;
+          const component =
+            chosen?.category === category ? chosen : undefined;
+
+          if (!component) {
+            return (
+              <li
+                className="flex items-center gap-3 rounded-xl px-1 py-1.5"
+                data-testid={`build-summary-row-${category}`}
+                key={category}
+              >
+                <span
+                  aria-hidden
+                  className="h-11 w-11 flex-none rounded-lg border border-dashed border-border-strong"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-primary">
+                    {categoryLabels[category]}
+                  </p>
+                  <p className="text-xs text-muted">Not selected yet</p>
+                </div>
+              </li>
+            );
+          }
+
+          const descriptor = getPartDescriptor(component);
+
+          return (
+            <li
+              className="flex items-center gap-3 rounded-xl px-1 py-1.5"
+              data-testid={`build-summary-row-${category}`}
+              key={category}
+            >
+              <PartThumbnail component={component} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-primary">
+                  {component.name}
+                </p>
+                <p className="text-xs capitalize text-secondary">
+                  {descriptor
+                    ? `${categoryLabels[category]} · ${descriptor}`
+                    : categoryLabels[category]}
+                </p>
+              </div>
+              <CheckCircle2
+                aria-hidden
+                className="h-4 w-4 flex-none text-success"
+              />
+              <span className="sr-only">selected</span>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
