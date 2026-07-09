@@ -73,7 +73,7 @@ describe("Keybot service", () => {
       const result = await generateWithCatalog("Hi, how are you?");
 
       expect(result.source).toBe("fallback_missing_api_key");
-      expect(result.answer).toContain("Hey, I'm Keybot");
+      expect(result.answer).toContain("Hey, I'm Meg");
       expect(result.answer).toContain("switches");
       expect(result.answer).toContain("compatibility");
       expect(result.answer).not.toContain("Gateron");
@@ -92,7 +92,7 @@ describe("Keybot service", () => {
       expect(result.source).toBe("fallback_missing_api_key");
       expect(result.answer).toContain("explain keyboard terms");
       expect(result.answer).toContain("recommend builds");
-      expect(result.answer).toContain("deterministic validation");
+      expect(result.answer).toContain("verified compatible");
       expect(result.answer).not.toContain("Gateron");
       expect(result.relatedComponentIds).toEqual([]);
       expect(result.usedRecommendationEngine).toBe(false);
@@ -201,7 +201,7 @@ describe("Keybot service", () => {
         "why did you choose this switch?",
       );
 
-      expect(result.answer).toContain("trusted selected switch ID");
+      expect(result.answer).toContain("once a build with a switch is selected");
       expect(result.relatedComponentIds).toEqual([]);
       expect(result.usedCatalogContext).toBe(false);
       expect(result.usedRecommendationEngine).toBe(false);
@@ -248,7 +248,7 @@ describe("Keybot service", () => {
 
       expect(result.answer).toContain("new preference");
       expect(result.answer).toContain("quieter or silent direction");
-      expect(result.answer).toContain("new validated recommendation search");
+      expect(result.answer).toContain("fresh validated search");
       expect(result.answer).not.toContain("random");
       expect(result.usedRecommendationEngine).toBe(false);
     });
@@ -269,7 +269,7 @@ describe("Keybot service", () => {
         },
       });
 
-      expect(result.answer).toContain("selected catalog component IDs");
+      expect(result.answer).toContain("actual selected parts");
       expect(result.answer).not.toContain("FakeBoard X");
       expect(result.answer).not.toContain("ImaginaryVendor");
       expect(result.answer).not.toContain("MYR 99");
@@ -296,7 +296,7 @@ describe("Keybot service", () => {
       expect(result.source).toBe("fallback_missing_api_key");
       expect(result.usedRecommendationEngine).toBe(true);
       expect(result.answer).toContain("validated build");
-      expect(result.answer).toContain("deterministic compatibility");
+      expect(result.answer).toContain("confirmed compatible");
       expect(result.relatedComponentIds?.length).toBeGreaterThan(0);
     });
   });
@@ -320,7 +320,7 @@ describe("Keybot service", () => {
       );
 
       expect(result.source).toBe("fallback_missing_api_key");
-      expect(result.answer).toContain("kit-derived structural parts");
+      expect(result.answer).toContain("locked to their original barebones kit");
       expect(result.answer).toContain("same kitId");
       expect(result.answer).toContain("Weikav Star 80 PCB");
       expect(result.answer).toContain("Yunzii B87 case");
@@ -367,10 +367,12 @@ describe("Keybot service", () => {
         expect(capturedModel).toBe("gpt-keybot-test-model");
         expect(capturedMaxOutputTokens).toBe(222);
         expect(result.source).toBe("openai");
-        expect(result.answer).toContain("deeper, rounded sound");
-        expect(result.answer).toContain(
-          "OpenAI helped format this response from grounded sharkeys facts.",
+        // The model's own grounded phrasing is served verbatim — no template
+        // recap, no machinery suffix.
+        expect(result.answer).toBe(
+          "Thocky means a deeper rounded sound in the provided catalog facts.",
         );
+        expect(result.answer).not.toContain("OpenAI helped format");
         expect(result.relatedComponentIds).toContain(
           "switch_gateron_milky_yellow_pro",
         );
@@ -406,10 +408,9 @@ describe("Keybot service", () => {
       expect(result.answer).not.toContain("MYR 99");
       expect(result.answer).not.toContain("in stock");
       expect(result.answer).not.toContain("fully compatible with every optical PCB");
+      // Ungrounded price ("MYR 99") trips the guard → deterministic fallback.
       expect(result.answer).toContain("deeper, rounded sound");
-      expect(result.answer).toContain(
-        "OpenAI helped format this response from grounded sharkeys facts.",
-      );
+      expect(result.answer).not.toContain("OpenAI helped format");
       expect(result.relatedComponentIds).toContain(
         "switch_gateron_milky_yellow_pro",
       );

@@ -12,7 +12,7 @@ import Link from "next/link";
 const NAV_LINKS = [
   { label: "Configurator", href: "/configurator" },
   { label: "Browse", href: "/browse" },
-  { label: "Gallery", href: "/community-gallery", ariaLabel: "Community Gallery" },
+  { label: "Community", href: "/community-gallery", ariaLabel: "Community Gallery" },
   { label: "Builds", href: "/my-builds", ariaLabel: "My Builds" },
   { label: "Log in", href: "/login" },
 ] as const;

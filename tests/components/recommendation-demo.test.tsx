@@ -280,7 +280,7 @@ function submitConfiguratorPrompt(prompt: string) {
 
 function getLastKeybotPanel() {
   const panels = screen.getAllByRole("region", {
-    name: /Keybot keyboard helper/i,
+    name: /Meg keyboard helper/i,
   });
 
   return panels[panels.length - 1];
@@ -365,8 +365,8 @@ describe("RecommendationDemo", () => {
     expect(screen.getAllByText(/sharkeys\./i).length).toBeGreaterThan(0);
     expect(screen.queryByText("Sharkeys")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Open Keybot assistant/i }),
-    ).toHaveTextContent(/Ask Keybot/i);
+      screen.getByRole("button", { name: /Open Meg assistant/i }),
+    ).toHaveTextContent(/Ask Meg/i);
     expect(screen.getByText(/How it works/i)).toBeInTheDocument();
     expect(screen.getByText(/Engineered for precision/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Configurator/i })).toHaveAttribute(
@@ -517,32 +517,32 @@ describe("RecommendationDemo", () => {
     render(<RecommendationDemo mode="configurator" />);
 
     const openButton = screen.getByRole("button", {
-      name: /Open Keybot assistant/i,
+      name: /Open Meg assistant/i,
     });
 
     expect(openButton).toBeInTheDocument();
-    expect(openButton).toHaveTextContent(/Ask Keybot/i);
+    expect(openButton).toHaveTextContent(/Ask Meg/i);
     expect(
-      screen.queryByRole("region", { name: /Keybot keyboard helper/i }),
+      screen.queryByRole("region", { name: /Meg keyboard helper/i }),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /Close Keybot assistant/i }),
+      screen.queryByRole("button", { name: /Close Meg assistant/i }),
     ).not.toBeInTheDocument();
 
     fireEvent.click(openButton);
 
     const closeButton = screen.getByRole("button", {
-      name: /Close Keybot assistant/i,
+      name: /Close Meg assistant/i,
     });
 
     expect(closeButton).toBeInTheDocument();
     fireEvent.click(closeButton);
 
     expect(
-      screen.getByRole("button", { name: /Open Keybot assistant/i }),
+      screen.getByRole("button", { name: /Open Meg assistant/i }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /Close Keybot assistant/i }),
+      screen.queryByRole("button", { name: /Close Meg assistant/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -552,7 +552,7 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Open Keybot assistant/i,
+        name: /Open Meg assistant/i,
       }),
     );
 
@@ -567,24 +567,24 @@ describe("RecommendationDemo", () => {
     expect(getLastKeybotRequestBody().message).toBe("What is thocky?");
   });
 
-  it("sends Keybot questions and renders grounded assistant responses", async () => {
+  it("sends Meg questions and renders grounded assistant responses", async () => {
     mockFetch([recommendationResult], { keybotDelayMs: 20 });
     render(<RecommendationDemo mode="configurator" />);
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Open Keybot assistant/i,
+        name: /Open Meg assistant/i,
       }),
     );
 
     const panel = getLastKeybotPanel();
 
-    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+    fireEvent.change(within(panel).getByLabelText("Meg question"), {
       target: { value: "What is a thocky keyboard?" },
     });
     fireEvent.click(
       within(panel).getByRole("button", {
-        name: /Send Keybot question/i,
+        name: /Send Meg question/i,
       }),
     );
 
@@ -608,29 +608,29 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Open Keybot assistant/i,
+        name: /Open Meg assistant/i,
       }),
     );
 
     const panel = getLastKeybotPanel();
 
-    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+    fireEvent.change(within(panel).getByLabelText("Meg question"), {
       target: { value: "What is thocky?" },
     });
     fireEvent.click(
       within(panel).getByRole("button", {
-        name: /Send Keybot question/i,
+        name: /Send Meg question/i,
       }),
     );
 
     await within(panel).findByText(/deeper rounded keyboard sound/i);
 
-    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+    fireEvent.change(within(panel).getByLabelText("Meg question"), {
       target: { value: "why that one?" },
     });
     fireEvent.click(
       within(panel).getByRole("button", {
-        name: /Send Keybot question/i,
+        name: /Send Meg question/i,
       }),
     );
 
@@ -668,18 +668,18 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Open Keybot assistant/i,
+        name: /Open Meg assistant/i,
       }),
     );
 
     const panel = getLastKeybotPanel();
 
-    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+    fireEvent.change(within(panel).getByLabelText("Meg question"), {
       target: { value: "Why no 75% aluminum build?" },
     });
     fireEvent.click(
       within(panel).getByRole("button", {
-        name: /Send Keybot question/i,
+        name: /Send Meg question/i,
       }),
     );
 
@@ -697,18 +697,18 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Open Keybot assistant/i,
+        name: /Open Meg assistant/i,
       }),
     );
 
     const panel = getLastKeybotPanel();
 
-    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+    fireEvent.change(within(panel).getByLabelText("Meg question"), {
       target: { value: "Can you explain this build?" },
     });
     fireEvent.click(
       within(panel).getByRole("button", {
-        name: /Send Keybot question/i,
+        name: /Send Meg question/i,
       }),
     );
 
@@ -716,7 +716,7 @@ describe("RecommendationDemo", () => {
       await within(panel).findByText(/Keybot is unavailable/i),
     ).toBeInTheDocument();
     expect(
-      within(panel).getByText(/could not reach Keybot just now/i),
+      within(panel).getByText(/could not reach Meg just now/i),
     ).toBeInTheDocument();
     expect(within(panel).getByText(/Route unavailable/i)).toBeInTheDocument();
   });
@@ -730,19 +730,19 @@ describe("RecommendationDemo", () => {
     expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Open Keybot assistant/i,
+        name: /Open Meg assistant/i,
       }),
     );
 
     const panel = getLastKeybotPanel();
 
     expect(within(panel).getByText(/Active build context/i)).toBeInTheDocument();
-    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+    fireEvent.change(within(panel).getByLabelText("Meg question"), {
       target: { value: "Why did you choose this switch?" },
     });
     fireEvent.click(
       within(panel).getByRole("button", {
-        name: /Send Keybot question/i,
+        name: /Send Meg question/i,
       }),
     );
 
@@ -769,18 +769,18 @@ describe("RecommendationDemo", () => {
     expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Open Keybot assistant/i,
+        name: /Open Meg assistant/i,
       }),
     );
 
     const panel = getLastKeybotPanel();
 
-    fireEvent.change(within(panel).getByLabelText("Keybot question"), {
+    fireEvent.change(within(panel).getByLabelText("Meg question"), {
       target: { value: "why that one?" },
     });
     fireEvent.click(
       within(panel).getByRole("button", {
-        name: /Send Keybot question/i,
+        name: /Send Meg question/i,
       }),
     );
 
@@ -790,7 +790,7 @@ describe("RecommendationDemo", () => {
 
     expect(requestBody.message).toBe("why that one?");
     expect(requestBody.context?.recentMessages?.[0]?.content).toContain(
-      "Hi, I’m Keybot",
+      "Hi, I’m Meg",
     );
     expect(requestBody.context?.currentRecommendationIds).toContain(
       recommendationResult.recommendations[0].id,
@@ -814,7 +814,7 @@ describe("RecommendationDemo", () => {
     });
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Open Keybot assistant/i,
+        name: /Open Meg assistant/i,
       }),
     );
 

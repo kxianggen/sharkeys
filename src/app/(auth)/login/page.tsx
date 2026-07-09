@@ -22,7 +22,7 @@ export default async function LoginPage({
         Welcome back
       </h1>
       <p className="mb-6 mt-2 text-sm text-secondary">
-        Sign in to share builds and chat with Keybot.
+        Sign in to share builds and chat with Meg.
       </p>
       <AuthForm action={signInAction} mode="login" next={next} />
     </>

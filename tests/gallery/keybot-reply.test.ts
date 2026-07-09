@@ -4,28 +4,32 @@ import { keyboardComponents } from "@/data";
 import { invokeKeybotAgent } from "@/lib/agent";
 import { mentionsKeybot, stripKeybotMention } from "@/lib/gallery/keybot-reply";
 
-describe("gallery @keybot reply helpers", () => {
+describe("gallery @meg reply helpers", () => {
   describe("mentionsKeybot", () => {
-    it("detects the @keybot mention case-insensitively", () => {
-      expect(mentionsKeybot("hey @keybot what do you think?")).toBe(true);
-      expect(mentionsKeybot("@Keybot is this compatible?")).toBe(true);
+    it("detects the @meg mention case-insensitively", () => {
+      expect(mentionsKeybot("hey @meg what do you think?")).toBe(true);
+      expect(mentionsKeybot("@Meg is this compatible?")).toBe(true);
     });
 
     it("ignores comments without the mention", () => {
       expect(mentionsKeybot("this build looks great")).toBe(false);
-      expect(mentionsKeybot("email me at keybot@example.com")).toBe(false);
+      expect(mentionsKeybot("email me at meg@example.com")).toBe(false);
+    });
+
+    it("no longer answers to the retired @keybot tag", () => {
+      expect(mentionsKeybot("hey @keybot what do you think?")).toBe(false);
     });
   });
 
   describe("stripKeybotMention", () => {
     it("removes the mention and trims", () => {
-      expect(stripKeybotMention("@keybot is this compatible?")).toBe(
+      expect(stripKeybotMention("@meg is this compatible?")).toBe(
         "is this compatible?",
       );
     });
 
     it("falls back to a neutral prompt when nothing remains", () => {
-      expect(stripKeybotMention("@keybot")).toBe(
+      expect(stripKeybotMention("@meg")).toBe(
         "What do you think of this build?",
       );
     });
@@ -39,7 +43,7 @@ describe("gallery @keybot reply helpers", () => {
 
       const response = await invokeKeybotAgent(
         {
-          message: stripKeybotMention("@keybot is this a good combo?"),
+          message: stripKeybotMention("@meg is this a good combo?"),
           context: {
             selectedComponentIds: {
               switch: aSwitch!.id,

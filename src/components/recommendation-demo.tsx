@@ -1497,7 +1497,7 @@ export function RecommendationDemo({
                 <p className="text-xs text-secondary">AI build control</p>
               </div>
               <button
-                aria-label="Open Meg assistant"
+                aria-label="Open Meg chat"
                 className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-secondary transition hover:bg-accent-subtle hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/25"
                 onClick={() => setKeybotOpenSignal((current) => current + 1)}
                 type="button"
@@ -2279,7 +2279,7 @@ function ConfiguratorSidebar({ onAskKeybot }: { onAskKeybot: () => void }) {
         <KeybotAvatar small />
         <div>
           <h2 className="text-xl font-black lowercase text-primary">
-            keybot
+            meg
           </h2>
           <p className="text-[10px] font-black uppercase tracking-[0.08em] text-secondary">
             AI keyboard expert
@@ -2313,7 +2313,7 @@ function ConfiguratorSidebar({ onAskKeybot }: { onAskKeybot: () => void }) {
 
       <div className="mt-9 rounded-xl border border-border bg-white p-3 shadow-sm">
         <p className="text-xs leading-5 text-secondary">
-          Ask Keybot about sound profiles, layouts, compatibility, or why a
+          Ask Meg about sound profiles, layouts, compatibility, or why a
           selected build fits your prompt.
         </p>
         <button
@@ -2322,7 +2322,7 @@ function ConfiguratorSidebar({ onAskKeybot }: { onAskKeybot: () => void }) {
           type="button"
         >
           <MessageCircle className="h-4 w-4" aria-hidden />
-          Ask Keybot
+          Ask Meg
         </button>
       </div>
     </aside>
@@ -2819,7 +2819,7 @@ function FloatingKeybot({
   if (!isOpen) {
     return (
       <button
-        aria-label="Open Keybot assistant"
+        aria-label="Open Meg assistant"
         className="group fixed bottom-5 right-5 z-40 flex h-16 w-16 items-center justify-center rounded-full bg-accent text-white shadow-xl outline-none transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:ring-4 focus-visible:ring-accent/40 sm:bottom-6 sm:right-6"
         onClick={() => setIsOpen(true)}
         type="button"
@@ -2833,7 +2833,7 @@ function FloatingKeybot({
           src="/meg-avatar.png"
           width={64}
         />
-        <span className="sr-only">Ask Keybot</span>
+        <span className="sr-only">Ask Meg</span>
       </button>
     );
   }
@@ -2863,7 +2863,7 @@ function KeybotPanel({
       id: "keybot-welcome",
       role: "assistant",
       content:
-        "Hi, I’m Keybot. Ask about switches, sound, layouts, compatibility, or your current build.",
+        "Hi, I’m Meg. Ask about switches, sound, layouts, compatibility, or your current build.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -2944,7 +2944,7 @@ function KeybotPanel({
 
       if (!response.ok || !body.success) {
         throw new Error(
-          "error" in body ? body.error.message : "Keybot could not answer.",
+          "error" in body ? body.error.message : "Meg could not answer.",
         );
       }
 
@@ -2962,7 +2962,7 @@ function KeybotPanel({
       const message =
         caughtError instanceof Error
           ? caughtError.message
-          : "Keybot could not answer right now.";
+          : "Meg could not answer right now.";
 
       setError(message);
       setMessages((current) => [
@@ -2971,7 +2971,7 @@ function KeybotPanel({
           id: createKeybotMessageId("assistant"),
           role: "assistant",
           content:
-            "I could not reach Keybot just now. The main configurator still uses deterministic validation.",
+            "I could not reach Meg just now. The main configurator still uses deterministic validation.",
           isRouteFailure: true,
           source: "fallback_error",
         },
@@ -2983,7 +2983,7 @@ function KeybotPanel({
 
   return (
     <section
-      aria-label="Keybot keyboard helper"
+      aria-label="Meg keyboard helper"
       className={
         floating
           ? "fixed inset-x-3 bottom-3 z-50 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[28rem] sm:max-w-[calc(100vw-3rem)]"
@@ -3000,7 +3000,7 @@ function KeybotPanel({
             <KeybotAvatar />
             <div className="min-w-0 flex-1">
               <h2 className="text-base font-bold leading-5 text-primary">
-                Keybot
+                Meg
               </h2>
               <p className="text-xs font-semibold text-secondary">
                 Grounded assistant
@@ -3008,7 +3008,7 @@ function KeybotPanel({
             </div>
             {onClose ? (
               <button
-                aria-label="Close Keybot assistant"
+                aria-label="Close Meg assistant"
                 className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-secondary transition hover:bg-accent-subtle hover:text-primary focus:outline-none focus:ring-4 focus:ring-accent/25"
                 onClick={onClose}
                 type="button"
@@ -3104,7 +3104,7 @@ function KeybotPanel({
         >
           <div className="flex items-center gap-2 rounded-2xl border border-border bg-surface-secondary p-1.5 focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/20">
             <input
-              aria-label="Keybot question"
+              aria-label="Meg question"
               className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-primary placeholder:text-secondary/70 focus:outline-none"
               disabled={isSending}
               onChange={(event) => setInput(event.target.value)}
@@ -3112,7 +3112,7 @@ function KeybotPanel({
               value={input}
             />
             <button
-              aria-label="Send Keybot question"
+              aria-label="Send Meg question"
               className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-45"
               disabled={isSending || input.trim().length === 0}
               type="submit"
@@ -3395,7 +3395,7 @@ function HowItWorksSection() {
     },
     {
       title: "Validate",
-      body: "Keybot checks every switch, plate, and PCB for compatibility.",
+      body: "Meg checks every switch, plate, and PCB for compatibility.",
       icon: CheckCircle,
     },
     {
@@ -3535,7 +3535,7 @@ function FeatureBento() {
               Knowledge Assistant
             </h3>
             <p className="mt-2 text-sm leading-6 text-primary/70">
-              Ask Keybot anything from switch feel to layout tradeoffs.
+              Ask Meg anything from switch feel to layout tradeoffs.
             </p>
           </div>
           <div className="mt-5 flex items-center gap-2 rounded-xl border border-white/70 bg-white/45 p-2">

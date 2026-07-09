@@ -30,7 +30,52 @@ export type GalleryComment = {
   isKeybot: boolean;
   createdAt: string;
   author: GalleryAuthor | null;
+  // Single-level threading: null = top-level, otherwise the parent comment id.
+  parentId: string | null;
 };
+
+// A top-level comment plus its (chronological) nested replies. Threading is
+// exactly one level deep; replies-to-replies are flattened at write time.
+export type GalleryCommentThread = {
+  comment: GalleryComment;
+  replies: GalleryComment[];
+};
+
+/**
+ * Groups a flat, chronologically-ordered comment list into one-level threads.
+ * A reply whose parent is missing (deleted) or is itself a reply still lands
+ * exactly one level deep under the nearest resolvable top-level comment, or is
+ * promoted to top-level as a last resort — never dropped, never nested deeper.
+ */
+export function buildCommentThreads(
+  comments: readonly GalleryComment[],
+): GalleryCommentThread[] {
+  const byId = new Map(comments.map((comment) => [comment.id, comment]));
+  const threads: GalleryCommentThread[] = [];
+  const threadByCommentId = new Map<string, GalleryCommentThread>();
+
+  for (const comment of comments) {
+    // Resolve the top-level ancestor (at most one hop in well-formed data).
+    let anchor = comment.parentId ? byId.get(comment.parentId) : undefined;
+    while (anchor?.parentId && byId.get(anchor.parentId)) {
+      anchor = byId.get(anchor.parentId);
+    }
+
+    if (comment.parentId && anchor) {
+      const thread = threadByCommentId.get(anchor.id);
+      if (thread) {
+        thread.replies.push(comment);
+        continue;
+      }
+    }
+
+    const thread: GalleryCommentThread = { comment, replies: [] };
+    threads.push(thread);
+    threadByCommentId.set(comment.id, thread);
+  }
+
+  return threads;
+}
 
 // Supabase returns joined `profiles` as an object (or null). Narrow it here.
 type AuthorRow = {
@@ -110,7 +155,7 @@ export async function getPostWithComments(
   const { data: commentRows } = await supabase
     .from("post_comments")
     .select(
-      "id, body, is_keybot, created_at, author:profiles!post_comments_author_id_fkey(id, username, display_name, avatar_url)",
+      "id, body, is_keybot, created_at, parent_id, author:profiles!post_comments_author_id_fkey(id, username, display_name, avatar_url)",
     )
     .eq("post_id", postId)
     .order("created_at", { ascending: true });
@@ -133,6 +178,7 @@ export async function getPostWithComments(
       isKeybot: row.is_keybot,
       createdAt: row.created_at,
       author: mapAuthor(row.author as AuthorRow),
+      parentId: row.parent_id ?? null,
     })),
   };
 }

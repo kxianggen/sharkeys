@@ -1,13 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Bot, ShieldCheck, ShieldAlert } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
-import { CommentComposer } from "@/components/comment-composer";
+import { CommentThread } from "@/components/comment-thread";
+import { KitImage } from "@/components/kit-image";
 import { MainNav } from "@/components/main-nav";
 import { getSessionUser } from "@/lib/auth";
 import { getCatalogComponents } from "@/lib/components";
-import { getPostWithComments } from "@/lib/gallery/service";
+import { summarizeGalleryBuild } from "@/lib/gallery/build-summary";
+import { buildCommentThreads, getPostWithComments } from "@/lib/gallery/service";
 import { requiredComponentCategories } from "@/lib/types";
+
+function formatPostedAt(createdAt: string) {
+  const date = new Date(createdAt);
+
+  return Number.isNaN(date.getTime())
+    ? null
+    : new Intl.DateTimeFormat("en-MY", { dateStyle: "medium" }).format(date);
+}
 
 export default async function PostDetailPage({
   params,
@@ -26,57 +36,63 @@ export default async function PostDetailPage({
 
   const { post, comments } = detail;
   const nameById = new Map(catalog.map((c) => [c.id, `${c.brand} — ${c.name}`]));
-  const valid = post.validationSnapshot?.isValid ?? null;
+  const summary = summarizeGalleryBuild(post.componentIds, catalog);
+  const postedAt = formatPostedAt(post.createdAt);
+  const threads = buildCommentThreads(comments);
+  const selectedCategories = requiredComponentCategories.filter(
+    (category) => post.componentIds[category],
+  );
 
   return (
     <main className="min-h-screen bg-surface-secondary text-primary">
-      <MainNav active="Gallery" />
+      <MainNav active="Community" />
 
-      <section className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-8">
+      <section className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
         <Link
-          className="text-sm font-bold text-primary hover:underline"
+          className="text-sm font-medium text-secondary transition-colors hover:text-primary"
           href="/community-gallery"
         >
-          ← Back to gallery
+          ← Community
         </Link>
 
-        <div className="mt-4 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-black tracking-[-0.01em] text-primary">
-              {post.title}
-            </h1>
-            <p className="mt-1 text-sm font-bold text-primary">
-              @{post.author?.username ?? "unknown"}
-            </p>
-          </div>
-          {valid === null ? null : valid ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
-              <ShieldCheck className="h-4 w-4" aria-hidden /> Validated
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">
-              <ShieldAlert className="h-4 w-4" aria-hidden /> Has issues
-            </span>
-          )}
-        </div>
+        {/* Post reads top-down: title → author/time → description → build */}
+        <header className="mt-4">
+          <h1 className="text-h3 font-semibold text-primary">{post.title}</h1>
+          <p className="mt-1 text-sm text-secondary">
+            @{post.author?.username ?? "unknown"}
+            {postedAt ? ` · ${postedAt}` : ""}
+          </p>
+        </header>
 
         {post.description ? (
-          <p className="mt-4 text-base leading-7 text-secondary">
+          <p className="mt-3 text-base leading-7 text-primary">
             {post.description}
           </p>
         ) : null}
 
-        {/* Bill of materials */}
-        <div className="mt-8 rounded-3xl border border-border bg-white p-6">
-          <h2 className="text-sm font-black uppercase tracking-[0.12em] text-primary">
-            Build
-          </h2>
-          <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-            {requiredComponentCategories.map((category) => {
+        <div className="mt-4 max-w-md">
+          <KitImage alt={`${post.title} build`} kitId={summary.kitId} />
+        </div>
+
+        {/* Parts: collapsed disclosure — validation is implicit, never shown */}
+        <details className="group mt-4 border-y-[0.5px] border-border py-3">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 [&::-webkit-details-marker]:hidden">
+            <span>
+              {[summary.kitName, `${selectedCategories.length} parts`]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
+            <ChevronDown
+              aria-hidden
+              className="h-4 w-4 text-secondary transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+            {selectedCategories.map((category) => {
               const id = post.componentIds[category];
               return (
                 <div key={category}>
-                  <dt className="text-xs font-bold uppercase capitalize text-secondary">
+                  <dt className="text-xs font-medium capitalize text-secondary">
                     {category}
                   </dt>
                   <dd className="text-sm font-medium text-primary">
@@ -86,70 +102,20 @@ export default async function PostDetailPage({
               );
             })}
           </dl>
-
-          {post.validationSnapshot?.explanations?.length ? (
-            <ul className="mt-5 space-y-1 border-t border-border pt-4 text-sm text-secondary">
-              {post.validationSnapshot.explanations.map((line, i) => (
-                <li key={i}>• {line}</li>
-              ))}
-            </ul>
+          {summary.priceLabel ? (
+            <p className="mt-3 text-sm text-secondary">
+              Estimated total: {summary.priceLabel}
+            </p>
           ) : null}
-        </div>
+        </details>
 
-        {/* Comments */}
-        <div className="mt-10">
-          <h2 className="text-lg font-black text-primary">
-            Comments ({comments.length})
-          </h2>
-
-          <ul className="mt-5 space-y-4">
-            {comments.map((comment) => (
-              <li
-                className={`rounded-2xl border p-4 ${
-                  comment.isKeybot
-                    ? "border-accent/50 bg-accent-subtle"
-                    : "border-border bg-white"
-                }`}
-                key={comment.id}
-              >
-                <div className="flex items-center gap-2 text-xs font-bold">
-                  {comment.isKeybot ? (
-                    <span className="inline-flex items-center gap-1 text-primary">
-                      <Bot className="h-4 w-4" aria-hidden /> Keybot
-                    </span>
-                  ) : (
-                    <span className="text-primary">
-                      @{comment.author?.username ?? "unknown"}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-primary">
-                  {comment.body}
-                </p>
-              </li>
-            ))}
-            {comments.length === 0 ? (
-              <li className="text-sm text-secondary">
-                No comments yet. Tag @keybot to get grounded advice on this build.
-              </li>
-            ) : null}
-          </ul>
-
-          <div className="mt-6">
-            {user ? (
-              <CommentComposer postId={post.id} />
-            ) : (
-              <p className="rounded-2xl border border-border bg-white p-4 text-sm text-secondary">
-                <Link
-                  className="font-bold text-primary underline"
-                  href={`/login?next=/community-gallery/${post.id}`}
-                >
-                  Sign in
-                </Link>{" "}
-                to comment and tag @keybot.
-              </p>
-            )}
-          </div>
+        {/* Discussion */}
+        <div className="mt-6">
+          <CommentThread
+            postId={post.id}
+            signedIn={Boolean(user)}
+            threads={threads}
+          />
         </div>
       </section>
     </main>

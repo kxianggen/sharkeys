@@ -24,7 +24,7 @@ export default async function NewPostPage() {
 
   return (
     <main className="min-h-screen bg-surface-secondary text-primary">
-      <MainNav active="Gallery" />
+      <MainNav active="Community" />
 
       <section className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-8">
         <h1 className="text-3xl font-black tracking-[-0.01em] text-primary">

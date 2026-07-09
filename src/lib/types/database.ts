@@ -178,6 +178,7 @@ export type Database = {
           body: string;
           is_keybot: boolean;
           created_at: string;
+          parent_id: string | null;
         };
         Insert: {
           id?: string;
@@ -186,6 +187,7 @@ export type Database = {
           body: string;
           is_keybot?: boolean;
           created_at?: string;
+          parent_id?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["post_comments"]["Insert"]>;
         Relationships: [
@@ -199,6 +201,12 @@ export type Database = {
             foreignKeyName: "post_comments_author_id_fkey";
             columns: ["author_id"];
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "post_comments_parent_id_fkey";
+            columns: ["parent_id"];
+            referencedRelation: "post_comments";
             referencedColumns: ["id"];
           },
         ];

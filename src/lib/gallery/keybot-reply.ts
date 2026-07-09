@@ -3,7 +3,9 @@ import { readOptionalSupabasePublicEnv } from "@/lib/env";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { ComponentIdSelection } from "@/lib/types";
 
-const KEYBOT_MENTION = /@keybot\b/i;
+// The assistant's user-facing name is Meg; internal identifiers keep the
+// keybot naming (API route, is_keybot column, function names).
+const KEYBOT_MENTION = /@meg\b/i;
 const MAX_HISTORY = 6;
 const MAX_CONTENT = 1200;
 
@@ -11,14 +13,14 @@ export function mentionsKeybot(body: string): boolean {
   return KEYBOT_MENTION.test(body);
 }
 
-// Removes the @keybot mention to form the agent prompt; falls back to a neutral
+// Removes the @meg mention to form the agent prompt; falls back to a neutral
 // question when nothing meaningful remains.
 export function stripKeybotMention(body: string): string {
   return body.replace(KEYBOT_MENTION, "").trim() || "What do you think of this build?";
 }
 
 /**
- * If a freshly-posted comment tags @keybot, generate a grounded reply through
+ * If a freshly-posted comment tags @meg, generate a grounded reply through
  * the LangGraph agent and persist it as a keybot comment.
  *
  * The post is the context: its component selection + frozen validation snapshot
@@ -33,9 +35,14 @@ export function stripKeybotMention(body: string): string {
 export async function maybeReplyWithKeybot({
   postId,
   commentBody,
+  parentId = null,
 }: {
   postId: string;
   commentBody: string;
+  // Thread parent for the reply: the tagging comment's id when it is
+  // top-level, or its parent's id when the tag came from a nested reply
+  // (threading is a single level deep).
+  parentId?: string | null;
 }): Promise<void> {
   if (!mentionsKeybot(commentBody)) return;
   if (!readOptionalSupabasePublicEnv()) return;
@@ -87,6 +94,7 @@ export async function maybeReplyWithKeybot({
       author_id: null,
       body: response.answer,
       is_keybot: true,
+      parent_id: parentId,
     });
   } catch {
     // Swallow — a failed keybot reply must not fail the user's comment.
