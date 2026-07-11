@@ -1,20 +1,22 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { NavAccount } from "@/components/nav-account";
+
 /**
  * The single shared top navigation. Apple-style thin bar: logo on the far
  * left, links centered in the bar, 0.5px bottom hairline, no shadow.
  *
- * Plain presentational component (no hooks) so it can render from both
- * server pages and client components. Visible labels are short; aria-labels
- * preserve the accessible route names the tests assert on.
+ * Presentational shell (no hooks) so it can render from both server pages and
+ * client components. The auth-aware account slot (Log in / username + Log out)
+ * is delegated to the <NavAccount/> client island. Visible labels are short;
+ * aria-labels preserve the accessible route names the tests assert on.
  */
 const NAV_LINKS = [
   { label: "Configurator", href: "/configurator" },
   { label: "Browse", href: "/browse" },
   { label: "Community", href: "/community-gallery", ariaLabel: "Community Gallery" },
   { label: "Builds", href: "/my-builds", ariaLabel: "My Builds" },
-  { label: "Log in", href: "/login" },
 ] as const;
 
 export function MainNav({ active }: { active?: string } = {}) {
@@ -50,6 +52,7 @@ export function MainNav({ active }: { active?: string } = {}) {
               {link.label}
             </Link>
           ))}
+          <NavAccount />
         </div>
       </div>
     </nav>
