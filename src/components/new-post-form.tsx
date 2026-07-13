@@ -12,11 +12,18 @@ type Option = { id: string; name: string; brand: string };
 type NewPostFormProps = {
   categories: readonly string[];
   optionsByCategory: Record<string, Option[]>;
+  // Pre-fill from a saved build (?from=<savedBuildId>): the selection and
+  // title land as defaults, the user still reviews and describes before it
+  // goes live through the one shared publish path.
+  initialSelection?: Record<string, string>;
+  initialTitle?: string;
 };
 
 export function NewPostForm({
   categories,
   optionsByCategory,
+  initialSelection,
+  initialTitle,
 }: NewPostFormProps) {
   const [state, formAction, pending] = useActionState<
     GalleryActionState,
@@ -29,6 +36,7 @@ export function NewPostForm({
         Title
         <input
           className="h-11 rounded-xl border border-border bg-white px-3 text-sm font-medium focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+          defaultValue={initialTitle ?? ""}
           maxLength={120}
           name="title"
           required
@@ -55,7 +63,7 @@ export function NewPostForm({
             {category}
             <select
               className="h-11 rounded-xl border border-border bg-white px-3 text-sm font-medium focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-              defaultValue=""
+              defaultValue={initialSelection?.[category] ?? ""}
               name={category}
               required
             >

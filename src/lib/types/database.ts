@@ -170,6 +170,41 @@ export type Database = {
           },
         ];
       };
+      saved_builds: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string | null;
+          component_ids: Json;
+          validation_snapshot: Json | null;
+          estimated_price: number | null;
+          estimated_price_currency: string | null;
+          source: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title?: string | null;
+          component_ids?: Json;
+          validation_snapshot?: Json | null;
+          estimated_price?: number | null;
+          estimated_price_currency?: string | null;
+          source?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["saved_builds"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "saved_builds_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       post_comments: {
         Row: {
           id: string;

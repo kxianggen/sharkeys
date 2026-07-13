@@ -7,7 +7,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { keyboardComponents } from "@/data";
-import { MyBuildsPage, RecommendationDemo } from "@/components/recommendation-demo";
+import { RecommendationDemo } from "@/components/recommendation-demo";
 import {
   createRecommendationResult,
   recommendationsApiResponseSchema,
@@ -24,6 +24,16 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: navigationMocks.push,
   }),
+}));
+
+// The component imports the account-save server action; mock it so jsdom
+// tests never touch the server-only Supabase/auth modules.
+const savedBuildActionMocks = vi.hoisted(() => ({
+  saveBuildAction: vi.fn(async () => ({ ok: true as const, id: "saved-1" })),
+}));
+
+vi.mock("@/app/my-builds/actions", () => ({
+  saveBuildAction: savedBuildActionMocks.saveBuildAction,
 }));
 
 const recommendationResult = createRecommendationResult({
@@ -257,10 +267,6 @@ function getPromptSubmitButton() {
   return within(
     screen.getByRole("form", { name: /AI keyboard prompt form/i }),
   ).getByRole("button", { name: /Design my build|Start Building/i });
-}
-
-function getSavedGallery() {
-  return screen.getByRole("region", { name: /Saved builds gallery/i });
 }
 
 function openManualCheck() {
@@ -951,128 +957,4 @@ describe("RecommendationDemo", () => {
     ).toBeInTheDocument();
   });
 
-  it.skip("saves the selected validated recommendation to local storage", async () => {
-    mockFetch();
-    render(<RecommendationDemo mode="configurator" />);
-
-    submitConfiguratorPrompt("Creamy 65% under RM500");
-
-    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
-    fireEvent.click(screen.getAllByRole("button", { name: /^Save build$/i })[0]);
-
-    expect(
-      await screen.findByText(/saved locally/i),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/My Builds page/i)).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(
-        window.localStorage.getItem("sharkeys.savedBuilds.v1"),
-      ).toContain("Lucky65 V3");
-    });
-  });
-
-  it("renders the My Builds empty state", async () => {
-    mockFetch();
-    render(<MyBuildsPage />);
-
-    expect(
-      await screen.findByText(/No saved builds yet/i),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /My Builds/i })).toBeInTheDocument();
-  });
-
-  it.skip("loads a saved build from My Builds into manual selection", async () => {
-    mockFetch();
-    const recommendation = recommendationResult.recommendations[0];
-
-    window.localStorage.setItem(
-      "sharkeys.savedBuilds.v1",
-      JSON.stringify([
-        {
-          id: "saved_recommendation_test",
-          title: recommendation.title,
-          createdAt: "2026-05-25T00:00:00.000Z",
-          source: "recommendation",
-          componentIds: recommendation.componentIds,
-          estimatedPrice: recommendation.estimatedPrice,
-          estimatedPriceCurrency: recommendation.estimatedPriceCurrency,
-          validation: recommendation.validation,
-        },
-      ]),
-    );
-
-    render(<MyBuildsPage />);
-
-    const gallery = getSavedGallery();
-
-    expect(
-      await within(gallery).findByText(recommendation.title),
-    ).toBeInTheDocument();
-    fireEvent.click(
-      within(gallery).getByRole("button", { name: /Load build/i }),
-    );
-
-    expect(navigationMocks.push).toHaveBeenCalledWith(
-      expect.stringContaining("/configurator?case=case_lucky65_v3_65_aluminum"),
-    );
-  });
-
-  it.skip("saves a manually validated compatible build to local storage", async () => {
-    mockFetch();
-    render(<RecommendationDemo mode="configurator" />);
-
-    submitConfiguratorPrompt("Creamy 65% under RM500");
-    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
-    openManualCheck();
-
-    fireEvent.click(screen.getByRole("button", { name: /Validate manual build/i }));
-    expect(await screen.findByText("Compatible build")).toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole("button", { name: /Save compatible build/i }),
-    );
-
-    expect(
-      await screen.findByText(/Manual build: Lucky65 V3/i),
-    ).toBeInTheDocument();
-    expect(window.localStorage.getItem("sharkeys.savedBuilds.v1")).toContain(
-      "Manual build: Lucky65 V3",
-    );
-  });
-
-  it("deletes saved builds from My Builds", async () => {
-    mockFetch();
-    const recommendation = recommendationResult.recommendations[0];
-
-    window.localStorage.setItem(
-      "sharkeys.savedBuilds.v1",
-      JSON.stringify([
-        {
-          id: "saved_recommendation_test",
-          title: recommendation.title,
-          createdAt: "2026-05-25T00:00:00.000Z",
-          source: "recommendation",
-          componentIds: recommendation.componentIds,
-          estimatedPrice: recommendation.estimatedPrice,
-          estimatedPriceCurrency: recommendation.estimatedPriceCurrency,
-          validation: recommendation.validation,
-        },
-      ]),
-    );
-
-    render(<MyBuildsPage />);
-
-    const gallery = getSavedGallery();
-
-    expect(
-      await within(gallery).findByText(recommendation.title),
-    ).toBeInTheDocument();
-    fireEvent.click(within(gallery).getByRole("button", { name: /Delete/i }));
-
-    await waitFor(() => {
-      expect(within(gallery).queryByText(/Saved recommendation/i)).toBeNull();
-    });
-    expect(within(gallery).getByText(/No saved builds yet/i)).toBeInTheDocument();
-    expect(window.localStorage.getItem("sharkeys.savedBuilds.v1")).toBe("[]");
-  });
 });

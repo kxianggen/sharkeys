@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   AlertCircle,
   BookmarkPlus,
@@ -11,7 +12,6 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
-  CopyPlus,
   Cpu,
   ExternalLink,
   Eye,
@@ -31,10 +31,10 @@ import {
   Volume2,
   WandSparkles,
   Sparkles,
-  Trash2,
   X,
 } from "lucide-react";
 
+import { saveBuildAction } from "@/app/my-builds/actions";
 import { ImageDrop } from "@/components/image-drop";
 import { MainNav } from "@/components/main-nav";
 import { SwatchDots } from "@/components/swatch-dots";
@@ -78,17 +78,6 @@ type ValidateBuildApiResponse = {
   data: {
     result: CompatibilityResult;
   };
-};
-
-type SavedBuild = {
-  id: string;
-  title: string;
-  createdAt: string;
-  source: SavedBuildSource;
-  componentIds: CompleteComponentIdSelection;
-  estimatedPrice: number | null;
-  estimatedPriceCurrency: KeyboardComponent["priceCurrency"] | null;
-  validation: CompatibilityResult;
 };
 
 type KeybotChatMessage = {
@@ -211,8 +200,6 @@ const keybotBlockerActions = [
   },
 ] as const;
 
-const savedBuildsStorageKey = "sharkeys.savedBuilds.v1";
-const maxSavedBuilds = 12;
 const estimatedSwitchCount = 70;
 
 function formatMoney(amount: number, currency: string) {
@@ -342,77 +329,6 @@ function getMountSummary(component: KeyboardComponent) {
   }
 }
 
-function createSavedBuildId(source: SavedBuildSource) {
-  const suffix =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `${Date.now()}`;
-
-  return `saved_${source}_${suffix}`;
-}
-
-function readSavedBuildsFromStorage() {
-  try {
-    const raw = window.localStorage.getItem(savedBuildsStorageKey);
-
-    if (!raw) {
-      return [];
-    }
-
-    const parsed = JSON.parse(raw) as unknown;
-
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed.filter(isSavedBuild).slice(0, maxSavedBuilds);
-  } catch {
-    return [];
-  }
-}
-
-function persistSavedBuilds(savedBuilds: SavedBuild[]) {
-  window.localStorage.setItem(
-    savedBuildsStorageKey,
-    JSON.stringify(savedBuilds.slice(0, maxSavedBuilds)),
-  );
-}
-
-function isSavedBuild(value: unknown): value is SavedBuild {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  const candidate = value as Partial<SavedBuild>;
-
-  return (
-    typeof candidate.id === "string" &&
-    typeof candidate.title === "string" &&
-    typeof candidate.createdAt === "string" &&
-    (candidate.source === "recommendation" || candidate.source === "manual") &&
-    isCompleteComponentIdSelection(candidate.componentIds) &&
-    (typeof candidate.estimatedPrice === "number" ||
-      candidate.estimatedPrice === null) &&
-    (typeof candidate.estimatedPriceCurrency === "string" ||
-      candidate.estimatedPriceCurrency === null) &&
-    Boolean(candidate.validation?.isValid)
-  );
-}
-
-function isCompleteComponentIdSelection(
-  value: unknown,
-): value is CompleteComponentIdSelection {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  const selection = value as Partial<Record<ComponentCategory, unknown>>;
-
-  return componentCategories.every(
-    (category) => typeof selection[category] === "string",
-  );
-}
-
 function toCompleteComponentIds(
   selection: ManualSelection,
 ): CompleteComponentIdSelection | null {
@@ -505,12 +421,6 @@ function estimateAssemblyPrice(
   };
 }
 
-function estimateSavedBuildPrice(
-  components: CompleteComponentSelection,
-): PriceEstimate | null {
-  return estimateAssemblyPrice(components);
-}
-
 function buildSavedBuildTitle(components: CompleteComponentSelection) {
   return `${components.case.name} with ${components.switch.name}`;
 }
@@ -557,6 +467,9 @@ type RecommendationDemoMode = "configurator" | "landing";
 type RecommendationDemoProps = {
   initialKitId?: string | null;
   initialPrompt?: string | null;
+  // Server-known session presence: gates saving to the account. Logged-out
+  // users get a login prompt instead of a silent localStorage write.
+  isAuthenticated?: boolean;
   mode?: RecommendationDemoMode;
 };
 
@@ -594,6 +507,7 @@ function intentToPrompt(intent: ExtractedKeyboardIntent): string {
 export function RecommendationDemo({
   initialKitId = null,
   initialPrompt = null,
+  isAuthenticated = false,
   mode = "landing",
 }: RecommendationDemoProps = {}) {
   const router = useRouter();
@@ -620,11 +534,11 @@ export function RecommendationDemo({
   const [error, setError] = useState<string | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [manualError, setManualError] = useState<string | null>(null);
-  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([]);
-  const [savedBuildsLoaded, setSavedBuildsLoaded] = useState(false);
   const [savedBuildMessage, setSavedBuildMessage] = useState<string | null>(
     null,
   );
+  const [saveRequiresLogin, setSaveRequiresLogin] = useState(false);
+  const [isSavingBuild, setIsSavingBuild] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
@@ -803,24 +717,10 @@ export function RecommendationDemo({
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       setHasMounted(true);
-      setSavedBuilds(readSavedBuildsFromStorage());
-      setSavedBuildsLoaded(true);
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
   }, []);
-
-  useEffect(() => {
-    if (!hasMounted || !savedBuildsLoaded) {
-      return;
-    }
-
-    try {
-      persistSavedBuilds(savedBuilds);
-    } catch {
-      // Local persistence is a prototype convenience; saving should not break validation.
-    }
-  }, [hasMounted, savedBuilds, savedBuildsLoaded]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1140,12 +1040,33 @@ export function RecommendationDemo({
     setManualError(null);
   }
 
-  function prependSavedBuild(savedBuild: SavedBuild) {
-    setSavedBuilds((current) => [
-      savedBuild,
-      ...current.filter((build) => build.id !== savedBuild.id),
-    ].slice(0, maxSavedBuilds));
-    setSavedBuildMessage(`${savedBuild.title} saved locally.`);
+  // Account-backed save. Client-side validity checks above are UX only — the
+  // server action recomputes validation from the catalog before inserting
+  // (the rule engine stays the only authority). Logged-out users are prompted
+  // to log in; nothing is written to localStorage anymore.
+  async function saveBuildToAccount(input: {
+    title: string;
+    source: SavedBuildSource;
+    componentIds: CompleteComponentIdSelection;
+  }) {
+    if (!isAuthenticated) {
+      setSaveRequiresLogin(true);
+      setSavedBuildMessage("Log in to save builds to your account.");
+      return;
+    }
+
+    setSaveRequiresLogin(false);
+    setIsSavingBuild(true);
+    try {
+      const saveResult = await saveBuildAction(input);
+      setSavedBuildMessage(
+        saveResult.ok ? `${input.title} saved to your builds.` : saveResult.error,
+      );
+    } catch {
+      setSavedBuildMessage("Could not save the build. Please try again.");
+    } finally {
+      setIsSavingBuild(false);
+    }
   }
 
   function saveRecommendationBuild(recommendation: RecommendationBuild) {
@@ -1156,15 +1077,10 @@ export function RecommendationDemo({
       return;
     }
 
-    prependSavedBuild({
-      id: createSavedBuildId("recommendation"),
+    void saveBuildToAccount({
       title: recommendation.title,
-      createdAt: new Date().toISOString(),
       source: "recommendation",
       componentIds: recommendation.componentIds,
-      estimatedPrice: recommendation.estimatedPrice,
-      estimatedPriceCurrency: recommendation.estimatedPriceCurrency,
-      validation: recommendation.validation,
     });
   }
 
@@ -1173,7 +1089,7 @@ export function RecommendationDemo({
 
     if (!componentIds || !manualValidation?.isValid) {
       setManualError(
-        "Validate a complete compatible build before saving it locally.",
+        "Validate a complete compatible build before saving it.",
       );
       return;
     }
@@ -1185,17 +1101,10 @@ export function RecommendationDemo({
       return;
     }
 
-    const priceEstimate = estimateSavedBuildPrice(components);
-
-    prependSavedBuild({
-      id: createSavedBuildId("manual"),
+    void saveBuildToAccount({
       title: `Manual build: ${buildSavedBuildTitle(components)}`,
-      createdAt: new Date().toISOString(),
       source: "manual",
       componentIds,
-      estimatedPrice: priceEstimate?.amount ?? null,
-      estimatedPriceCurrency: priceEstimate?.currency ?? null,
-      validation: manualValidation,
     });
   }
 
@@ -1224,6 +1133,7 @@ export function RecommendationDemo({
     const canSaveAssembly =
       isBuildComplete &&
       !isAssemblyValidating &&
+      !isSavingBuild &&
       Boolean(assemblyValidation?.isValid);
     // A section is resolved when none of its categories still awaits a user
     // choice — kit-locked sections resolve as soon as the case is set.
@@ -1412,17 +1322,10 @@ export function RecommendationDemo({
         return;
       }
 
-      const priceEstimate = estimateAssemblyPrice(components);
-
-      prependSavedBuild({
-        id: createSavedBuildId("recommendation"),
+      void saveBuildToAccount({
         title: buildSavedBuildTitle(components),
-        createdAt: new Date().toISOString(),
         source: "recommendation",
         componentIds: assembledComponentIds,
-        estimatedPrice: priceEstimate?.amount ?? null,
-        estimatedPriceCurrency: priceEstimate?.currency ?? null,
-        validation: assemblyValidation,
       });
     };
 
@@ -1609,7 +1512,21 @@ export function RecommendationDemo({
               {savedBuildMessage ? (
                 <Notice
                   icon={Info}
-                  message={`${savedBuildMessage} View saved builds on the My Builds page.`}
+                  message={
+                    saveRequiresLogin ? (
+                      <>
+                        {savedBuildMessage}{" "}
+                        <Link
+                          className="font-semibold text-primary underline"
+                          href="/login?next=/configurator"
+                        >
+                          Log in
+                        </Link>
+                      </>
+                    ) : (
+                      `${savedBuildMessage} View saved builds on the My Builds page.`
+                    )
+                  }
                   tone="sky"
                 />
               ) : null}
@@ -2005,7 +1922,21 @@ export function RecommendationDemo({
             <Notice
               className="mt-5"
               icon={Info}
-              message={`${savedBuildMessage} View saved builds on the My Builds page.`}
+              message={
+                saveRequiresLogin ? (
+                  <>
+                    {savedBuildMessage}{" "}
+                    <Link
+                      className="font-semibold text-primary underline"
+                      href="/login?next=/"
+                    >
+                      Log in
+                    </Link>
+                  </>
+                ) : (
+                  `${savedBuildMessage} View saved builds on the My Builds page.`
+                )
+              }
               tone="sky"
             />
           ) : null}
@@ -2088,157 +2019,6 @@ export function RecommendationDemo({
         manualSelection={manualSelection}
         result={result}
         selectedRecommendation={selectedRecommendation}
-      />
-    </div>
-  );
-}
-
-export function MyBuildsPage() {
-  const router = useRouter();
-  const [catalog, setCatalog] = useState<KeyboardComponent[]>([]);
-  const [catalogError, setCatalogError] = useState<string | null>(null);
-  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([]);
-  const [savedBuildsLoaded, setSavedBuildsLoaded] = useState(false);
-  const [savedBuildMessage, setSavedBuildMessage] = useState<string | null>(
-    null,
-  );
-
-  const catalogById = useMemo(() => {
-    return new Map(catalog.map((component) => [component.id, component]));
-  }, [catalog]);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setSavedBuilds(readSavedBuildsFromStorage());
-      setSavedBuildsLoaded(true);
-    }, 0);
-
-    return () => window.clearTimeout(timeoutId);
-  }, []);
-
-  useEffect(() => {
-    if (!savedBuildsLoaded) {
-      return;
-    }
-
-    try {
-      persistSavedBuilds(savedBuilds);
-    } catch {
-      // Local persistence is a prototype convenience; saved-build browsing should stay usable.
-    }
-  }, [savedBuilds, savedBuildsLoaded]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadCatalog() {
-      try {
-        setCatalogError(null);
-        const response = await fetch("/api/components", {
-          signal: controller.signal,
-        });
-        const body = (await response.json()) as
-          | ComponentsApiResponse
-          | ApiErrorResponse;
-
-        if (!response.ok || !body.success) {
-          throw new Error(
-            body.success ? "Component catalog failed to load." : body.error.message,
-          );
-        }
-
-        setCatalog(body.data.components);
-      } catch (caughtError) {
-        if (caughtError instanceof DOMException && caughtError.name === "AbortError") {
-          return;
-        }
-
-        setCatalogError(
-          caughtError instanceof Error
-            ? caughtError.message
-            : "Component catalog failed to load.",
-        );
-      }
-    }
-
-    void loadCatalog();
-
-    return () => controller.abort();
-  }, []);
-
-  function loadSavedBuild(savedBuild: SavedBuild) {
-    const params = new URLSearchParams();
-    for (const category of componentCategories) {
-      if (savedBuild.componentIds[category]) {
-        params.set(category, savedBuild.componentIds[category]);
-      }
-    }
-    router.push(`/configurator?${params.toString()}`);
-  }
-
-  function deleteSavedBuild(savedBuildId: string) {
-    const deletedBuild = savedBuilds.find((build) => build.id === savedBuildId);
-
-    setSavedBuilds((current) =>
-      current.filter((build) => build.id !== savedBuildId),
-    );
-    setSavedBuildMessage(
-      deletedBuild ? `${deletedBuild.title} removed from saved builds.` : null,
-    );
-  }
-
-  function clearSavedBuilds() {
-    setSavedBuilds([]);
-    setSavedBuildMessage("Saved builds cleared.");
-  }
-
-  return (
-    <div className="min-h-screen overflow-x-hidden bg-surface-secondary text-primary">
-      <MainNav active="Builds" />
-
-      <main className="mx-auto w-full max-w-screen-xl px-4 py-12 sm:px-8 lg:px-16">
-        <div className="rounded-[32px] border border-white/80 bg-white/70 p-8 shadow-sm backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-primary">
-            Local builds
-          </p>
-          <h1 className="mt-3 text-4xl font-black tracking-[-0.01em] text-primary sm:text-5xl">
-            My Builds
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-secondary">
-            Saved recommendations and compatible manual builds live in this
-            browser. Remove old drafts or load them to the manual selection panel.
-          </p>
-        </div>
-
-        {catalogError ? (
-          <Notice
-            className="mt-6"
-            icon={AlertCircle}
-            message={catalogError}
-            tone="red"
-          />
-        ) : null}
-
-        <div className="mt-8">
-          <SavedBuildsGallery
-            catalogById={catalogById}
-            loadLabel="Load build"
-            message={savedBuildMessage}
-            onClear={clearSavedBuilds}
-            onDelete={deleteSavedBuild}
-            onLoad={loadSavedBuild}
-            savedBuilds={savedBuilds}
-            savedBuildsLoaded={savedBuildsLoaded}
-          />
-        </div>
-      </main>
-
-      <SharkeysFooter />
-      <FloatingKeybot
-        catalogById={catalogById}
-        manualSelection={{}}
-        result={null}
-        selectedRecommendation={null}
       />
     </div>
   );
@@ -4186,195 +3966,6 @@ function ManualSelectionPanel({
   );
 }
 
-function SavedBuildsGallery({
-  catalogById,
-  loadLabel = "Load build",
-  message,
-  onClear,
-  onDelete,
-  onLoad,
-  savedBuilds,
-  savedBuildsLoaded,
-}: {
-  catalogById: Map<string, KeyboardComponent>;
-  loadLabel?: string;
-  message: string | null;
-  onClear: () => void;
-  onDelete: (savedBuildId: string) => void;
-  onLoad: (savedBuild: SavedBuild) => void;
-  savedBuilds: SavedBuild[];
-  savedBuildsLoaded: boolean;
-}) {
-  return (
-    <section
-      aria-label="Saved builds gallery"
-      className="rounded-3xl border border-border bg-white p-5 shadow-sm"
-      id="saved-builds-gallery"
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-            Local gallery
-          </p>
-          <h2 className="mt-1 text-base font-bold text-primary">
-            Saved builds
-          </h2>
-          <p className="mt-1 text-sm text-secondary">
-            Saved in this browser for local prototype review.
-          </p>
-        </div>
-        <button
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 text-sm font-semibold text-secondary transition hover:bg-accent-subtle disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={savedBuildsLoaded && savedBuilds.length === 0}
-          onClick={onClear}
-          type="button"
-        >
-          <Trash2 className="h-4 w-4" aria-hidden />
-          Clear all
-        </button>
-      </div>
-
-      {message ? (
-        <Notice
-          className="mt-4"
-          icon={Info}
-          message={message}
-          tone="sky"
-        />
-      ) : null}
-
-      {!savedBuildsLoaded ? (
-        <p className="mt-4 rounded-2xl border border-border bg-surface-secondary px-3 py-2 text-sm text-secondary">
-          Loading saved builds...
-        </p>
-      ) : null}
-
-      {savedBuildsLoaded && savedBuilds.length === 0 ? (
-        <p className="mt-4 rounded-2xl border border-dashed border-border bg-surface-secondary px-3 py-4 text-sm text-secondary">
-          No saved builds yet. Save a validated recommendation or a compatible
-          manual build to keep it here.
-        </p>
-      ) : null}
-
-      {savedBuilds.length > 0 ? (
-        <div className="mt-4 grid gap-3">
-          {savedBuilds.map((savedBuild) => (
-            <SavedBuildCard
-              catalogById={catalogById}
-              key={savedBuild.id}
-              loadLabel={loadLabel}
-              onDelete={onDelete}
-              onLoad={onLoad}
-              savedBuild={savedBuild}
-            />
-          ))}
-        </div>
-      ) : null}
-    </section>
-  );
-}
-
-function SavedBuildCard({
-  catalogById,
-  loadLabel,
-  onDelete,
-  onLoad,
-  savedBuild,
-}: {
-  catalogById: Map<string, KeyboardComponent>;
-  loadLabel: string;
-  onDelete: (savedBuildId: string) => void;
-  onLoad: (savedBuild: SavedBuild) => void;
-  savedBuild: SavedBuild;
-}) {
-  const price =
-    savedBuild.estimatedPrice !== null && savedBuild.estimatedPriceCurrency
-      ? formatEstimatedTotal(
-          savedBuild.estimatedPrice,
-          savedBuild.estimatedPriceCurrency,
-        )
-      : "No estimate";
-
-  return (
-    <article className="rounded-2xl border border-border bg-surface-secondary p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-border bg-white px-2 py-1 text-xs font-semibold text-primary">
-              {savedBuild.validation.isValid ? "Compatible" : "Needs review"}
-            </span>
-            <span className="rounded-full border border-border bg-white px-2 py-1 text-xs font-semibold text-secondary">
-              Saved {savedBuild.source}
-            </span>
-          </div>
-          <h3 className="mt-2 text-sm font-bold leading-5 text-primary">
-            {savedBuild.title}
-          </h3>
-          <p className="mt-1 text-xs text-secondary">
-            {new Date(savedBuild.createdAt).toLocaleString("en-MY", {
-              dateStyle: "medium",
-              timeStyle: "short",
-            })}
-          </p>
-        </div>
-        <div className="text-left sm:text-right">
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-secondary">
-            Estimated total
-          </p>
-          <p className="mt-1 text-base font-bold text-primary">{price}</p>
-        </div>
-      </div>
-
-      <dl className="mt-3 grid gap-2 border-y border-border py-3 sm:grid-cols-2">
-        {componentCategories.map((category) => {
-          const component = catalogById.get(savedBuild.componentIds[category]);
-
-          return (
-            <div key={category}>
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary">
-                {categoryLabels[category]}
-              </dt>
-              <dd className="mt-1 text-sm text-primary">
-                {component?.name ?? savedBuild.componentIds[category]}
-              </dd>
-              {component?.vendorUrl ? (
-                <a
-                  className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary hover:underline"
-                  href={component.vendorUrl}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Vendor
-                  <ExternalLink className="h-3 w-3" aria-hidden />
-                </a>
-              ) : null}
-            </div>
-          );
-        })}
-      </dl>
-
-      <div className="mt-3 flex flex-wrap gap-2">
-        <button
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-accent px-3 text-sm font-bold text-white transition hover:bg-accent-hover"
-          onClick={() => onLoad(savedBuild)}
-          type="button"
-        >
-          <CopyPlus className="h-4 w-4" aria-hidden />
-          {loadLabel}
-        </button>
-        <button
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 text-sm font-semibold text-secondary transition hover:bg-accent-subtle"
-          onClick={() => onDelete(savedBuild.id)}
-          type="button"
-        >
-          <Trash2 className="h-4 w-4" aria-hidden />
-          Delete
-        </button>
-      </div>
-    </article>
-  );
-}
-
 function EmptyWorkspace() {
   return (
     <div className="rounded-3xl border border-dashed border-border bg-white p-10 text-center shadow-sm">
@@ -4416,7 +4007,7 @@ function Notice({
 }: {
   className?: string;
   icon: typeof AlertCircle;
-  message: string;
+  message: ReactNode;
   tone: "amber" | "red" | "sky";
 }) {
   const toneClasses = {
