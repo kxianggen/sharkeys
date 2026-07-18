@@ -387,10 +387,12 @@ describe("RecommendationDemo", () => {
       "href",
       "/community-gallery",
     );
-    expect(screen.getByRole("link", { name: /My Builds/i })).toHaveAttribute(
-      "href",
-      "/my-builds",
-    );
+    // Builds moved out of the top nav into the account flyout panel; the bar
+    // now exposes only the account trigger for it.
+    expect(screen.queryByRole("link", { name: /My Builds/i })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Account" }),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/Validated keyboard workspace/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Candidate groups/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Extracted preferences/i)).not.toBeInTheDocument();

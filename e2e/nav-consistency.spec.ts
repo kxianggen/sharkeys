@@ -2,9 +2,10 @@ import { expect, test } from "@playwright/test";
 
 /**
  * Nav-consistency check: every top-level page must render the single shared
- * MainNav — identified by the nav landmark containing the Sharkeys logo link
- * and the full centered link set (Configurator / Browse / Gallery / Builds /
- * Log in). Also captures a full-page screenshot per page for review.
+ * MainNav — identified by the nav landmark containing the Sharkeys logo link,
+ * the centered route-link set (Configurator / Browse / Community), and the
+ * account flyout trigger. Builds now lives inside the account panel, not the
+ * top nav. Also captures a full-page screenshot per page for review.
  */
 const pages = [
   { name: "configurator", path: "/configurator" },
@@ -29,8 +30,9 @@ for (const { name, path } of pages) {
     await expect(
       nav.getByRole("link", { name: "Community Gallery" }),
     ).toBeVisible();
-    await expect(nav.getByRole("link", { name: "My Builds" })).toBeVisible();
-    await expect(nav.getByRole("link", { name: "Log in" })).toBeVisible();
+    // Builds moved into the account panel; the bar exposes the flyout trigger.
+    await expect(nav.getByRole("link", { name: "My Builds" })).toHaveCount(0);
+    await expect(nav.getByRole("button", { name: "Account" })).toBeVisible();
 
     await page.screenshot({
       animations: "disabled",

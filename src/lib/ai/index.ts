@@ -1,6 +1,7 @@
 export {
   extractKeyboardIntent,
   extractIntentFromImage,
+  defaultVisionModel,
 } from "./intent-extraction";
 export {
   mapIntentToSearchCriteria,

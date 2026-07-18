@@ -55,10 +55,11 @@ export async function maybeReplyWithKeybot({
   try {
     const supabase = createSupabaseAdminClient();
 
-    // Load the build context for this post.
+    // Load the build context for this post, including any attached photo so Meg
+    // can answer from what the image shows (not just the catalog).
     const { data: post } = await supabase
       .from("build_posts")
-      .select("component_ids")
+      .select("component_ids, image_url")
       .eq("id", postId)
       .maybeSingle();
     if (!post) return;
@@ -94,13 +95,23 @@ export async function maybeReplyWithKeybot({
         : "Can you share some general keyboard advice?",
     );
 
-    const response = await invokeKeybotAgent({
-      message,
-      context: {
-        selectedComponentIds,
-        conversationHistory,
+    // When the post has a photo, fetch it from its public Storage URL and pass
+    // it to the vision model as image input. A failed/absent fetch just falls
+    // back to the text-only grounded path — the reply must not depend on it.
+    const postImageDataUrl = post.image_url
+      ? await fetchImageAsDataUrl(post.image_url)
+      : undefined;
+
+    const response = await invokeKeybotAgent(
+      {
+        message,
+        context: {
+          selectedComponentIds,
+          conversationHistory,
+        },
       },
-    });
+      postImageDataUrl ? { postImageDataUrl } : {},
+    );
 
     await supabase.from("post_comments").insert({
       post_id: postId,
@@ -111,5 +122,26 @@ export async function maybeReplyWithKeybot({
     });
   } catch {
     // Swallow — a failed keybot reply must not fail the user's comment.
+  }
+}
+
+/**
+ * Fetches an image from its public URL and returns it as a base64 data URL
+ * suitable for the vision model's `input_image` block. Returns null on any
+ * failure (network error, non-OK response, empty body) so the caller can fall
+ * back to the text-only grounded path rather than dropping the reply.
+ */
+export async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+
+    const contentType = response.headers.get("content-type") ?? "image/webp";
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.byteLength === 0) return null;
+
+    return `data:${contentType};base64,${bytes.toString("base64")}`;
+  } catch {
+    return null;
   }
 }

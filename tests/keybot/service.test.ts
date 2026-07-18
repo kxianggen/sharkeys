@@ -461,4 +461,89 @@ describe("Keybot service", () => {
       expect(result.answer).toContain("deeper, rounded sound");
     });
   });
+
+  describe("vision-in-comments (post photo attached)", () => {
+    type CapturedInput = {
+      model?: string;
+      input: Array<{ role: string; content: unknown }>;
+    };
+
+    it("passes the post image to the vision model with honesty guardrails", async () => {
+      await withOpenAIEnv({ [openAIKeyEnv]: "test-openai-key" }, async () => {
+        const dataUrl = "data:image/webp;base64,AAAABBBB";
+        let captured: CapturedInput | undefined;
+
+        const result = await generateWithCatalog("what colour is this case?", {
+          postImageDataUrl: dataUrl,
+          client: {
+            responses: {
+              parse: async (input: CapturedInput) => {
+                captured = input;
+                return {
+                  output_parsed: {
+                    answer: "That reads as a sage-green 65% case to me.",
+                    relatedComponentIds: [],
+                    clarificationQuestion: null,
+                  },
+                };
+              },
+            },
+          } as unknown as GenerateKeybotResponseOptions["client"],
+        });
+
+        expect(result.source).toBe("openai");
+        // Reused the inspiration-photo vision model.
+        expect(captured?.model).toBe("gpt-4o-mini");
+
+        // The image is passed as an input_image block alongside the text.
+        const userContent = captured?.input[1]?.content;
+        expect(Array.isArray(userContent)).toBe(true);
+        const imageBlock = (
+          userContent as Array<{ type: string; image_url?: string }>
+        ).find((block) => block.type === "input_image");
+        expect(imageBlock?.image_url).toBe(dataUrl);
+
+        // The honesty guardrails are encoded in the system prompt.
+        const systemContent = String(captured?.input[0]?.content);
+        expect(systemContent).toContain(
+          "MUST NOT state a specific brand or exact product model as fact from a photo",
+        );
+        expect(systemContent).toContain("hedged");
+        expect(systemContent).toContain("Colour is directly observable");
+        // The base "never invent" rules are still present.
+        expect(systemContent).toContain("Do not invent products, prices");
+      });
+    });
+
+    it("omits image input and image-only rules when the post has no photo", async () => {
+      await withOpenAIEnv({ [openAIKeyEnv]: "test-openai-key" }, async () => {
+        let captured: CapturedInput | undefined;
+
+        await generateWithCatalog("what is a thocky keyboard?", {
+          client: {
+            responses: {
+              parse: async (input: CapturedInput) => {
+                captured = input;
+                return {
+                  output_parsed: {
+                    answer: "A thocky keyboard has a deeper, rounded sound.",
+                    relatedComponentIds: [],
+                    clarificationQuestion: null,
+                  },
+                };
+              },
+            },
+          } as unknown as GenerateKeybotResponseOptions["client"],
+        });
+
+        // Text-only user content (no input_image block).
+        expect(typeof captured?.input[1]?.content).toBe("string");
+        // Image-only guardrails are absent without a photo.
+        const systemContent = String(captured?.input[0]?.content);
+        expect(systemContent).not.toContain(
+          "MUST NOT state a specific brand or exact product model as fact from a photo",
+        );
+      });
+    });
+  });
 });

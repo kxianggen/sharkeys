@@ -23,8 +23,9 @@ import {
 type OpenAIIntentClient = Pick<OpenAI, "responses">;
 
 // Vision model for image intent (Phase 5, decision D7). Text-only intent keeps
-// using the configured OPENAI_MODEL.
-const defaultVisionModel = "gpt-4o-mini";
+// using the configured OPENAI_MODEL. Exported so the @meg comment path can
+// reuse the same vision model when a post has an attached build photo.
+export const defaultVisionModel = "gpt-4o-mini";
 
 type ExtractKeyboardIntentOptions = {
   apiKey?: string;

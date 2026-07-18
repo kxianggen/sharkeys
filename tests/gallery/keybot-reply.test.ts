@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { keyboardComponents } from "@/data";
 import { invokeKeybotAgent } from "@/lib/agent";
-import { mentionsKeybot, stripKeybotMention } from "@/lib/gallery/keybot-reply";
+import {
+  fetchImageAsDataUrl,
+  mentionsKeybot,
+  stripKeybotMention,
+} from "@/lib/gallery/keybot-reply";
 
 describe("gallery @meg reply helpers", () => {
   describe("mentionsKeybot", () => {
@@ -32,6 +36,52 @@ describe("gallery @meg reply helpers", () => {
       expect(stripKeybotMention("@meg")).toBe(
         "What do you think of this build?",
       );
+    });
+  });
+
+  describe("fetchImageAsDataUrl", () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it("returns a base64 data URL for an OK image response", async () => {
+      const bytes = new Uint8Array([1, 2, 3, 4]);
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(
+          async () =>
+            new Response(bytes, {
+              status: 200,
+              headers: { "content-type": "image/webp" },
+            }),
+        ),
+      );
+
+      const result = await fetchImageAsDataUrl("https://example.com/x.webp");
+
+      expect(result).toBe(
+        `data:image/webp;base64,${Buffer.from(bytes).toString("base64")}`,
+      );
+    });
+
+    it("returns null on a non-OK response", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => new Response(null, { status: 404 })),
+      );
+
+      expect(await fetchImageAsDataUrl("https://example.com/missing")).toBeNull();
+    });
+
+    it("returns null when the fetch throws", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => {
+          throw new Error("network down");
+        }),
+      );
+
+      expect(await fetchImageAsDataUrl("https://example.com/x.webp")).toBeNull();
     });
   });
 

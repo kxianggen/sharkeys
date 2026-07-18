@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { Bot, Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
 
 import { CommentComposer } from "@/components/comment-composer";
 import type { GalleryComment, GalleryCommentThread } from "@/lib/gallery/service";
@@ -141,9 +142,21 @@ function CommentBlock({
 }) {
   const authorLabel = comment.isKeybot ? (
     <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-      <Bot className="h-4 w-4 text-accent" aria-hidden /> Meg
+      <span
+        aria-hidden
+        className="flex h-5 w-5 flex-none items-center justify-center"
+      >
+        <Image
+          alt="Meg"
+          className="h-full w-full rounded-full object-cover"
+          height={20}
+          src="/meg-avatar.png"
+          width={20}
+        />
+      </span>
+      Meg
       <span className="rounded-pill bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
-        Grounded assistant
+        AI assistant
       </span>
     </span>
   ) : (
