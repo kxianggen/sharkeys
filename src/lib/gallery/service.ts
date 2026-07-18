@@ -19,6 +19,9 @@ export type GalleryPost = {
   description: string | null;
   componentIds: ComponentIdSelection;
   validationSnapshot: ValidationSnapshot | null;
+  // Public URL of the author's uploaded build photo; null falls back to the
+  // kit hero image at render time.
+  imageUrl: string | null;
   isPublished: boolean;
   createdAt: string;
   author: GalleryAuthor | null;
@@ -96,7 +99,7 @@ function mapAuthor(row: AuthorRow): GalleryAuthor | null {
 }
 
 const POST_SELECT =
-  "id, title, description, component_ids, validation_snapshot, is_published, created_at, author:profiles!build_posts_author_id_fkey(id, username, display_name, avatar_url)";
+  "id, title, description, component_ids, validation_snapshot, image_url, is_published, created_at, author:profiles!build_posts_author_id_fkey(id, username, display_name, avatar_url)";
 
 /**
  * Lists published gallery posts (newest first). RLS guarantees only published
@@ -122,6 +125,7 @@ export async function listPublishedPosts(limit = 30): Promise<GalleryPost[]> {
     description: row.description,
     componentIds: (row.component_ids ?? {}) as ComponentIdSelection,
     validationSnapshot: (row.validation_snapshot as ValidationSnapshot | null) ?? null,
+    imageUrl: row.image_url ?? null,
     isPublished: row.is_published,
     createdAt: row.created_at,
     author: mapAuthor(row.author as AuthorRow),
@@ -168,6 +172,7 @@ export async function getPostWithComments(
       componentIds: (postRow.component_ids ?? {}) as ComponentIdSelection,
       validationSnapshot:
         (postRow.validation_snapshot as ValidationSnapshot | null) ?? null,
+      imageUrl: postRow.image_url ?? null,
       isPublished: postRow.is_published,
       createdAt: postRow.created_at,
       author: mapAuthor(postRow.author as AuthorRow),

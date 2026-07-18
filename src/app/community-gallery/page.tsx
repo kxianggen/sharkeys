@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { KitImage } from "@/components/kit-image";
+import { BuildPostImage } from "@/components/build-post-image";
 import { MainNav } from "@/components/main-nav";
 import { getSessionUser } from "@/lib/auth";
 import { getCatalogComponents } from "@/lib/components";
@@ -54,12 +54,16 @@ export default async function CommunityGalleryPage() {
           <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => {
               const summary = summarizeGalleryBuild(post.componentIds, catalog);
+              const hasBuild = Object.keys(post.componentIds).length > 0;
               const summaryLine = [
                 `@${post.author?.username ?? "unknown"}`,
                 summary.kitName,
               ]
                 .filter(Boolean)
                 .join(" · ");
+              // A buildless post with no photo renders text-only — no empty
+              // image tile. A photo or a build still resolves a visual.
+              const showVisual = Boolean(post.imageUrl) || hasBuild;
 
               return (
                 <Link
@@ -67,7 +71,24 @@ export default async function CommunityGalleryPage() {
                   href={`/community-gallery/${post.id}`}
                   key={post.id}
                 >
-                  <KitImage alt={`${post.title} build`} kitId={summary.kitId} />
+                  {showVisual ? (
+                    <BuildPostImage
+                      alt={`${post.title} build`}
+                      imageUrl={post.imageUrl}
+                      kitId={summary.kitId}
+                    />
+                  ) : (
+                    <div className="flex aspect-[4/3] w-full flex-col justify-center rounded-lg border-[0.5px] border-border bg-surface p-5">
+                      <h2 className="text-base font-semibold text-primary group-hover:text-accent">
+                        {post.title}
+                      </h2>
+                      {post.description ? (
+                        <p className="mt-2 line-clamp-4 text-sm text-secondary">
+                          {post.description}
+                        </p>
+                      ) : null}
+                    </div>
+                  )}
                   <h2 className="mt-4 text-base font-semibold text-primary group-hover:text-accent">
                     {post.title}
                   </h2>

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { RotateCcw, Send, X } from "lucide-react";
 
 import type { KeybotApiResponse } from "@/lib/keybot/schemas";
+import { useKeybotThinkingStage } from "@/components/use-keybot-thinking-stage";
 
 type ApiErrorResponse = {
   success: false;
@@ -47,6 +48,7 @@ export function GlobalKeybotLauncher() {
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<FloatingMessage[]>([WELCOME_MESSAGE]);
   const endRef = useRef<HTMLDivElement | null>(null);
+  const thinkingLabel = useKeybotThinkingStage(isSending);
 
   useEffect(() => {
     if (hidden) {
@@ -147,25 +149,16 @@ export function GlobalKeybotLauncher() {
     return (
       <button
         aria-label="Open Meg assistant"
-        className="group fixed bottom-5 right-5 z-40 flex h-16 w-16 items-center justify-center rounded-full bg-accent text-white shadow-xl outline-none transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:ring-4 focus-visible:ring-accent/40 sm:bottom-6 sm:right-6"
+        className="group fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full border-[0.5px] border-border bg-surface shadow-[var(--shadow-overlay)] outline-none transition duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-accent/30 sm:bottom-6 sm:right-6"
         onClick={() => setIsOpen(true)}
         type="button"
       >
-        {/* Living, pulsing halo */}
-        <span
-          aria-hidden
-          className="absolute inset-0 rounded-full bg-accent/40 motion-safe:animate-ping"
-        />
-        <span
-          aria-hidden
-          className="absolute inset-0 rounded-full ring-1 ring-inset ring-white/20"
-        />
         <Image
           alt=""
-          className="relative h-full w-full rounded-full object-cover transition-transform duration-300 group-hover:scale-105"
-          height={64}
+          className="h-full w-full rounded-full object-cover"
+          height={56}
           src="/meg-avatar.png"
-          width={64}
+          width={56}
         />
       </button>
     );
@@ -182,29 +175,26 @@ export function GlobalKeybotLauncher() {
       <style>{
         "@keyframes meg-pop{from{opacity:0;transform:translateY(16px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}"
       }</style>
-      <div className="flex max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-3xl border border-white/40 bg-white/85 shadow-2xl backdrop-blur-2xl sm:h-[600px]">
-        {/* Deep Navy Mac-style header */}
-        <header className="flex items-center gap-3 bg-accent px-4 py-4 text-white">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-lg border-[0.5px] border-border bg-surface shadow-[var(--shadow-overlay)] sm:h-[600px]">
+        <header className="flex items-center gap-3 border-b-[0.5px] border-border bg-surface px-5 py-4">
           <span
             aria-hidden
-            className="flex h-12 w-12 flex-none items-center justify-center"
+            className="flex h-9 w-9 flex-none items-center justify-center"
           >
             <Image
               alt="Meg"
               className="h-full w-full rounded-full object-cover"
-              height={48}
+              height={36}
               src="/meg-avatar.png"
-              width={48}
+              width={36}
             />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-bold leading-5 tracking-tight">
-              Ask Meg
-            </h2>
+            <h2 className="text-base font-semibold text-primary">Ask Meg</h2>
           </div>
           <button
             aria-label="Clear conversation"
-            className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-white/70 transition hover:bg-white/15 hover:text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-white/25"
+            className="flex h-8 w-8 flex-none items-center justify-center rounded-xs text-secondary transition hover:bg-surface-secondary hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
             onClick={clearConversation}
             type="button"
           >
@@ -212,7 +202,7 @@ export function GlobalKeybotLauncher() {
           </button>
           <button
             aria-label="Close Meg assistant"
-            className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-white/70 transition hover:bg-white/15 hover:text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-white/25"
+            className="flex h-8 w-8 flex-none items-center justify-center rounded-xs text-secondary transition hover:bg-surface-secondary hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
             onClick={() => setIsOpen(false)}
             type="button"
           >
@@ -222,11 +212,11 @@ export function GlobalKeybotLauncher() {
 
         <div
           aria-live="polite"
-          className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-surface-secondary to-white px-4 py-4"
+          className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-surface-secondary px-5 py-5"
         >
           {messages.map((message) => (
             <div
-              className={`flex items-end gap-2 ${
+              className={`flex items-start gap-2.5 ${
                 message.role === "assistant" ? "justify-start" : "justify-end"
               }`}
               key={message.id}
@@ -234,32 +224,31 @@ export function GlobalKeybotLauncher() {
               {message.role === "assistant" ? (
                 <span
                   aria-hidden
-                  className="mb-1 flex h-8 w-8 flex-none items-center justify-center"
+                  className="flex h-7 w-7 flex-none items-center justify-center"
                 >
                   <Image
                     alt="Meg"
                     className="h-full w-full rounded-full object-cover"
-                    height={32}
+                    height={28}
                     src="/meg-avatar.png"
-                    width={32}
+                    width={28}
                   />
                 </span>
               ) : null}
               <div
-                className={`max-w-[82%] rounded-3xl px-4 py-3 text-sm leading-6 shadow-sm transition ${
+                className={`max-w-[82%] rounded-md px-4 py-3 text-sm leading-6 text-primary ${
                   message.role === "assistant"
-                    ? "rounded-bl-md bg-white text-primary ring-1 ring-accent/5"
-                    : "rounded-br-md bg-accent-subtle text-primary"
+                    ? "border-[0.5px] border-border bg-surface"
+                    : "bg-accent-subtle"
                 }`}
               >
                 {message.content}
-                {message.role === "assistant" && message.source ? (
-                  <div className="mt-3 border-t border-accent/10 pt-2 text-[11px] font-bold uppercase tracking-[0.08em] text-secondary">
-                    {message.source === "fallback_missing_api_key" ||
-                    message.source === "fallback_error"
-                      ? "Using local grounded fallback"
-                      : "Catalog verified"}
-                  </div>
+                {message.role === "assistant" &&
+                (message.source === "fallback_missing_api_key" ||
+                  message.source === "fallback_error") ? (
+                  <p className="mt-2 text-caption text-secondary">
+                    Using local grounded fallback
+                  </p>
                 ) : null}
               </div>
             </div>
@@ -269,7 +258,7 @@ export function GlobalKeybotLauncher() {
             <div className="flex flex-wrap gap-2 pt-1">
               {SUGGESTED_QUERIES.map((query) => (
                 <button
-                  className="rounded-full border border-accent/15 bg-white px-3.5 py-2 text-xs font-medium tracking-tight text-primary shadow-sm transition hover:-translate-y-0.5 hover:border-accent hover:bg-accent-subtle focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/25"
+                  className="rounded-pill border-[0.5px] border-border bg-surface px-3.5 py-2 text-caption text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
                   key={query}
                   onClick={() => {
                     setInput(query);
@@ -284,26 +273,26 @@ export function GlobalKeybotLauncher() {
           ) : null}
 
           {isSending ? (
-            <div className="flex items-end gap-2">
+            <div className="flex items-start gap-2.5">
               <span
                 aria-hidden
-                className="mb-1 flex h-8 w-8 flex-none items-center justify-center"
+                className="flex h-7 w-7 flex-none items-center justify-center"
               >
                 <Image
                   alt="Meg"
                   className="h-full w-full rounded-full object-cover"
-                  height={32}
+                  height={28}
                   src="/meg-avatar.png"
-                  width={32}
+                  width={28}
                 />
               </span>
-              <div className="inline-flex items-center gap-2 rounded-3xl rounded-bl-md bg-white px-4 py-3 text-sm font-medium text-primary shadow-sm ring-1 ring-accent/5">
+              <div className="inline-flex items-center gap-2 rounded-md border-[0.5px] border-border bg-surface px-4 py-3 text-sm leading-6 text-secondary">
                 <span className="flex items-center gap-1" aria-hidden>
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent motion-safe:animate-bounce [animation-delay:-0.3s]" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent motion-safe:animate-bounce [animation-delay:-0.15s]" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent motion-safe:animate-bounce" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-text-muted motion-safe:animate-bounce [animation-delay:-0.3s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-text-muted motion-safe:animate-bounce [animation-delay:-0.15s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-text-muted motion-safe:animate-bounce" />
                 </span>
-                Meg is pondering...
+                {thinkingLabel}
               </div>
             </div>
           ) : null}
@@ -311,22 +300,22 @@ export function GlobalKeybotLauncher() {
         </div>
 
         {error ? (
-          <p className="border-t border-error/20 bg-error px-4 py-2 text-xs font-semibold text-error">
+          <p className="border-t-[0.5px] border-border bg-surface px-5 py-3 text-caption text-error">
             {error}
           </p>
         ) : null}
 
         <form
-          className="border-t border-accent/10 bg-white/70 p-3 backdrop-blur"
+          className="border-t-[0.5px] border-border bg-surface p-4"
           onSubmit={(event) => {
             event.preventDefault();
             void sendMessage(input);
           }}
         >
-          <div className="flex items-center gap-2 rounded-2xl border border-accent/15 bg-surface-secondary p-1.5 transition focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/20">
+          <div className="flex items-center gap-2 rounded-pill border-[0.5px] border-border bg-surface p-1.5 transition focus-within:border-accent">
             <input
               aria-label="Ask Meg a question"
-              className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-primary placeholder:text-secondary/70 focus:outline-none disabled:cursor-not-allowed"
+              className="min-w-0 flex-1 bg-transparent px-3 py-1.5 text-sm text-primary placeholder:text-secondary focus:outline-none disabled:cursor-not-allowed"
               disabled={isSending}
               onChange={(event) => setInput(event.target.value)}
               placeholder={
@@ -336,7 +325,7 @@ export function GlobalKeybotLauncher() {
             />
             <button
               aria-label="Send message to Meg"
-              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent text-white transition hover:bg-accent-hover hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-45"
+              className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-accent text-on-accent transition hover:bg-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-40"
               disabled={isSending || input.trim().length === 0}
               type="submit"
             >

@@ -14,9 +14,14 @@ export function mentionsKeybot(body: string): boolean {
 }
 
 // Removes the @meg mention to form the agent prompt; falls back to a neutral
-// question when nothing meaningful remains.
-export function stripKeybotMention(body: string): string {
-  return body.replace(KEYBOT_MENTION, "").trim() || "What do you think of this build?";
+// question when nothing meaningful remains. On a buildless post the caller
+// passes a build-agnostic fallback so Meg is never prompted about a build that
+// doesn't exist.
+export function stripKeybotMention(
+  body: string,
+  fallback = "What do you think of this build?",
+): string {
+  return body.replace(KEYBOT_MENTION, "").trim() || fallback;
 }
 
 /**
@@ -77,9 +82,17 @@ export async function maybeReplyWithKeybot({
 
     const selectedComponentIds = (post.component_ids ??
       {}) as ComponentIdSelection;
+    const hasBuild = Object.keys(selectedComponentIds).length > 0;
 
-    // Strip the mention; fall back to a neutral prompt if nothing remains.
-    const message = stripKeybotMention(commentBody);
+    // Strip the mention; fall back to a neutral prompt if nothing remains. A
+    // buildless post has no build to ground against, so the fallback is a
+    // general keyboard-advice prompt — Meg must not invent a build.
+    const message = stripKeybotMention(
+      commentBody,
+      hasBuild
+        ? "What do you think of this build?"
+        : "Can you share some general keyboard advice?",
+    );
 
     const response = await invokeKeybotAgent({
       message,

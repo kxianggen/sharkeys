@@ -566,11 +566,16 @@ describe("RecommendationDemo", () => {
 
     fireEvent.click(within(panel).getByRole("button", { name: /What is thocky/i }));
 
-    expect(await within(panel).findAllByText("What is thocky?")).toHaveLength(2);
+    expect(await within(panel).findByText("What is thocky?")).toBeInTheDocument();
     expect(
       await within(panel).findByText(/deeper rounded keyboard sound/i),
     ).toBeInTheDocument();
     expect(getLastKeybotRequestBody().message).toBe("What is thocky?");
+
+    // Suggestion chips are onboarding only: they retire once the conversation starts.
+    expect(
+      within(panel).queryByRole("button", { name: /What is thocky/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("sends Meg questions and renders grounded assistant responses", async () => {
@@ -595,7 +600,7 @@ describe("RecommendationDemo", () => {
     );
 
     expect(
-      await within(panel).findByText(/Checking catalog facts/i),
+      await within(panel).findByText(/Understanding your question/i),
     ).toBeInTheDocument();
     expect(
       await within(panel).findByText(/deeper rounded keyboard sound/i),

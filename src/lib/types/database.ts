@@ -145,6 +145,7 @@ export type Database = {
           description: string | null;
           component_ids: Json;
           validation_snapshot: Json | null;
+          image_url: string | null;
           is_published: boolean;
           created_at: string;
           updated_at: string;
@@ -156,6 +157,7 @@ export type Database = {
           description?: string | null;
           component_ids?: Json;
           validation_snapshot?: Json | null;
+          image_url?: string | null;
           is_published?: boolean;
           created_at?: string;
           updated_at?: string;

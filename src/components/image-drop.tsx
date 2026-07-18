@@ -4,28 +4,13 @@ import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 
-// Bound the longest edge and re-encode as JPEG so the base64 payload stays
-// small (the API rejects images over ~4MB). Compression happens entirely in the
-// browser — the original file bytes never leave the device.
-const MAX_DIMENSION = 1024;
-const OUTPUT_MIME = "image/jpeg";
-const OUTPUT_QUALITY = 0.82;
+import { compressImageToDataUrl } from "@/lib/images/compress-image";
 
+// Compression happens entirely in the browser — the original file bytes never
+// leave the device. Defaults (JPEG @ 0.82, longest edge 1024) keep the base64
+// payload small enough for the vision API (~4MB cap).
 async function fileToCompressedDataUrl(file: File): Promise<string> {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas not supported");
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close?.();
-
-  return canvas.toDataURL(OUTPUT_MIME, OUTPUT_QUALITY);
+  return compressImageToDataUrl(file);
 }
 
 type ImageDropProps = {

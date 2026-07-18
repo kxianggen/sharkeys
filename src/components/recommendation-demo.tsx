@@ -24,6 +24,7 @@ import {
   MessageCircle,
   Mic,
   PackageSearch,
+  RotateCcw,
   Send,
   ShieldAlert,
   ShieldCheck,
@@ -38,6 +39,7 @@ import { saveBuildAction } from "@/app/my-builds/actions";
 import { ImageDrop } from "@/components/image-drop";
 import { MainNav } from "@/components/main-nav";
 import { SwatchDots } from "@/components/swatch-dots";
+import { useKeybotThinkingStage } from "@/components/use-keybot-thinking-stage";
 import type { CompatibilityResult, KeyboardComponent } from "@/lib/types";
 import type {
   AiIntentApiResponse,
@@ -161,6 +163,13 @@ const configuratorQuickPrompts = [
   },
 ] as const;
 
+
+const KEYBOT_WELCOME_MESSAGE: KeybotChatMessage = {
+  id: "keybot-welcome",
+  role: "assistant",
+  content:
+    "Hi, I’m Meg. Ask about switches, sound, layouts, compatibility, or your current build.",
+};
 
 const keybotQuickActions = [
   {
@@ -2639,12 +2648,7 @@ function KeybotPanel({
   selectedRecommendation,
 }: KeybotPanelProps) {
   const [messages, setMessages] = useState<KeybotChatMessage[]>([
-    {
-      id: "keybot-welcome",
-      role: "assistant",
-      content:
-        "Hi, I’m Meg. Ask about switches, sound, layouts, compatibility, or your current build.",
-    },
+    KEYBOT_WELCOME_MESSAGE,
   ]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -2655,9 +2659,14 @@ function KeybotPanel({
     manualSelection,
     selectedRecommendation,
   });
-  const loadingLabel = contextSummary
-    ? "Validating build context..."
-    : "Checking catalog facts...";
+  // Onboarding only: the chips disappear for good once the conversation starts.
+  const showSuggestions = messages.length <= 1 && !isSending;
+
+  function clearConversation() {
+    setMessages([KEYBOT_WELCOME_MESSAGE]);
+    setError(null);
+    setInput("");
+  }
 
   useEffect(() => {
     if (!floating || !onClose) {
@@ -2775,54 +2784,48 @@ function KeybotPanel({
           floating ? "sm:h-[640px]" : ""
         }`}
       >
-        <div className="border-b border-border/70 p-4">
-          <div className="flex items-center gap-3">
-            <KeybotAvatar />
-            <div className="min-w-0 flex-1">
-              <h2 className="text-base font-bold leading-5 text-primary">
-                Meg
-              </h2>
-              <p className="text-xs font-semibold text-secondary">
-                Grounded assistant
-              </p>
-            </div>
-            {onClose ? (
-              <button
-                aria-label="Close Meg assistant"
-                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-secondary transition hover:bg-accent-subtle hover:text-primary focus:outline-none focus:ring-4 focus:ring-accent/25"
-                onClick={onClose}
-                type="button"
-              >
-                <X className="h-4 w-4" aria-hidden />
-              </button>
-            ) : null}
-          </div>
+        <header className="flex items-center gap-2.5 border-b-[0.5px] border-border bg-surface px-4 py-3">
+          <KeybotAvatar small />
+          <h2 className="min-w-0 flex-1 text-sm font-semibold text-primary">
+            Meg
+          </h2>
+          <button
+            aria-label="Clear conversation"
+            className="flex h-8 w-8 flex-none items-center justify-center rounded-xs text-secondary transition hover:bg-surface-secondary hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+            onClick={clearConversation}
+            type="button"
+          >
+            <RotateCcw className="h-4 w-4" aria-hidden />
+          </button>
+          {onClose ? (
+            <button
+              aria-label="Close Meg assistant"
+              className="flex h-8 w-8 flex-none items-center justify-center rounded-xs text-secondary transition hover:bg-surface-secondary hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+              onClick={onClose}
+              type="button"
+            >
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          ) : null}
+        </header>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-surface-secondary px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-primary">
-              <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
-              Grounded in catalog + rules
-            </span>
-            {contextSummary ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent-subtle px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-primary">
+        <div
+          aria-live="polite"
+          className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-surface-secondary px-4 py-4"
+        >
+          {contextSummary ? (
+            <div className="rounded-md border-[0.5px] border-border bg-surface p-3">
+              <p className="inline-flex items-center gap-1.5 text-caption text-secondary">
                 <Cpu className="h-3.5 w-3.5" aria-hidden />
                 Active build context
-              </span>
-            ) : null}
-          </div>
-
-          {contextSummary ? (
-            <div className="mt-3 rounded-2xl border border-border/70 bg-surface-secondary p-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-secondary">
-                {contextSummary.label}
               </p>
-              <p className="mt-1 truncate text-sm font-bold text-primary">
+              <p className="mt-1 truncate text-sm font-semibold text-primary">
                 {contextSummary.title}
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {contextSummary.parts.map((part) => (
                   <span
-                    className="rounded-full border border-border/70 bg-surface px-2.5 py-1 text-[11px] font-semibold text-secondary"
+                    className="rounded-pill border-[0.5px] border-border bg-surface-secondary px-2.5 py-1 text-caption text-secondary"
                     key={part}
                   >
                     {part}
@@ -2831,31 +2834,7 @@ function KeybotPanel({
               </div>
             </div>
           ) : null}
-        </div>
 
-        <div className="border-b border-border/70 px-4 py-3">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.1em] text-secondary">
-            Suggested queries
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {keybotQuickActions.map((action) => (
-              <button
-                className="inline-flex items-center rounded-full border border-border/80 bg-surface px-3 py-2 text-xs font-bold text-secondary transition hover:border-accent hover:bg-accent-subtle hover:text-primary focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={isSending}
-                key={action.label}
-                onClick={() => void sendKeybotMessage(action.message)}
-                type="button"
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div
-          aria-live="polite"
-          className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-surface-secondary px-4 py-4"
-        >
           {messages.map((message) => (
             <KeybotMessageBubble
               catalogById={catalogById}
@@ -2865,18 +2844,35 @@ function KeybotPanel({
               onSuggestion={(suggestion) => void sendKeybotMessage(suggestion)}
             />
           ))}
-          {isSending ? <KeybotLoadingState label={loadingLabel} /> : null}
+
+          {showSuggestions ? (
+            <div className="flex flex-wrap gap-2">
+              {keybotQuickActions.map((action) => (
+                <button
+                  className="inline-flex items-center rounded-pill border-[0.5px] border-border bg-surface px-3 py-2 text-caption text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={isSending}
+                  key={action.label}
+                  onClick={() => void sendKeybotMessage(action.message)}
+                  type="button"
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          {isSending ? <KeybotLoadingState /> : null}
           <div ref={messagesEndRef} />
         </div>
 
         {error ? (
-          <p className="border-t border-error/20 bg-error px-4 py-2 text-xs font-semibold text-error">
+          <p className="border-t-[0.5px] border-border bg-surface px-4 py-3 text-caption text-error">
             {error}
           </p>
         ) : null}
 
         <form
-          className="border-t border-border/70 bg-surface p-3"
+          className="border-t-[0.5px] border-border bg-surface p-3"
           onSubmit={(event) => {
             event.preventDefault();
             void sendKeybotMessage(input);
@@ -2893,7 +2889,7 @@ function KeybotPanel({
             />
             <button
               aria-label="Send Meg question"
-              className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-accent text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-45"
+              className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-accent text-on-accent transition hover:bg-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-40"
               disabled={isSending || input.trim().length === 0}
               type="submit"
             >
@@ -3037,7 +3033,10 @@ function KeybotMessageBubble({
   );
 }
 
-function KeybotLoadingState({ label }: { label: string }) {
+function KeybotLoadingState() {
+  // Only mounted while a reply is pending, so the stage timer is always active.
+  const label = useKeybotThinkingStage(true);
+
   return (
     <div className="flex items-start gap-2.5">
       <KeybotAvatar small />
@@ -3104,6 +3103,8 @@ function splitKeybotParagraphs(content: string) {
     .filter(Boolean);
 }
 
+// Grounding is implicit: successful replies carry no badge. Only degraded
+// answer quality (fallback, route failure) is surfaced to the user.
 function getKeybotTrustLabel(message: KeybotChatMessage) {
   if (message.isRouteFailure) {
     return "Route unavailable";
@@ -3116,11 +3117,7 @@ function getKeybotTrustLabel(message: KeybotChatMessage) {
     return "Using local grounded fallback";
   }
 
-  if (message.source === "openai") {
-    return "Catalog verified";
-  }
-
-  return "Catalog + rules";
+  return null;
 }
 
 function isKeybotBlockerMessage(content: string) {

@@ -2,28 +2,37 @@
 
 import { useActionState } from "react";
 
+import { BuildImageUpload } from "@/components/build-image-upload";
+import { BuildPicker, type PartOption } from "@/components/build-picker";
 import {
   createBuildPostAction,
   type GalleryActionState,
 } from "@/app/community-gallery/actions";
-
-type Option = { id: string; name: string; brand: string };
+import type { KitOption } from "@/lib/components/kits";
 
 type NewPostFormProps = {
-  categories: readonly string[];
-  optionsByCategory: Record<string, Option[]>;
-  // Pre-fill from a saved build (?from=<savedBuildId>): the selection and
-  // title land as defaults, the user still reviews and describes before it
-  // goes live through the one shared publish path.
-  initialSelection?: Record<string, string>;
+  kitOptions: KitOption[];
+  switchOptions: PartOption[];
+  keycapOptions: PartOption[];
+  // Pre-fill from a saved build (?from=<savedBuildId>): the title, kit, and
+  // free choices land as defaults; the user still reviews before publishing
+  // through the one shared publish path.
   initialTitle?: string;
+  initialKitId?: string;
+  initialSwitchId?: string;
+  initialKeycapId?: string;
+  initialStabilizerId?: string;
 };
 
 export function NewPostForm({
-  categories,
-  optionsByCategory,
-  initialSelection,
+  kitOptions,
+  switchOptions,
+  keycapOptions,
   initialTitle,
+  initialKitId,
+  initialSwitchId,
+  initialKeycapId,
+  initialStabilizerId,
 }: NewPostFormProps) {
   const [state, formAction, pending] = useActionState<
     GalleryActionState,
@@ -54,31 +63,18 @@ export function NewPostForm({
         />
       </label>
 
-      <fieldset className="grid gap-4 sm:grid-cols-2">
-        {categories.map((category) => (
-          <label
-            className="flex flex-col gap-1 text-sm font-bold capitalize text-primary"
-            key={category}
-          >
-            {category}
-            <select
-              className="h-11 rounded-xl border border-border bg-white px-3 text-sm font-medium focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-              defaultValue={initialSelection?.[category] ?? ""}
-              name={category}
-              required
-            >
-              <option disabled value="">
-                Select a {category}…
-              </option>
-              {(optionsByCategory[category] ?? []).map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.brand} — {option.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        ))}
-      </fieldset>
+      <BuildPicker
+        disabled={pending}
+        initialKeycapId={initialKeycapId}
+        initialKitId={initialKitId}
+        initialStabilizerId={initialStabilizerId}
+        initialSwitchId={initialSwitchId}
+        keycapOptions={keycapOptions}
+        kitOptions={kitOptions}
+        switchOptions={switchOptions}
+      />
+
+      <BuildImageUpload name="image_data" disabled={pending} />
 
       {state?.error ? (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">

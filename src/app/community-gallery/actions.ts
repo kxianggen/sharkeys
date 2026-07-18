@@ -10,6 +10,8 @@ import {
   validateBuildSelectionFromIds,
 } from "@/lib/components";
 import { maybeReplyWithKeybot } from "@/lib/gallery/keybot-reply";
+import type { ValidationSnapshot } from "@/lib/gallery/service";
+import { uploadBuildPostImage } from "@/lib/gallery/upload-image";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   requiredComponentCategories,
@@ -46,27 +48,58 @@ export async function createBuildPostAction(
     }
   }
 
-  const missing = requiredComponentCategories.filter(
-    (category) => !componentIds[category],
+  // Buildless post: title + optional description/photo, no components. An empty
+  // component_ids ('{}') is a valid "no build"; validation is skipped entirely,
+  // so a buildless post can never fail for "missing parts".
+  const hasBuild = requiredComponentCategories.some(
+    (category) => componentIds[category],
   );
-  if (missing.length > 0) {
-    return { error: `Select a component for: ${missing.join(", ")}.` };
+
+  let validationSnapshot: ValidationSnapshot | null = null;
+
+  if (hasBuild) {
+    // A partial build is not a build: require every category before validating.
+    const missing = requiredComponentCategories.filter(
+      (category) => !componentIds[category],
+    );
+    if (missing.length > 0) {
+      return { error: `Select a component for: ${missing.join(", ")}.` };
+    }
+
+    // Invariant: validation is computed server-side from the catalog, never
+    // trusted from the client — this is the backstop that rejects impossible
+    // (e.g. cross-kit or incompatible-stabilizer) builds. The snapshot is
+    // frozen onto the post.
+    const catalog = await getCatalogComponents();
+    const validation = validateBuildSelectionFromIds({ componentIds }, catalog);
+    if (!validation.isValid) {
+      return {
+        error:
+          validation.errors[0]?.message ??
+          "That build isn't compatible. Adjust your parts and try again.",
+      };
+    }
+    // Store a lean, JSON-serializable snapshot (drop the heavy component objects).
+    validationSnapshot = {
+      isValid: validation.isValid,
+      errors: validation.errors,
+      warnings: validation.warnings,
+      issues: validation.issues,
+      explanations: validation.explanations,
+    };
   }
 
-  // Invariant: validation is computed server-side from the catalog, never
-  // trusted from the client. The snapshot is frozen onto the post.
-  const catalog = await getCatalogComponents();
-  const validation = validateBuildSelectionFromIds({ componentIds }, catalog);
-  // Store a lean, JSON-serializable snapshot (drop the heavy component objects).
-  const validationSnapshot = {
-    isValid: validation.isValid,
-    errors: validation.errors,
-    warnings: validation.warnings,
-    issues: validation.issues,
-    explanations: validation.explanations,
-  };
-
   const supabase = await createSupabaseServerClient();
+
+  // Optional build photo (client-compressed WebP data URL). Upload before the
+  // insert; on failure we publish without the image rather than lose the post,
+  // and the post falls back to the kit hero image (image_url stays null).
+  const imageData = formData.get("image_data");
+  const imageUrl =
+    typeof imageData === "string" && imageData.length > 0
+      ? await uploadBuildPostImage(supabase, user.id, imageData)
+      : null;
+
   const { data, error } = await supabase
     .from("build_posts")
     .insert({
@@ -75,6 +108,7 @@ export async function createBuildPostAction(
       description: parsed.data.description ?? null,
       component_ids: componentIds,
       validation_snapshot: validationSnapshot,
+      image_url: imageUrl,
       is_published: true,
     })
     .select("id")

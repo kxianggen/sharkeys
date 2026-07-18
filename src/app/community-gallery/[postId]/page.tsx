@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 
+import { BuildPostImage } from "@/components/build-post-image";
 import { CommentThread } from "@/components/comment-thread";
-import { KitImage } from "@/components/kit-image";
 import { MainNav } from "@/components/main-nav";
 import { getSessionUser } from "@/lib/auth";
 import { getCatalogComponents } from "@/lib/components";
@@ -42,6 +42,8 @@ export default async function PostDetailPage({
   const selectedCategories = requiredComponentCategories.filter(
     (category) => post.componentIds[category],
   );
+  const hasBuild = selectedCategories.length > 0;
+  const showVisual = Boolean(post.imageUrl) || hasBuild;
 
   return (
     <main className="min-h-screen bg-surface-secondary text-primary">
@@ -70,11 +72,19 @@ export default async function PostDetailPage({
           </p>
         ) : null}
 
-        <div className="mt-4 max-w-md">
-          <KitImage alt={`${post.title} build`} kitId={summary.kitId} />
-        </div>
+        {showVisual ? (
+          <div className="mt-4 max-w-md">
+            <BuildPostImage
+              alt={`${post.title} build`}
+              imageUrl={post.imageUrl}
+              kitId={summary.kitId}
+            />
+          </div>
+        ) : null}
 
-        {/* Parts: collapsed disclosure — validation is implicit, never shown */}
+        {/* Parts: collapsed disclosure — validation is implicit, never shown.
+            Omitted entirely on a buildless post (no empty parts area). */}
+        {hasBuild ? (
         <details className="group mt-4 border-y-[0.5px] border-border py-3">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 [&::-webkit-details-marker]:hidden">
             <span>
@@ -108,6 +118,7 @@ export default async function PostDetailPage({
             </p>
           ) : null}
         </details>
+        ) : null}
 
         {/* Discussion */}
         <div className="mt-6">
