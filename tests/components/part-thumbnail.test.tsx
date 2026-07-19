@@ -2,7 +2,7 @@ import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { keyboardComponents } from "@/data";
-import { PartThumbnail } from "@/components/recommendation-demo";
+import { PartThumbnail } from "@/components/part-thumbnail";
 
 // Real seed records: an aftermarket stab that ships a part photo, and a
 // kit-locked stab that has no photo (so its thumbnail falls back to the glyph).

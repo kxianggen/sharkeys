@@ -34,6 +34,11 @@ import {
 
 import { saveBuildAction } from "@/app/my-builds/actions";
 import { BuilderPickTag, isBuilderPick } from "@/components/builder-pick-tag";
+import { HeroConfiguratorDemo } from "@/components/hero-configurator-demo";
+import {
+  getComponentSwatch,
+  PartThumbnail,
+} from "@/components/part-thumbnail";
 import { ImageDrop } from "@/components/image-drop";
 import {
   CustomerReviewsSection,
@@ -256,27 +261,6 @@ function getMetadataString(
 // them as auto-included rather than user pick-steps.
 function isKitLockedComponent(component: KeyboardComponent | undefined) {
   return component?.metadata?.kitLock === true;
-}
-
-function getMetadataStringArray(
-  metadata: KeyboardComponent["metadata"],
-  key: string,
-) {
-  const value = metadata?.[key];
-
-  return Array.isArray(value) &&
-    value.every((entry): entry is string => typeof entry === "string")
-    ? value
-    : undefined;
-}
-
-// Interim keycap visual: the set's real 3-colour palette stored as
-// metadata.swatch on the catalog record. No colours are generated or
-// invented at runtime — no swatch data, no swatch.
-function getComponentSwatch(component: KeyboardComponent | undefined) {
-  return component
-    ? getMetadataStringArray(component.metadata, "swatch")
-    : undefined;
 }
 
 // One-word descriptor for the "Your build" summary rows, drawn straight from
@@ -517,6 +501,15 @@ function intentToPrompt(intent: ExtractedKeyboardIntent): string {
   return `A ${parts.join(", ")} keyboard`;
 }
 
+// Landing hero entrance: one shared fade-up applied to the headline, subtitle,
+// prompt box, and quick chips with a small per-element stagger, so the whole
+// hero arrives as a single motion (the standard, quiet pattern for hero copy —
+// opacity 0→1 with an 8px rise, ~700ms ease-out). Replaced the earlier
+// typewriter headline: the demo panel below types its prompt character by
+// character, and two typewriter effects on one screen read as a gimmick rather
+// than a choice. Reduced motion renders everything immediately.
+type HeroEntranceState = "pending" | "in" | "instant";
+
 export function RecommendationDemo({
   initialKitId = null,
   initialPrompt = null,
@@ -526,6 +519,12 @@ export function RecommendationDemo({
   const router = useRouter();
   const promptRef = useRef<HTMLTextAreaElement | null>(null);
   const resultsRef = useRef<HTMLElement | null>(null);
+  // Scroll-linked hero handoff targets (landing only): the runway that gives
+  // the pinned stage its scroll distance, the copy block that fades away, and
+  // the demo-panel wrapper that travels up into the copy's place.
+  const heroRunwayRef = useRef<HTMLDivElement | null>(null);
+  const heroCopyRef = useRef<HTMLDivElement | null>(null);
+  const heroPanelLiftRef = useRef<HTMLDivElement | null>(null);
   const initialPromptSubmittedRef = useRef(false);
   const initialKitSubmittedRef = useRef(false);
   const isLanding = mode === "landing";
@@ -553,6 +552,8 @@ export function RecommendationDemo({
   const [saveRequiresLogin, setSaveRequiresLogin] = useState(false);
   const [isSavingBuild, setIsSavingBuild] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
+  const [heroEntrance, setHeroEntrance] =
+    useState<HeroEntranceState>("pending");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [visionLoading, setVisionLoading] = useState(false);
@@ -734,6 +735,129 @@ export function RecommendationDemo({
 
     return () => window.clearTimeout(timeoutId);
   }, []);
+
+  // Hero entrance trigger: fires once shortly after mount so the staggered
+  // fade-up lands just after first paint. Landing-only; reduced motion shows
+  // everything immediately.
+  useEffect(() => {
+    if (!isLanding) {
+      return;
+    }
+
+    if (
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setHeroEntrance("instant");
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => setHeroEntrance("in"), 100);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isLanding]);
+
+  // Scroll-linked hero handoff (landing only, Attio-style pinned stage): the
+  // hero section is `sticky` inside a taller "runway" div, so while the user
+  // scrolls through the runway the stage holds still on screen. Progress
+  // through the runway drives the sequence: the demo panel physically travels
+  // up from its resting spot into the headline's space while the copy fades
+  // out beneath it — the panel replaces the copy, not just "scrolls past" it.
+  // Styles are written straight to the DOM inside a rAF frame so this large
+  // component tree never re-renders during scroll. On viewports where the
+  // runway has no spare height (the pinning classes are lg-only) and under
+  // reduced motion, everything stays static.
+  useEffect(() => {
+    if (!isLanding) {
+      return;
+    }
+
+    if (
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    const NAV_HEIGHT = 48; // matches MainNav h-12 / stage top-12
+    let frame = 0;
+
+    const resetStyles = (copy: HTMLElement, panel: HTMLElement) => {
+      copy.style.opacity = "";
+      copy.style.transform = "";
+      copy.style.pointerEvents = "";
+      panel.style.transform = "";
+    };
+
+    const apply = () => {
+      const runway = heroRunwayRef.current;
+      const copy = heroCopyRef.current;
+      const panel = heroPanelLiftRef.current;
+
+      if (!runway || !copy || !panel) {
+        return;
+      }
+
+      const stageHeight = window.innerHeight - NAV_HEIGHT;
+      const runwaySpare = runway.offsetHeight - stageHeight;
+
+      // No spare runway (small screens — pinning classes are lg-only): plain
+      // static hero, and any styles from a previous viewport size come off.
+      if (runwaySpare <= 40) {
+        resetStyles(copy, panel);
+        return;
+      }
+
+      const runwayTop = runway.getBoundingClientRect().top;
+      const progress = Math.min(
+        1,
+        Math.max(0, (NAV_HEIGHT - runwayTop) / runwaySpare),
+      );
+
+      copy.style.opacity = String(1 - progress);
+      copy.style.transform = `translateY(${-32 * progress}px)`;
+      // The real prompt form must not intercept clicks once it has faded.
+      copy.style.pointerEvents = progress > 0.5 ? "none" : "";
+
+      // Travel distance: from the panel's natural spot in the stage up to
+      // its final CENTERED position in the pinned viewport — measured live so
+      // it adapts to viewport and content size. Panels taller than the stage
+      // rest just under the top instead (centering would crop their header).
+      const finalTop = Math.max(
+        12,
+        (stageHeight - panel.offsetHeight) / 2,
+      );
+      const lift = Math.max(0, panel.offsetTop - finalTop);
+      panel.style.transform = `translateY(${-lift * progress}px)`;
+    };
+
+    const schedule = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(apply);
+    };
+
+    apply();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [isLanding]);
+
+  // Per-element entrance classes; the delay class staggers elements into one
+  // continuous motion. Returns nothing outside the landing hero so the
+  // configurator workspace (and non-animated states) are untouched.
+  const heroFade = (delayClass = "") =>
+    !isLanding || heroEntrance === "instant"
+      ? ""
+      : ` transition-all duration-700 ease-out ${delayClass} ${
+          heroEntrance === "in"
+            ? "translate-y-0 opacity-100"
+            : "translate-y-2 opacity-0"
+        }`;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1792,37 +1916,101 @@ export function RecommendationDemo({
 
   return (
     <div
-      className={`min-h-screen overflow-x-hidden text-primary ${
+      // overflow-x-CLIP, not -hidden: hidden overflow on an ancestor silently
+      // disables position:sticky for everything inside it (the ancestor
+      // becomes the sticking context but never scrolls). clip guards against
+      // horizontal scrollbars identically while leaving the sticky nav and
+      // the pinned hero stage working.
+      className={`min-h-screen overflow-x-clip text-primary ${
         isLanding ? "bg-surface" : "bg-surface-secondary"
       }`}
     >
       <MainNav />
 
+      {/* Full-bleed hero wrapper: hosts the backdrop (gradient + grid) so it
+          spans the whole viewport width while the content section stays at its
+          max-width. The backdrop ends exactly where this wrapper ends — the
+          sections below it stay plain. */}
+      <div className="relative">
+        {isLanding ? (
+          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+            {/* Soft wash: white at the top, the design system's subtle accent
+                fill at the bottom, strongest around the demo panel. */}
+            <div
+              className="absolute inset-0"
+              style={{
+                // A clearly visible wash of the system accent: ~16% accent
+                // mixed into white at the bottom (accent-subtle alone is too
+                // faint to read as a gradient at all).
+                background:
+                  "linear-gradient(to bottom, var(--surface) 0%, var(--surface) 10%, color-mix(in srgb, var(--accent) 22%, white) 100%)",
+              }}
+            />
+            {/* Fine vertical hairline grid, Attio-style: tight 12px columns
+                with LOW-contrast 1px lines — the quality read comes from the
+                lines being felt rather than seen. Tiled background-size keeps
+                each line crisply 1px (repeating-gradients can smear across
+                device pixels). Revealed progressively over the tinted area. */}
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(255,255,255,0.5) 1px, transparent 1px)",
+                backgroundSize: "12px 100%",
+                maskImage:
+                  "linear-gradient(to bottom, transparent 18%, black 65%)",
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, transparent 18%, black 65%)",
+              }}
+            />
+          </div>
+        ) : null}
+
+      {/* Runway: taller than the viewport at lg so the sticky stage inside it
+          pins while the handoff plays. Inert (plain div) below lg and on the
+          configurator route. */}
+      <div
+        className={isLanding ? "lg:h-[180vh]" : undefined}
+        ref={heroRunwayRef}
+      >
       <section
-        className={`mx-auto flex w-full flex-col items-center px-4 text-center sm:px-8 ${
+        className={`relative mx-auto flex w-full flex-col items-center px-4 text-center sm:px-8 ${
           isLanding
-            ? "max-w-[920px] pb-20 pt-20 lg:pb-24 lg:pt-28"
+            ? "max-w-[920px] pb-20 pt-20 lg:sticky lg:top-12 lg:h-[calc(100vh-3rem)] lg:overflow-hidden lg:pb-0 lg:pt-16"
             : "max-w-screen-xl pb-10 pt-12 lg:pb-14 lg:pt-16"
         }`}
         id="configurator"
       >
+        {/* Copy block: fades and rises away as the scroll handoff plays. */}
+        <div
+          className="flex w-full flex-col items-center will-change-transform"
+          ref={heroCopyRef}
+        >
         <h1
           className={`max-w-4xl text-primary ${
             isLanding
               ? "text-h1 sm:text-display"
               : "text-4xl font-black leading-[1.08] tracking-[-0.01em] sm:text-5xl"
-          }`}
+          }${heroFade()}`}
         >
           {isLanding
             ? "Build your dream keyboard in words."
             : "Configurator workspace"}
         </h1>
-        <p className="mt-6 max-w-xl text-base leading-7 text-secondary">
+        <p
+          className={`mt-6 max-w-xl text-base leading-7 text-secondary${heroFade("delay-150")}`}
+        >
           {isLanding
             ? "Describe your sound, layout, and budget — sharkeys turns it into compatible builds."
             : "Generate validated recommendations, compare builds, and inspect grounded catalog parts."}
         </p>
 
+        {/* The form animates via a wrapper: the form element's own `transition`
+            class serves its focus ring, and inheriting a 700ms duration there
+            would make focus feedback sluggish. */}
+        <div
+          className={`flex w-full flex-col items-center${heroFade("delay-300")}`}
+        >
         <form
           aria-label="AI keyboard prompt form"
           className="mt-10 flex w-full max-w-2xl items-center gap-2 rounded-pill border-[0.5px] border-border bg-surface py-1.5 pl-2 pr-1.5 text-left transition focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/15"
@@ -1876,8 +2064,11 @@ export function RecommendationDemo({
             )}
           </button>
         </form>
+        </div>
 
-        <div className="mt-5 flex max-w-4xl flex-wrap justify-center gap-3">
+        <div
+          className={`mt-5 flex max-w-4xl flex-wrap justify-center gap-3${heroFade("delay-[450ms]")}`}
+        >
           {quickPrompts.map((prompt) => (
             <button
               className="inline-flex min-h-9 items-center rounded-pill border-[0.5px] border-border bg-surface px-5 py-2 text-sm font-medium text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
@@ -1899,7 +2090,26 @@ export function RecommendationDemo({
             tone="red"
           />
         ) : null}
+        </div>
+
+        {/* Attio-style demo panel: sits at the bottom of the hero so its top
+            slice is visible on first paint and scrolling reveals the full
+            mock window. The lift wrapper is the scroll-handoff target that
+            pulls it up over the fading copy. Decorative replay of a recorded
+            pipeline run — the form above stays the only real entry point. */}
+        {isLanding ? (
+          <div className="w-full will-change-transform" ref={heroPanelLiftRef}>
+            <HeroConfiguratorDemo />
+          </div>
+        ) : null}
       </section>
+      </div>
+
+      {/* Run-out: tinted breathing room between the hero and the next
+          section — the backdrop (gradient + grid) fills it, so the hero
+          exhales before the plain-white sections begin. */}
+      {isLanding ? <div aria-hidden className="h-20 lg:h-32" /> : null}
+      </div>
 
       {isLanding ? (
         <>
@@ -2433,65 +2643,6 @@ function KitVisual({
         width={640}
       />
     </div>
-  );
-}
-
-// Per-category zoom for the "Your build" thumbnails. Part photos ship on a
-// 4:3 canvas with wide transparent margins, and the subjects are framed
-// differently (switches sit small; stabilizer wires are sparse), so each is
-// zoomed to bring the product to ~82% of the square thumbnail. Values are
-// measured against the real assets' non-transparent bounding boxes and stay
-// below each category's clip ceiling in this square frame (switch 4.06,
-// keycap 1.97, stab 2.39), so only transparent canvas is ever cropped.
-// Written as literal strings so the Tailwind JIT can see them.
-const THUMB_ZOOM_CLASS: Partial<Record<ComponentCategory, string>> = {
-  switch: "scale-[3.4]",
-  keycap: "scale-[1.65]",
-  stabilizer: "scale-[1.95]",
-};
-
-// Small square thumbnail for one selected part. Resolves the real part photo
-// at public/parts/<componentId>.webp. When the photo loads it is shown
-// enlarged and alone — the photo conveys the colours. Only when no photo
-// exists does the fallback kick in: a keycap with a real metadata.swatch
-// palette shows its SwatchDots (honest colour identity), any other part shows
-// a neutral glyph. Photo and dots are never doubled up.
-export function PartThumbnail({ component }: { component: KeyboardComponent }) {
-  const [imageFailed, setImageFailed] = useState(false);
-  // Reset the load-error fallback whenever the selected part changes. Without
-  // this, selecting a no-photo part (glyph fallback) first would leave
-  // imageFailed=true, so a subsequently-selected part with a real photo would
-  // keep showing the stale glyph instead of its image. React's render-phase
-  // "adjust state on prop change" pattern — no effect, resets before paint.
-  const [renderedId, setRenderedId] = useState(component.id);
-  if (renderedId !== component.id) {
-    setRenderedId(component.id);
-    setImageFailed(false);
-  }
-  const swatch =
-    component.category === "keycap" ? getComponentSwatch(component) : undefined;
-  const zoomClassName = THUMB_ZOOM_CLASS[component.category] ?? "";
-
-  return (
-    <span className="relative flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-lg bg-surface-secondary">
-      {imageFailed ? (
-        swatch ? (
-          <SwatchDots colors={swatch} />
-        ) : (
-          <Keyboard className="h-5 w-5 text-secondary/50" aria-hidden />
-        )
-      ) : (
-        <Image
-          alt=""
-          aria-hidden
-          className={`h-full w-full object-contain ${zoomClassName}`}
-          height={44}
-          onError={() => setImageFailed(true)}
-          src={`/parts/${component.id}.webp`}
-          width={44}
-        />
-      )}
-    </span>
   );
 }
 
