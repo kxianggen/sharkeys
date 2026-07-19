@@ -14,7 +14,6 @@ import {
   ChevronRight,
   Cpu,
   ExternalLink,
-  Eye,
   Heart,
   Info,
   Image as ImageIcon,
@@ -29,14 +28,19 @@ import {
   ShieldAlert,
   ShieldCheck,
   SlidersHorizontal,
-  Volume2,
-  WandSparkles,
   Sparkles,
   X,
 } from "lucide-react";
 
 import { saveBuildAction } from "@/app/my-builds/actions";
+import { BuilderPickTag, isBuilderPick } from "@/components/builder-pick-tag";
 import { ImageDrop } from "@/components/image-drop";
+import {
+  CustomerReviewsSection,
+  FaqSection,
+  FeatureCardsSection,
+  FounderQuoteSection,
+} from "@/components/landing-sections";
 import { MainNav } from "@/components/main-nav";
 import { SwatchDots } from "@/components/swatch-dots";
 import { useKeybotThinkingStage } from "@/components/use-keybot-thinking-stage";
@@ -971,19 +975,6 @@ export function RecommendationDemo({
     }
   }
 
-  function focusPrompt() {
-    if (isLanding) {
-      router.push(buildConfiguratorPromptHref(message));
-      return;
-    }
-
-    promptRef.current?.focus();
-    promptRef.current?.scrollIntoView?.({
-      behavior: "smooth",
-      block: "center",
-    });
-  }
-
   async function validateManualSelection() {
     if (isManualValidating) {
       return;
@@ -1912,9 +1903,10 @@ export function RecommendationDemo({
 
       {isLanding ? (
         <>
-          <HowItWorksSection />
-          <FeatureBento />
-          <FinalCta onStartBuilding={focusPrompt} />
+          <FeatureCardsSection />
+          <FounderQuoteSection />
+          <CustomerReviewsSection />
+          <FaqSection />
         </>
       ) : null}
 
@@ -2249,8 +2241,13 @@ function RecommendationCarousel({
 
           <span className="min-w-0 flex-1">
             <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-              <span className="text-lg font-black leading-6 text-primary">
-                {kitName}
+              <span className="flex items-center gap-2">
+                <span className="text-lg font-black leading-6 text-primary">
+                  {kitName}
+                </span>
+                {isBuilderPick(recommendation.components.case) ? (
+                  <BuilderPickTag />
+                ) : null}
               </span>
               <span className="text-sm font-black text-primary">{price}</span>
             </span>
@@ -3156,263 +3153,6 @@ function buildKeybotRequestContext({
       .slice(0, 6),
     selectedComponentIds,
   };
-}
-
-function HowItWorksSection() {
-  const steps = [
-    {
-      title: "Describe",
-      body: "Type your requirements just like you’re talking to a friend.",
-      icon: MessageCircle,
-    },
-    {
-      title: "Generate",
-      body: "Our AI curates specific builds tailored to your prompt.",
-      icon: WandSparkles,
-    },
-    {
-      title: "Validate",
-      body: "Meg checks every switch, plate, and PCB for compatibility.",
-      icon: CheckCircle,
-    },
-    {
-      title: "Preview",
-      body: "See a high-fidelity visual of your build before you buy.",
-      icon: Eye,
-    },
-  ] as const;
-
-  return (
-    <section className="px-4 py-20 sm:px-8 lg:px-16">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-16 text-center">
-          <h2 className="text-3xl font-bold tracking-[-0.01em] text-primary sm:text-4xl">
-            How it works
-          </h2>
-          <p className="mt-3 text-base leading-7 text-primary/70">
-            Your journey from thought to thock in four simple steps.
-          </p>
-        </div>
-
-        <div className="relative mx-auto max-w-2xl pl-12">
-          <div className="absolute bottom-8 left-[31px] top-8 w-0.5 rounded-full bg-gradient-to-b from-accent via-[#5DF8D8] to-accent/20" />
-          {steps.map((step, index) => (
-            <article
-              className="relative z-10 mb-10 pl-8 last:mb-0"
-              key={step.title}
-            >
-              <div
-                className={`absolute left-[-24px] top-0 flex h-14 w-14 items-center justify-center rounded-full border-4 bg-white text-lg font-black text-primary shadow-lg ${
-                  index % 2 === 0 ? "border-accent" : "border-[#5DF8D8]"
-                }`}
-              >
-                {index + 1}
-              </div>
-              <div className="rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
-                <div className="mb-2 flex items-center gap-2">
-                  <step.icon
-                    className={`h-4 w-4 ${
-                      index % 2 === 0 ? "text-accent" : "text-[#12bfae]"
-                    }`}
-                    aria-hidden
-                  />
-                  <h3 className="text-lg font-bold text-primary">
-                    {step.title}
-                  </h3>
-                </div>
-                <p className="text-sm leading-6 text-primary/70">
-                  {step.body}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FeatureBento() {
-  return (
-    <section
-      className="mx-auto max-w-[1280px] px-4 py-20 sm:px-8 lg:px-6"
-      id="features"
-    >
-      <div className="mb-10 text-center">
-        <h2 className="text-3xl font-bold tracking-[-0.01em] text-primary sm:text-4xl">
-          Engineered for precision
-        </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-primary/70">
-          High-end tools to visualize, test, and perfect your custom build
-          before ordering.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <article className="flex min-h-[220px] flex-col justify-between rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur md:col-span-2">
-          <div>
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-primary">
-              <Cpu className="h-5 w-5" aria-hidden />
-            </div>
-            <h3 className="text-lg font-bold text-primary">
-              AI Part Compatibility
-            </h3>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-primary/70">
-              Real-time validation ensures your chosen switches, PCB, and
-              keycaps fit perfectly. No more costly mismatch errors.
-            </p>
-          </div>
-          <div className="mt-6 flex items-center justify-between rounded-xl border border-white/70 bg-white/45 p-3">
-            <span className="text-xs font-bold text-primary/80">
-              Compatibility Status
-            </span>
-            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.14em] text-primary/60">
-              <span className="h-2 w-2 rounded-full bg-accent" />
-              Live check
-            </span>
-          </div>
-        </article>
-
-        <article className="flex min-h-[220px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
-          <div>
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-primary">
-              <Eye className="h-5 w-5" aria-hidden />
-            </div>
-            <h3 className="text-lg font-bold text-primary">
-              Visual Preview
-            </h3>
-            <p className="mt-2 text-sm leading-6 text-primary/70">
-              See exactly how your components look together before you buy.
-            </p>
-          </div>
-          <FeatureKeyboardMini />
-        </article>
-
-        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
-          <div>
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-primary">
-              <Volume2 className="h-5 w-5" aria-hidden />
-            </div>
-            <h3 className="text-lg font-bold text-primary">
-              Typing Sound Preview
-            </h3>
-            <p className="mt-2 text-sm leading-6 text-primary/70">
-              Estimate acoustic profiles from switch, plate, and case metadata.
-            </p>
-          </div>
-          <SoundWave />
-        </article>
-
-        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
-          <div>
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-primary">
-              <Bot className="h-5 w-5" aria-hidden />
-            </div>
-            <h3 className="text-lg font-bold text-primary">
-              Knowledge Assistant
-            </h3>
-            <p className="mt-2 text-sm leading-6 text-primary/70">
-              Ask Meg anything from switch feel to layout tradeoffs.
-            </p>
-          </div>
-          <div className="mt-5 flex items-center gap-2 rounded-xl border border-white/70 bg-white/45 p-2">
-            <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-accent text-white">
-              <Image
-                alt="Meg"
-                className="h-full w-full rounded-full object-cover"
-                height={24}
-                src="/meg-avatar.png"
-                width={24}
-              />
-            </span>
-            <span className="text-xs font-bold text-primary/60">
-              “What’s a thock?”
-            </span>
-          </div>
-        </article>
-
-        <article className="flex min-h-[200px] flex-col rounded-[24px] border border-white/80 bg-white/70 p-6 shadow-sm backdrop-blur">
-          <div>
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-primary">
-              <MessageCircle className="h-5 w-5" aria-hidden />
-            </div>
-            <h3 className="text-lg font-bold text-primary">
-              Community Builds
-            </h3>
-            <p className="mt-2 text-sm leading-6 text-primary/70">
-              Explore shared builds and remix ideas in future phases.
-            </p>
-          </div>
-          <div className="mt-5 flex items-center -space-x-2">
-            {["A", "B", "C"].map((label, index) => (
-              <span
-                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-black text-primary ${
-                  index === 0
-                    ? "bg-accent/30"
-                    : index === 1
-                      ? "bg-[#5DF8D8]/30"
-                      : "bg-accent/15"
-                }`}
-                key={label}
-              >
-                {label}
-              </span>
-            ))}
-            <span className="pl-4 text-xs font-bold text-primary/45">
-              +1k
-            </span>
-          </div>
-        </article>
-      </div>
-    </section>
-  );
-}
-
-function FeatureKeyboardMini() {
-  return (
-    <div className="mt-auto flex h-16 items-center justify-center rounded-xl border border-white/70 bg-white/45">
-      <Keyboard className="h-7 w-7 text-primary/25" aria-hidden />
-    </div>
-  );
-}
-
-function SoundWave() {
-  const heights = [30, 58, 100, 44, 24, 82];
-
-  return (
-    <div className="mt-5 flex h-10 items-end justify-center gap-1.5">
-      {heights.map((height, index) => (
-        <span
-          className="w-3 rounded-t-sm bg-accent/70"
-          key={`${height}-${index}`}
-          style={{ height: `${height}%` }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function FinalCta({ onStartBuilding }: { onStartBuilding: () => void }) {
-  return (
-    <section className="px-4 py-24 text-center sm:px-8 lg:px-6">
-      <div className="mx-auto max-w-[1280px] rounded-[40px] border border-accent/30 bg-white/55 px-6 py-16 shadow-sm backdrop-blur sm:px-10 lg:py-20">
-        <h2 className="text-4xl font-black tracking-[-0.01em] text-primary sm:text-5xl">
-          Ready to hear the perfect click?
-        </h2>
-        <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-primary/70">
-          Start your journey with sharkeys today and join thousands of
-          enthusiasts building better boards.
-        </p>
-        <button
-          className="mt-9 inline-flex min-h-14 items-center justify-center rounded-full bg-accent px-8 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30 sm:px-12"
-          onClick={onStartBuilding}
-          type="button"
-        >
-          Create your keyboard now
-        </button>
-      </div>
-    </section>
-  );
 }
 
 function SharkeysFooter() {

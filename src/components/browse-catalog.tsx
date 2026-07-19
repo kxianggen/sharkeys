@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CircleDot, Keyboard, LayoutGrid, Wrench, X } from "lucide-react";
 
+import { BuilderPickTag, isBuilderPick } from "@/components/builder-pick-tag";
 import { SwatchDots } from "@/components/swatch-dots";
 import type { ComponentCategory, KeyboardComponent } from "@/lib/types";
 
@@ -791,7 +792,10 @@ function ProductCard({
           src={`/kits/${kit.kitId}.webp`}
           zoomClassName={KIT_ZOOM_CLASS}
         />
-        <h3 className="mt-4 text-base font-semibold text-primary">{kit.name}</h3>
+        <div className="mt-4 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-primary">{kit.name}</h3>
+          {isBuilderPick(kit.caseComponent) ? <BuilderPickTag /> : null}
+        </div>
         <p className="mt-1 text-sm text-secondary">{kitSpecLine(kit)}</p>
         {price ? (
           <p className="mt-2 text-sm font-medium text-primary">{price}</p>
@@ -844,9 +848,12 @@ function ProductCard({
           src={`/parts/${component.id}.webp`}
           zoomClassName={PART_ZOOM_CLASS[component.category]}
         />
-        <h3 className="mt-4 text-base font-semibold text-primary">
-          {component.name}
-        </h3>
+        <div className="mt-4 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-primary">
+            {component.name}
+          </h3>
+          {isBuilderPick(component) ? <BuilderPickTag /> : null}
+        </div>
         <p className="mt-1 flex items-center gap-2 text-sm text-secondary">
           {partSpecLine(component)}
           {swatch ? <SwatchDots colors={swatch} /> : null}

@@ -20,7 +20,16 @@ const rawKeyboardComponents = [
     soundProfile: "creamy",
     price: 100,
     priceCurrency: "MYR",
-    metadata: { kitId: "gmk67", kitLock: true },
+    metadata: {
+      kitId: "gmk67",
+      kitLock: true,
+      // Builder's personal pick — a genuine recommendation from experience,
+      // not a popularity/sales statistic.
+      builderPick: true,
+      builderPickKind: "budget",
+      builderPickNote:
+        "The budget/beginner pick — a friendly, affordable 65% to learn on, hot-swap and tri-mode out of the box.",
+    },
   },
   {
     id: "pcb_gmk67_65_hotswap",
@@ -73,7 +82,15 @@ const rawKeyboardComponents = [
     soundProfile: "thocky",
     price: 200,
     priceCurrency: "MYR",
-    metadata: { kitId: "lucky65_v3", kitLock: true },
+    metadata: {
+      kitId: "lucky65_v3",
+      kitLock: true,
+      // Builder's top personal pick — a genuine recommendation, not a stat.
+      builderPick: true,
+      builderPickKind: "top",
+      builderPickNote:
+        "My top pick — a standout aluminium 65% that feels dense and thocky well above its price. The one I'd personally recommend for a first premium build.",
+    },
   },
   {
     id: "pcb_lucky65_v3_65_hotswap",
@@ -705,6 +722,11 @@ const rawKeyboardComponents = [
       observedPrice: 0.94,
       observedCurrency: "MYR",
       priceUnit: "per switch",
+      // Builder's personal switch pick — a genuine recommendation, not a stat.
+      builderPick: true,
+      builderPickKind: "switch",
+      builderPickNote:
+        "My switch pick — a smooth budget linear that punches far above its price; creamy and satisfying, and a great first switch.",
     },
   },
   {

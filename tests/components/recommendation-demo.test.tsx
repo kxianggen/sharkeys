@@ -373,8 +373,12 @@ describe("RecommendationDemo", () => {
     expect(
       screen.getByRole("button", { name: /Open Meg assistant/i }),
     ).toHaveTextContent(/Ask Meg/i);
-    expect(screen.getByText(/How it works/i)).toBeInTheDocument();
-    expect(screen.getByText(/Engineered for precision/i)).toBeInTheDocument();
+    // The old "How it works" / "Engineered for precision" sections are gone;
+    // the landing sells through feature cards, founder quote, reviews, FAQ.
+    expect(screen.queryByText(/How it works/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Engineered for precision/i)).not.toBeInTheDocument();
+    expect(screen.getByTestId("feature-cards-section")).toBeInTheDocument();
+    expect(screen.getByTestId("faq-section")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Configurator/i })).toHaveAttribute(
       "href",
       "/configurator",
@@ -425,7 +429,7 @@ describe("RecommendationDemo", () => {
     });
   });
 
-  it("navigates from landing prompt and final CTA to configurator", () => {
+  it("navigates from the landing prompt to the configurator", () => {
     mockFetch();
     render(<RecommendationDemo />);
 
@@ -438,13 +442,10 @@ describe("RecommendationDemo", () => {
       "/configurator?prompt=quiet+office+keyboard+under+RM500",
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Create your keyboard now/i }),
-    );
-
-    expect(navigationMocks.push).toHaveBeenLastCalledWith(
-      "/configurator?prompt=quiet+office+keyboard+under+RM500",
-    );
+    // The old "Create your keyboard now" final CTA is gone.
+    expect(
+      screen.queryByRole("button", { name: /Create your keyboard now/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("navigates landing prompt chips to configurator with prompt context", () => {
