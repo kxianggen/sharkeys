@@ -8,7 +8,7 @@ import type { ComponentCategory } from "@/lib/types";
  * animation — slow, costly, and non-deterministic for something meant to replay
  * identically. So the result of one real run is frozen here.
  *
- * How it was produced (2026-07, `scripts/probe-hero-demo.ts`):
+ * How it was produced (2026-07, via a one-off probe script since removed):
  *   prompt  → "Build me an office keyboard"
  *   source  → openai (the real extraction path, not the keyword fallback)
  *   result  → 3 validated builds; this is the top-ranked one
