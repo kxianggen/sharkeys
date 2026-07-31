@@ -309,7 +309,7 @@ function resolveDemo(): ResolvedDemo | null {
 // ---------------------------------------------------------------------------
 
 export function HeroConfiguratorDemo() {
-  const demo = useMemo(resolveDemo, []);
+  const demo = useMemo(() => resolveDemo(), []);
   const [phase, setPhase] = useState<Phase>("idle");
   const rootRef = useRef<HTMLElement | null>(null);
   const windowRef = useRef<HTMLDivElement | null>(null);
