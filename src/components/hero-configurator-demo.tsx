@@ -602,6 +602,10 @@ export function HeroConfiguratorDemo() {
   };
 
   const buildComplete = at >= phaseIndex("save");
+  // Known: reads a ref during render, so showToast is non-reactive and may be
+  // stale. Flagged by react-hooks/refs. Converting playedRef to state would
+  // alter re-render timing in this choreographed sequence; deferred rather
+  // than restructured late in the project.
   const showToast = isComplete && playedRef.current;
 
   return (
