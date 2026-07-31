@@ -68,6 +68,7 @@ export function validateBuildCompatibility(
   validateKeycapCompatibility(parsedSelection, selectedComponents, issues);
   validateStabilizerCompatibility(parsedSelection, selectedComponents, issues);
   validatePreferenceWarnings(parsedSelection, selectedComponents, issues);
+  annotatePlateCharacter(selectedComponents, issues);
 
   const errors = issues.filter((issue) => issue.severity === "error");
   const warnings = issues.filter((issue) => issue.severity === "warning");
@@ -83,6 +84,44 @@ export function validateBuildCompatibility(
 }
 
 export { requiredComponentCategories };
+
+/**
+ * Which errors would appear if `optionId` were chosen for `category`, given
+ * what the user has already selected.
+ *
+ * This exists so a picker can grey out parts that cannot work — the configurator
+ * previously offered every stabilizer regardless of what the selected PCB
+ * actually supports, and only complained after the pick.
+ *
+ * Critically it does NOT re-implement any rule: it runs the real engine on a
+ * hypothetical selection and keeps the errors that name this component.
+ * `missing_*` errors for not-yet-chosen categories carry no component ids, so
+ * they fall out of the filter automatically and a partial build stays valid.
+ */
+export function getOptionConflicts(
+  category: ComponentCategory,
+  optionId: string,
+  selectedComponentIds: Partial<Record<ComponentCategory, string>>,
+  catalog: readonly KeyboardComponent[],
+): CompatibilityIssue[] {
+  const componentIds: Record<string, string> = {};
+
+  for (const [selectedCategory, selectedId] of Object.entries(
+    selectedComponentIds,
+  )) {
+    if (selectedId && selectedCategory !== category) {
+      componentIds[selectedCategory] = selectedId;
+    }
+  }
+
+  componentIds[category] = optionId;
+
+  const result = validateBuildCompatibility({ componentIds }, catalog);
+
+  return result.errors.filter((error) =>
+    error.affectedComponentIds.includes(optionId),
+  );
+}
 
 function resolveSelectedComponents(
   selection: KeyboardBuildSelection,
@@ -580,6 +619,58 @@ function getSoundRelevantComponents(selected: SelectedKeyboardComponents) {
 
 function isDefined<T>(value: T | undefined): value is T {
   return value !== undefined;
+}
+
+/**
+ * Plate material is the cheapest lever a builder has on how a board sounds, but
+ * a bare part name doesn't communicate that — swapping polycarbonate for steel
+ * looks like a no-op in the UI until something says otherwise.
+ *
+ * This is an `info` annotation, deliberately: it never affects `isValid`, never
+ * appears in errors or warnings, and the rule engine remains the sole authority
+ * on compatibility. It only describes a part the user already chose. The copy is
+ * a fixed table keyed on catalog metadata, not generated text, so nothing here
+ * can hallucinate a claim about a plate.
+ */
+const plateMaterialCharacter: Record<string, string> = {
+  brass:
+    "Brass is the densest plate here: a stiff typing feel and a bright, resonant tone. Expect a noticeably higher pitch than polycarbonate or POM.",
+  steel:
+    "Steel is stiff with very little flex, giving a sharper and more pronounced sound than FR4 or POM.",
+  aluminum:
+    "Aluminum is stiff enough to reflect energy back into the switch rather than absorb it, which sharpens the attack of each keypress.",
+  carbon_fiber:
+    "Carbon fibre is light but very stiff — clacky, with a drier character than brass.",
+  fr4: "FR4 is the neutral middle ground: firmer than POM or polycarbonate, but with enough flex to stay forgiving.",
+  pom: "POM flexes softly and rounds off the high frequencies, giving the deepest, thockiest tone of the common plate materials.",
+  polycarbonate:
+    "Polycarbonate flexes the most, cushioning the typing feel and muting the highs that a metal plate would emphasise.",
+};
+
+function annotatePlateCharacter(
+  selected: SelectedKeyboardComponents,
+  issues: CompatibilityIssue[],
+) {
+  const { plate } = selected;
+
+  if (!plate) {
+    return;
+  }
+
+  const material = getMetadataString(plate.metadata, "plateMaterial");
+  const character = material ? plateMaterialCharacter[material] : undefined;
+
+  if (!character) {
+    return;
+  }
+
+  issues.push({
+    code: "plate_material_character",
+    severity: "info",
+    message: `${plate.name}: ${character}`,
+    affectedCategories: ["plate"],
+    affectedComponentIds: [plate.id],
+  });
 }
 
 function buildExplanations(
