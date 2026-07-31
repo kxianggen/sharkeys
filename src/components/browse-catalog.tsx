@@ -3,7 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CircleDot, Keyboard, LayoutGrid, Wrench, X } from "lucide-react";
+import {
+  CircleDot,
+  Cpu,
+  Keyboard,
+  Layers,
+  LayoutGrid,
+  Package,
+  Wrench,
+  X,
+} from "lucide-react";
 
 import { BuilderPickTag, isBuilderPick } from "@/components/builder-pick-tag";
 import { SwatchDots } from "@/components/swatch-dots";
@@ -190,12 +199,35 @@ const layoutLabels: Record<string, string> = {
   "1800": "1800",
 };
 
+const plateMaterialLabels: Record<string, string> = {
+  brass: "Brass",
+  steel: "Steel",
+  aluminum: "Aluminum",
+  carbon_fiber: "Carbon fibre",
+  fr4: "FR4",
+  pom: "POM",
+  polycarbonate: "Polycarbonate",
+};
+
+function getPlateMaterial(component: KeyboardComponent) {
+  const material = component.metadata?.plateMaterial;
+
+  return typeof material === "string" ? material : undefined;
+}
+
 const keycapProfileLabels: Record<string, string> = {
   cherry: "Cherry",
   oem: "OEM",
   xda: "XDA",
   sa: "SA",
   dsa: "DSA",
+};
+
+const mountStyleLabels: Record<string, string> = {
+  tray_mount: "Tray mount",
+  top_mount: "Top mount",
+  gasket_mount: "Gasket mount",
+  o_ring_mount: "O-ring mount",
 };
 
 const stabilizerTypeLabels: Record<string, string> = {
@@ -305,6 +337,37 @@ function partSpecLine(component: KeyboardComponent) {
       ]
         .filter(Boolean)
         .join(" · ");
+    case "plate": {
+      const material = getPlateMaterial(component);
+
+      return [
+        material ? plateMaterialLabels[material] ?? capitalize(material) : undefined,
+        component.layouts.map((layout) => layoutLabels[layout] ?? layout).join(", "),
+        component.soundProfile ? capitalize(component.soundProfile) : undefined,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+    }
+    case "case":
+      return [
+        component.layouts.map((layout) => layoutLabels[layout] ?? layout).join(", "),
+        component.caseMountSupport
+          .map((mount) => mountStyleLabels[mount] ?? mount)
+          .join(", "),
+      ]
+        .filter(Boolean)
+        .join(" · ");
+    case "pcb":
+      return [
+        component.layouts.map((layout) => layoutLabels[layout] ?? layout).join(", "),
+        component.hotswap ? "Hot-swap" : undefined,
+        component.switchTechnologySupport.includes("hall_effect")
+          ? "Magnetic / hall-effect"
+          : undefined,
+        capitalize(component.connection),
+      ]
+        .filter(Boolean)
+        .join(" · ");
     default:
       return "";
   }
@@ -393,6 +456,76 @@ export const browseSections: BrowseSectionConfig[] = [
             item.type === "part" &&
             item.component.category === "switch" &&
             item.component.soundProfile === "silent",
+        },
+      ]),
+  },
+  {
+    // Plate material is the cheapest lever on how a board sounds, so it gets a
+    // section of its own rather than hiding inside kit details. Kit-locked
+    // plates stay on their kit card; these are the ones you can actually buy
+    // and swap in.
+    id: "plates",
+    heading: "Plates.",
+    tagline: "Change the sound, not the board.",
+    icon: Layers,
+    getItems: (data) => aftermarketParts(data, "plate"),
+    getFilterOptions: (items) =>
+      presentOptions(
+        items,
+        Object.entries(plateMaterialLabels).map(([material, label]) => ({
+          id: `material-${material}`,
+          label,
+          matches: (item) =>
+            item.type === "part" &&
+            item.component.category === "plate" &&
+            getPlateMaterial(item.component) === material,
+        })),
+      ),
+  },
+  {
+    id: "cases",
+    heading: "Cases.",
+    tagline: "Standalone shells for a custom build.",
+    icon: Package,
+    getItems: (data) => aftermarketParts(data, "case"),
+    getFilterOptions: (items) =>
+      presentOptions(
+        items,
+        Object.entries(layoutLabels).map(([layout, label]) => ({
+          id: `case-layout-${layout}`,
+          label,
+          matches: (item) =>
+            item.type === "part" &&
+            item.component.category === "case" &&
+            item.component.layouts.includes(
+              layout as (typeof item.component.layouts)[number],
+            ),
+        })),
+      ),
+  },
+  {
+    id: "pcbs",
+    heading: "PCBs.",
+    tagline: "Mechanical or magnetic.",
+    icon: Cpu,
+    getItems: (data) => aftermarketParts(data, "pcb"),
+    getFilterOptions: (items) =>
+      presentOptions(items, [
+        {
+          id: "pcb-mechanical",
+          label: "Mechanical",
+          matches: (item) =>
+            item.type === "part" &&
+            item.component.category === "pcb" &&
+            item.component.switchTechnologySupport.includes("mechanical"),
+        },
+        {
+          id: "pcb-hall-effect",
+          label: "Magnetic",
+          matches: (item) =>
+            item.type === "part" &&
+            item.component.category === "pcb" &&
+            item.component.switchTechnologySupport.includes("hall_effect"),
         },
       ]),
   },

@@ -63,7 +63,7 @@ const rawKeyboardComponents = [
     soundProfile: "creamy",
     price: 20,
     priceCurrency: "MYR",
-    metadata: { kitId: "gmk67", kitLock: true },
+    metadata: { kitId: "gmk67", kitLock: true, plateMaterial: "polycarbonate" },
   },
 
   // ---------------------------------------------------------------------------
@@ -124,7 +124,7 @@ const rawKeyboardComponents = [
     soundProfile: "thocky",
     price: 40,
     priceCurrency: "MYR",
-    metadata: { kitId: "lucky65_v3", kitLock: true },
+    metadata: { kitId: "lucky65_v3", kitLock: true, plateMaterial: "fr4" },
   },
 
   // ---------------------------------------------------------------------------
@@ -177,7 +177,7 @@ const rawKeyboardComponents = [
     soundProfile: "creamy",
     price: 40,
     priceCurrency: "MYR",
-    metadata: { kitId: "gmk104", kitLock: true },
+    metadata: { kitId: "gmk104", kitLock: true, plateMaterial: "polycarbonate" },
   },
 
   // ---------------------------------------------------------------------------
@@ -230,7 +230,7 @@ const rawKeyboardComponents = [
     soundProfile: "creamy",
     price: 40,
     priceCurrency: "MYR",
-    metadata: { kitId: "leobog_hi75", kitLock: true },
+    metadata: { kitId: "leobog_hi75", kitLock: true, plateMaterial: "polycarbonate" },
   },
 
   // ---------------------------------------------------------------------------
@@ -283,7 +283,7 @@ const rawKeyboardComponents = [
     soundProfile: "creamy",
     price: 30,
     priceCurrency: "MYR",
-    metadata: { kitId: "gmk61", kitLock: true },
+    metadata: { kitId: "gmk61", kitLock: true, plateMaterial: "polycarbonate" },
   },
 
   // ---------------------------------------------------------------------------
@@ -531,6 +531,7 @@ const rawKeyboardComponents = [
     vendorUrl:
       "https://www.keebsproject.com/product/ready-stock-star-80-wireless-tkl-87-cnc-aluminum-case-hot-swap-rgb-gasket-mechanical-keyboard-kit-keebs-project",
     metadata: {
+      plateMaterial: "fr4",
       kitId: "weikav_star80",
       kitLock: true,
       sourceUrl:
@@ -914,6 +915,433 @@ const rawKeyboardComponents = [
       notes: [
         "MKB listing appears house/private-label; implementation brand is Unknown until manufacturer is confirmed.",
       ],
+    },
+  },
+  // ---------------------------------------------------------------------------
+  // GH60 OPEN ECOSYSTEM (12) — the one 60% form factor where case, PCB and plate
+  // genuinely interchange across brands. Unlike the kit records above, these are
+  // NOT kitLock'd: the whole point is that they mix freely with each other.
+  //
+  // Provenance: these are modelled from the public GH60 standard and from
+  // widely-sold universal GH60 parts, not from a single vendor listing. Prices
+  // are estimates for prototype budget maths — every record is marked
+  // `sourceType: "modelled_estimate"` so it can never be mistaken for an
+  // observed vendor price the way the MKB/KeebsProject records can.
+  // ---------------------------------------------------------------------------
+  {
+    id: "case_gh60_universal_aluminum",
+    category: "case",
+    name: "GH60 CNC Aluminum Case",
+    brand: "Generic GH60",
+    description:
+      "60% aluminum case built to the GH60 screw pattern, so any GH60-compatible PCB and plate will drop in. Stiff and bright next to a gasket build.",
+    beginnerFriendly: false,
+    layouts: ["60"],
+    caseMountSupport: ["tray_mount"],
+    soundProfile: "clacky",
+    price: 180,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      formFactor: "gh60",
+      notes: [
+        "GH60 is a community standard, not a product: the screw pattern is shared by Poker/Pok3r, DZ60, XD60/XD64, GK61/GK64 and YD60MQ-class PCBs.",
+        "Tray mount is stiffer than the gasket kits in this catalog, which is why the sound profile is tagged clacky rather than thocky.",
+      ],
+    },
+  },
+  {
+    id: "pcb_gh60_universal_mx_hotswap",
+    category: "pcb",
+    name: "GH60 MX Hotswap PCB",
+    brand: "Generic GH60",
+    description:
+      "Wired 60% hot-swap PCB on the GH60 standard. Takes 5-pin MX and optical switches and supports PCB-mount, screw-in or plate-mount stabilizers.",
+    beginnerFriendly: false,
+    layouts: ["60"],
+    switchTechnologySupport: ["mechanical", "optical"],
+    pcbMountSupport: ["tray_mount"],
+    stabilizerTypeSupport: ["pcb_mount", "screw_in", "plate_mount"],
+    connection: "wired",
+    hotswap: true,
+    price: 130,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      formFactor: "gh60",
+    },
+  },
+  {
+    id: "pcb_gh60_hall_effect_magnetic",
+    category: "pcb",
+    name: "GH60 Hall-Effect Magnetic PCB",
+    brand: "Generic GH60",
+    description:
+      "Analog magnetic 60% PCB with adjustable actuation and rapid trigger. Accepts magnetic switches only — standard MX mechanical switches will not work in it.",
+    beginnerFriendly: false,
+    layouts: ["60"],
+    switchTechnologySupport: ["hall_effect"],
+    pcbMountSupport: ["tray_mount"],
+    stabilizerTypeSupport: ["pcb_mount", "screw_in"],
+    connection: "wired",
+    hotswap: true,
+    price: 420,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      formFactor: "gh60",
+      notes: [
+        "Modelled on Wooting-60HE-class analog modules, which fit universal 60% tray-mount (GH60) cases but with real caveats.",
+        "Caveats worth surfacing to a user: the v2 module needs its foam sandwich pad to sit correctly, the USB-C port is on the LEFT side rather than centred, and no more than 6 case standoffs should match the tray pattern.",
+        "This PCB deliberately supports hall_effect only. Pairing it with any mechanical switch in this catalog is a genuine incompatibility, and the rule engine should say so.",
+      ],
+    },
+  },
+  {
+    id: "switch_gateron_ks37b_magnetic_jade",
+    category: "switch",
+    name: "Gateron KS-37B Magnetic Jade Linear Switch",
+    brand: "Gateron",
+    description:
+      "Magnetic linear switch for hall-effect PCBs. Actuation depth is set in software rather than by the switch, which is the point of going analog.",
+    beginnerFriendly: false,
+    switchTechnology: "hall_effect",
+    pinCount: 2,
+    actuationForceG: 30,
+    soundProfile: "neutral",
+    price: 3.2,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      specBasis: "approximate",
+      notes: [
+        "Price is PER SWITCH, matching every other switch record in this catalog. Magnetic switches sell in sets, so a set price must be divided by the piece count before it goes in here.",
+        "Sound profile is tagged neutral on purpose. Magnetic switches are chosen for actuation behaviour, not acoustics, and claiming a thocky/creamy character here would not be defensible.",
+        "Will not work in any of the MX hotswap PCBs in this catalog — magnetic switches need a hall-effect PCB.",
+      ],
+    },
+  },
+  {
+    id: "switch_lekker_l60_magnetic",
+    category: "switch",
+    name: "Lekker L60 Magnetic Linear Switch",
+    brand: "Wooting",
+    description:
+      "Linear magnetic switch designed for analog hall-effect boards, with a heavier bottom-out than the Gateron magnetic jade.",
+    beginnerFriendly: false,
+    switchTechnology: "hall_effect",
+    pinCount: 2,
+    actuationForceG: 45,
+    soundProfile: "neutral",
+    price: 4.5,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      specBasis: "approximate",
+      notes: [
+        "Price is PER SWITCH, consistent with the rest of the catalog.",
+        "Force figure is approximate — verify against the manufacturer spec before quoting it.",
+      ],
+    },
+  },
+  {
+    id: "plate_gh60_brass",
+    category: "plate",
+    name: "GH60 Brass Plate",
+    brand: "Generic GH60",
+    description:
+      "Dense brass 60% plate. The stiffest and most resonant option here — firm typing feel and a bright, ringing high-frequency signature.",
+    beginnerFriendly: false,
+    layouts: ["60"],
+    plateMountSupport: ["tray_mount"],
+    switchTechnologySupport: ["mechanical", "optical", "hall_effect"],
+    soundProfile: "clacky",
+    price: 95,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "brass",
+      formFactor: "gh60",
+      notes: [
+        "Plate cutouts are the standard 14mm MX opening, which is why mechanical, optical and magnetic switch housings all fit.",
+      ],
+    },
+  },
+  {
+    id: "plate_gh60_steel",
+    category: "plate",
+    name: "GH60 Steel Plate",
+    brand: "Generic GH60",
+    description:
+      "Stiff steel 60% plate. Sharper and more pronounced than FR4 or POM, with almost no flex.",
+    beginnerFriendly: false,
+    layouts: ["60"],
+    plateMountSupport: ["tray_mount"],
+    switchTechnologySupport: ["mechanical", "optical", "hall_effect"],
+    soundProfile: "clacky",
+    price: 60,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "steel",
+      formFactor: "gh60",
+    },
+  },
+  {
+    id: "plate_gh60_aluminum",
+    category: "plate",
+    name: "GH60 Aluminum Plate",
+    brand: "Generic GH60",
+    description:
+      "Aluminum 60% plate. High stiffness reflects energy back into the switch instead of absorbing it, giving a sharp, clacky transient.",
+    beginnerFriendly: false,
+    layouts: ["60"],
+    plateMountSupport: ["tray_mount"],
+    switchTechnologySupport: ["mechanical", "optical", "hall_effect"],
+    soundProfile: "clacky",
+    price: 55,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "aluminum",
+      formFactor: "gh60",
+    },
+  },
+  {
+    id: "plate_gh60_carbon_fiber",
+    category: "plate",
+    name: "GH60 Carbon Fibre Plate",
+    brand: "Generic GH60",
+    description:
+      "Carbon fibre 60% plate. Light but very stiff — noticeably clacky, with a drier character than brass.",
+    beginnerFriendly: false,
+    layouts: ["60"],
+    plateMountSupport: ["tray_mount"],
+    switchTechnologySupport: ["mechanical", "optical", "hall_effect"],
+    soundProfile: "clacky",
+    price: 85,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "carbon_fiber",
+      formFactor: "gh60",
+    },
+  },
+  {
+    id: "plate_gh60_fr4",
+    category: "plate",
+    name: "GH60 FR4 Plate",
+    brand: "Generic GH60",
+    description:
+      "FR4 60% plate. The neutral middle ground — more stiffness than POM or PC, but still a pleasant amount of flex.",
+    beginnerFriendly: true,
+    layouts: ["60"],
+    plateMountSupport: ["tray_mount"],
+    switchTechnologySupport: ["mechanical", "optical", "hall_effect"],
+    soundProfile: "neutral",
+    price: 35,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "fr4",
+      formFactor: "gh60",
+    },
+  },
+  {
+    id: "plate_gh60_pom",
+    category: "plate",
+    name: "GH60 POM Plate",
+    brand: "Generic GH60",
+    description:
+      "POM 60% plate. Soft typing feel and a deep, rounded sound — the thockiest of the universal plate materials.",
+    beginnerFriendly: true,
+    layouts: ["60"],
+    plateMountSupport: ["tray_mount"],
+    switchTechnologySupport: ["mechanical", "optical", "hall_effect"],
+    soundProfile: "thocky",
+    price: 45,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "pom",
+      formFactor: "gh60",
+    },
+  },
+  {
+    id: "plate_gh60_polycarbonate",
+    category: "plate",
+    name: "GH60 Polycarbonate Plate",
+    brand: "Generic GH60",
+    description:
+      "Polycarbonate 60% plate. Flexible and cushioned, muting the high frequencies a stiff plate would emphasise.",
+    beginnerFriendly: true,
+    layouts: ["60"],
+    plateMountSupport: ["tray_mount"],
+    switchTechnologySupport: ["mechanical", "optical", "hall_effect"],
+    soundProfile: "thocky",
+    price: 40,
+    priceCurrency: "MYR",
+    metadata: {
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "polycarbonate",
+      formFactor: "gh60",
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  // 65% ALTERNATE PLATES (6) — swappable material options for the two 65% kits.
+  //
+  // These ARE kitLock'd, and that is deliberate: 65% has no GH60-style universal
+  // standard, so a Lucky65 plate does not fit a GMK67 and vice versa. Locking
+  // each plate to its kitId lets a user change material within their own kit
+  // while the existing kit_structural_mismatch rule blocks cross-kit nonsense.
+  // No new rule code is needed for either behaviour.
+  // ---------------------------------------------------------------------------
+  {
+    id: "plate_lucky65_v3_65_brass",
+    category: "plate",
+    name: "Lucky65 V3 65% Brass Plate",
+    brand: "Weikav",
+    description:
+      "Brass swap plate for the Lucky65 V3. Adds mass and brightens the board considerably against the stock FR4.",
+    beginnerFriendly: false,
+    layouts: ["65"],
+    plateMountSupport: ["gasket_mount"],
+    switchTechnologySupport: ["mechanical"],
+    soundProfile: "clacky",
+    price: 110,
+    priceCurrency: "MYR",
+    metadata: {
+      kitId: "lucky65_v3",
+      kitLock: true,
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "brass",
+    },
+  },
+  {
+    id: "plate_lucky65_v3_65_aluminum",
+    category: "plate",
+    name: "Lucky65 V3 65% Aluminum Plate",
+    brand: "Weikav",
+    description:
+      "Aluminum swap plate for the Lucky65 V3. Firmer than the stock FR4 without going as bright as brass.",
+    beginnerFriendly: false,
+    layouts: ["65"],
+    plateMountSupport: ["gasket_mount"],
+    switchTechnologySupport: ["mechanical"],
+    soundProfile: "neutral",
+    price: 75,
+    priceCurrency: "MYR",
+    metadata: {
+      kitId: "lucky65_v3",
+      kitLock: true,
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "aluminum",
+      notes: [
+        "Tagged neutral rather than clacky: in a gasket mount the case absorbs much of the stiffness a tray mount would transmit.",
+      ],
+    },
+  },
+  {
+    id: "plate_lucky65_v3_65_pom",
+    category: "plate",
+    name: "Lucky65 V3 65% POM Plate",
+    brand: "Weikav",
+    description:
+      "POM swap plate for the Lucky65 V3. Softens the typing feel and deepens the board past the stock FR4.",
+    beginnerFriendly: true,
+    layouts: ["65"],
+    plateMountSupport: ["gasket_mount"],
+    switchTechnologySupport: ["mechanical"],
+    soundProfile: "thocky",
+    price: 65,
+    priceCurrency: "MYR",
+    metadata: {
+      kitId: "lucky65_v3",
+      kitLock: true,
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "pom",
+    },
+  },
+  {
+    id: "plate_gmk67_65_brass",
+    category: "plate",
+    name: "GMK67 65% Brass Plate",
+    brand: "Zuoya",
+    description:
+      "Brass swap plate for the GMK67. Adds weight and brightness to an otherwise soft plastic-cased board.",
+    beginnerFriendly: false,
+    layouts: ["65"],
+    plateMountSupport: ["gasket_mount"],
+    switchTechnologySupport: ["mechanical"],
+    soundProfile: "clacky",
+    price: 95,
+    priceCurrency: "MYR",
+    metadata: {
+      kitId: "gmk67",
+      kitLock: true,
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "brass",
+    },
+  },
+  {
+    id: "plate_gmk67_65_aluminum",
+    category: "plate",
+    name: "GMK67 65% Aluminum Plate",
+    brand: "Zuoya",
+    description:
+      "Aluminum swap plate for the GMK67 — a firmer, more defined alternative to the stock polycarbonate.",
+    beginnerFriendly: false,
+    layouts: ["65"],
+    plateMountSupport: ["gasket_mount"],
+    switchTechnologySupport: ["mechanical"],
+    soundProfile: "neutral",
+    price: 65,
+    priceCurrency: "MYR",
+    metadata: {
+      kitId: "gmk67",
+      kitLock: true,
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "aluminum",
+    },
+  },
+  {
+    id: "plate_gmk67_65_pom",
+    category: "plate",
+    name: "GMK67 65% POM Plate",
+    brand: "Zuoya",
+    description:
+      "POM swap plate for the GMK67. Deeper and softer again than the stock PC plate.",
+    beginnerFriendly: true,
+    layouts: ["65"],
+    plateMountSupport: ["gasket_mount"],
+    switchTechnologySupport: ["mechanical"],
+    soundProfile: "thocky",
+    price: 55,
+    priceCurrency: "MYR",
+    metadata: {
+      kitId: "gmk67",
+      kitLock: true,
+      sourceType: "modelled_estimate",
+      priceBasis: "estimated",
+      plateMaterial: "pom",
     },
   },
 ] satisfies KeyboardComponent[];
