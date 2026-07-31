@@ -18,7 +18,11 @@ import {
 } from "@/data/hero-demo-build";
 import { getComponentById } from "@/lib/components";
 import { requiredComponentCategories } from "@/lib/types";
-import type { ComponentCategory, KeyboardComponent } from "@/lib/types";
+import type {
+  ComponentCategory,
+  KeyboardComponent,
+  SelectedKeyboardComponents,
+} from "@/lib/types";
 
 /**
  * Attio-style animated hero panel: a mock of the REAL configurator workspace
@@ -215,7 +219,11 @@ function getKitDisplayName(caseComponent: KeyboardComponent) {
 }
 
 type ResolvedDemo = {
-  parts: Record<ComponentCategory, KeyboardComponent>;
+  // Per-category component types, not the bare KeyboardComponent union: the
+  // demo reads case-only fields (layouts) and switch-only fields
+  // (soundProfile), which the union cannot expose. Required<> because
+  // resolveDemo returns null unless every category resolved.
+  parts: Required<SelectedKeyboardComponents>;
   alternatives: Partial<Record<ComponentCategory, KeyboardComponent[]>>;
   kitTitle: string;
   kitId: string | null;
@@ -240,9 +248,13 @@ function resolveDemo(): ResolvedDemo | null {
     return null;
   }
 
+  // The assertion is what Object.fromEntries always costs — it cannot express
+  // "this key maps to that value type". It is sound here because the guard
+  // above discards the result unless every entry satisfied
+  // `component.category === category`.
   const parts = Object.fromEntries(
     entries as ReadonlyArray<readonly [ComponentCategory, KeyboardComponent]>,
-  ) as Record<ComponentCategory, KeyboardComponent>;
+  ) as Required<SelectedKeyboardComponents>;
 
   const alternatives: Partial<Record<ComponentCategory, KeyboardComponent[]>> =
     {};
