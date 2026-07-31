@@ -151,6 +151,12 @@ async function runKeybotGroundingSuite(): Promise<CaseResult[]> {
       );
     }
 
+    for (const required of tc.mustContainAll ?? []) {
+      if (!answer.includes(required.toLowerCase())) {
+        failures.push(`answer missing required term: "${required}"`);
+      }
+    }
+
     for (const banned of tc.mustNotContain) {
       if (answer.includes(banned.toLowerCase())) {
         failures.push(`answer contains banned term: "${banned}"`);

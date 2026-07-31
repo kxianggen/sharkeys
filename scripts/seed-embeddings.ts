@@ -13,6 +13,8 @@
  * Usage:  npm run seed:embeddings
  */
 
+import { loadEnvFile } from "./load-env-file";
+
 import { keyboardComponents } from "@/data";
 import { buildComponentEmbeddingText, getEmbedding } from "@/lib/ai/embeddings";
 import { createSupabaseAdminClient } from "@/lib/supabase";
@@ -20,6 +22,9 @@ import { createSupabaseAdminClient } from "@/lib/supabase";
 const BATCH_SIZE = 10; // stay well under OpenAI embeddings rate limits
 
 async function main() {
+  // Must run before any client factory reads process.env.
+  loadEnvFile();
+
   console.log("\nSharkeys — Embedding Seeder");
   console.log(`Components : ${keyboardComponents.length}`);
   console.log("Model      : text-embedding-3-small  (512 dimensions)\n");
