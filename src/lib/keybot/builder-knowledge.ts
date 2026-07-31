@@ -36,7 +36,17 @@ export const builderKnowledge: readonly BuilderKnowledgeEntry[] = [
   {
     topic: "dont_over_mod",
     guidance:
-      "Modern kits already include foam and often ship with pre-lubed switches, so heavy tape mods or hand-lubing every switch usually aren't worth the effort or cost anymore. Start with a good kit and switch and you're most of the way there.",
+      "Modern kits already include foam and often ship with pre-lubed switches, so heavy tape mods or hand-lubing every switch usually aren't worth the effort or cost anymore. Start with a good kit and switch and you're most of the way there. The one mod I do still recommend is tuning the stabilizers — that's six or seven keys rather than seventy, and it's the exception worth the twenty minutes.",
+  },
+  {
+    topic: "stabilizer_tuning",
+    guidance:
+      "Stabilizer tuning is the single change that makes a cheap board sound expensive, and it's a different job from lubing switches. Krytox 205g0 goes on the stabilizer stems — it's thick enough to damp the housing rattle. XHT-BDZ goes on the wires, where it stays put and kills the metallic ping that thin lube doesn't. Using one lube for both jobs is the usual mistake: the wire needs the heavier treatment, the stem needs the smoother one. Do just the big keys — spacebar, shift, enter, backspace — and the rattle that makes a board sound hollow disappears.",
+  },
+  {
+    topic: "budget_value_picks",
+    guidance:
+      "If you want the most sound for the least money, the two I keep coming back to are the MZ Z1 for budget thock and the KTT Cabbage Tofu for a creamy profile. Both punch well above their price, and for most builds I'd take either over a switch costing several times more. On the case side the Lucky65 is the standout aluminium pick — dense and thocky for what it costs.",
   },
   {
     topic: "hotswap_vs_soldered",

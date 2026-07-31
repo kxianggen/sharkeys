@@ -4,6 +4,12 @@ export interface KeybotGroundingTestCase {
   input: string;
   /** At least one of these strings must appear in the answer. */
   mustContainAny: string[];
+  /**
+   * Every one of these strings must appear. Use when a case is about
+   * *specificity* — an "any" list containing a common word like "wire" can be
+   * satisfied by an answer that never demonstrates the knowledge being tested.
+   */
+  mustContainAll?: string[];
   /** None of these strings may appear in the answer. */
   mustNotContain: string[];
   tags: string[];
@@ -87,7 +93,7 @@ export const keybotGroundingEvalCases: KeybotGroundingTestCase[] = [
     id: "kg-008",
     description: "Budget value expert tip — owner picks appropriate when user asks 'best bang for buck'",
     input: "What's the best bang for buck thocky switch right now?",
-    mustContainAny: ["MZ Z1", "KTT Cabbage Tofu", "budget", "value"],
+    mustContainAny: ["MZ Z1", "KTT Cabbage Tofu"],
     mustNotContain: ["Topre", "Holy Pandas", "Zeal", "expensive"],
     tags: ["expert-tip", "budget-value", "subjective-question", "secret-sauce"],
   },
@@ -103,7 +109,8 @@ export const keybotGroundingEvalCases: KeybotGroundingTestCase[] = [
     id: "kg-010",
     description: "Lube specificity — 205g0 vs XHT-BDZ roles explained when tuning is the topic",
     input: "I want to lube my stabilizers. What lube goes where?",
-    mustContainAny: ["Krytox 205g0", "205g0", "XHT-BDZ", "wire", "stem"],
+    mustContainAny: ["Krytox 205g0", "205g0"],
+    mustContainAll: ["205g0", "XHT-BDZ"],
     mustNotContain: ["same lube everywhere", "any lube works", "doesn't matter"],
     tags: ["expert-tip", "stab-tuning", "specificity", "subjective-question", "secret-sauce"],
   },

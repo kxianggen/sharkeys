@@ -49,6 +49,7 @@ import {
 import { MainNav } from "@/components/main-nav";
 import { SwatchDots } from "@/components/swatch-dots";
 import { useKeybotThinkingStage } from "@/components/use-keybot-thinking-stage";
+import { getOptionConflicts } from "@/lib/rules";
 import type { CompatibilityResult, KeyboardComponent } from "@/lib/types";
 import type {
   AiIntentApiResponse,
@@ -144,9 +145,16 @@ const configuratorSections: Array<{
 }> = [
   { title: "Case", prompt: "Start with the board.", categories: ["case"] },
   {
-    title: "Internals",
-    prompt: "PCB and plate, matched by the kit.",
-    categories: ["pcb", "plate"],
+    title: "PCB",
+    prompt: "The electronics and switch support.",
+    categories: ["pcb"],
+  },
+  {
+    // Split out from the old combined "Internals" step: plate material is a
+    // real acoustic choice, not an implementation detail of the PCB.
+    title: "Plate",
+    prompt: "The cheapest change to how it sounds.",
+    categories: ["plate"],
   },
   { title: "Switches", prompt: "Pick your feel.", categories: ["switch"] },
   { title: "Keycaps", prompt: "Finish the look.", categories: ["keycap"] },
@@ -616,6 +624,30 @@ export function RecommendationDemo({
 
   // Full component-id set once every free choice is made; null while the
   // assembly is still incomplete.
+  // The build so far, including partially-filled selections. `assembledComponentIds`
+  // deliberately returns null until every category is chosen, but the option
+  // pickers need to know what's already selected in order to grey out parts
+  // that conflict with it.
+  const partialComponentIds = useMemo(() => {
+    if (!selectedRecommendation) {
+      return {} as Partial<Record<ComponentCategory, string>>;
+    }
+
+    const ids: Partial<Record<ComponentCategory, string>> = {};
+
+    for (const category of componentCategories) {
+      const id = choiceCategories.includes(category)
+        ? chosenParts[category]
+        : selectedRecommendation.componentIds[category];
+
+      if (id) {
+        ids[category] = id;
+      }
+    }
+
+    return ids;
+  }, [selectedRecommendation, choiceCategories, chosenParts]);
+
   const assembledComponentIds = useMemo(() => {
     if (!selectedRecommendation) {
       return null;
@@ -1357,6 +1389,17 @@ export function RecommendationDemo({
         pushOption(catalogById.get(componentId));
       }
 
+      // Manual configuration is not limited to the AI's shortlist. Offer every
+      // catalog part in this category — the rule-engine gate at render time
+      // hides whatever cannot work with the current selection. Without this,
+      // choosing the hall-effect PCB left zero switches to pick from, because
+      // the shortlist had been built for a clacky (mechanical) query.
+      for (const component of catalog) {
+        if (component.category === category) {
+          pushOption(component);
+        }
+      }
+
       // Never offer a part locked to another kit.
       const offerable = options.filter(
         (component) =>
@@ -1752,13 +1795,43 @@ export function RecommendationDemo({
                                   Number(a.component.id === recommendedPart.id),
                               );
 
-                          return options.map(({ component, recommendation }) => {
+                          // Ask the rule engine, don't re-derive the rules
+                          // here: whatever it would reject after the pick is
+                          // what gets hidden before it.
+                          const optionsWithConflicts = options.map((option) => ({
+                            ...option,
+                            conflicts: isChoice
+                              ? getOptionConflicts(
+                                  category,
+                                  option.component.id,
+                                  partialComponentIds,
+                                  catalog,
+                                )
+                              : [],
+                          }));
+                          const compatibleOptions = optionsWithConflicts.filter(
+                            (option) =>
+                              option.conflicts.length === 0 ||
+                              option.component.id === chosenId,
+                          );
+                          // Safeguard: if nothing is compatible, show the full
+                          // list with reasons rather than an empty step. An
+                          // empty section is more confusing than a struck-out
+                          // one, and it hides *why* the build is stuck.
+                          const visibleOptions =
+                            compatibleOptions.length > 0
+                              ? compatibleOptions
+                              : optionsWithConflicts;
+
+                          return visibleOptions.map(
+                            ({ component, recommendation, conflicts }) => {
                             const selected = isChoice
                               ? component.id === chosenId
                               : component.id === recommendedPart.id;
                             const isOwnKitPart =
                               isChoice && isKitLockedComponent(component);
                             const swatch = getComponentSwatch(component);
+                            const blocked = conflicts.length > 0 && !selected;
 
                             return (
                               <button
@@ -1766,16 +1839,24 @@ export function RecommendationDemo({
                                 className={`flex w-full items-center justify-between gap-4 rounded-lg p-4 text-left transition ${
                                   selected
                                     ? "border-[1.5px] border-accent bg-accent-subtle/50"
-                                    : "border-[0.5px] border-border hover:border-border-strong"
+                                    : blocked
+                                      ? "cursor-not-allowed border-[0.5px] border-border bg-surface-secondary/40 opacity-55"
+                                      : "border-[0.5px] border-border hover:border-border-strong"
                                 }`}
+                                disabled={blocked}
                                 key={`${category}-${component.id}`}
                                 onClick={() => {
+                                  if (blocked) {
+                                    return;
+                                  }
+
                                   if (isChoice) {
                                     choosePart(category, component.id);
                                   } else if (recommendation) {
                                     selectRecommendation(recommendation);
                                   }
                                 }}
+                                title={blocked ? conflicts[0]?.message : undefined}
                                 type="button"
                               >
                                 <span className="min-w-0">
@@ -1791,6 +1872,11 @@ export function RecommendationDemo({
                                   {isOwnKitPart ? (
                                     <span className="mt-2 inline-flex items-center rounded-pill bg-accent-subtle px-2.5 py-0.5 text-xs font-semibold text-primary">
                                       Included with this kit
+                                    </span>
+                                  ) : null}
+                                  {blocked ? (
+                                    <span className="mt-2 block text-xs font-semibold leading-5 text-secondary">
+                                      Not compatible — {conflicts[0]?.message}
                                     </span>
                                   ) : null}
                                 </span>

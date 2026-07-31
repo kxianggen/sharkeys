@@ -53,6 +53,10 @@ type AssemblyResult = {
   recommendations: ValidatedRecommendationBuild[];
   rejectedBuildCount: number;
   rejectionExplanations: string[];
+  // Cheapest build that passed every compatibility rule and was rejected ONLY
+  // for price. "No build found" is unhelpful when the honest answer is "your
+  // budget is RM39 short".
+  cheapestOverBudget: PriceEstimate | null;
 };
 
 // Assembly must be able to enumerate the full prepared candidate space
@@ -250,6 +254,7 @@ export function buildValidatedRecommendations({
           ", ",
         )}.`,
       ],
+      cheapestOverBudget: null,
     };
   }
 
@@ -257,6 +262,7 @@ export function buildValidatedRecommendations({
   const rejectionReasons = new Set<string>();
   let rejectedBuildCount = 0;
   let attempts = 0;
+  let cheapestOverBudget: PriceEstimate | null = null;
 
   for (const componentIds of enumerateBuildSelections(candidateSets)) {
     if (attempts >= maxAssemblyAttempts) {
@@ -300,6 +306,19 @@ export function buildValidatedRecommendations({
     if (exceedsExtractedBudget(recommendation, intent)) {
       rejectedBuildCount += 1;
       rejectionReasons.add("Estimated build price exceeds the extracted budget.");
+
+      if (
+        recommendation.estimatedPrice !== null &&
+        recommendation.estimatedPriceCurrency !== null &&
+        (cheapestOverBudget === null ||
+          recommendation.estimatedPrice < cheapestOverBudget.amount)
+      ) {
+        cheapestOverBudget = {
+          amount: recommendation.estimatedPrice,
+          currency: recommendation.estimatedPriceCurrency,
+        };
+      }
+
       continue;
     }
 
@@ -307,11 +326,15 @@ export function buildValidatedRecommendations({
   }
 
   return {
-    recommendations: recommendations
-      .sort((left, right) => compareRecommendations(left, right, intent))
-      .slice(0, maxRecommendations),
+    recommendations: diversifyByCase(
+      recommendations.sort((left, right) =>
+        compareRecommendations(left, right, intent),
+      ),
+      maxRecommendations,
+    ),
     rejectedBuildCount,
     rejectionExplanations: [...rejectionReasons].slice(0, 4),
+    cheapestOverBudget,
   };
 }
 
@@ -545,6 +568,7 @@ export function scoreRecommendation(
     score += scoreSoundProfile(components.plate.soundProfile, intent.soundProfile, 4);
   }
 
+  score += scoreConstraintFit(recommendation, intent);
   score += scoreUseCaseFit(recommendation, intent);
   score += scoreBeginnerFit(recommendation, intent);
   score += scoreBudgetFit(recommendation, intent);
@@ -554,6 +578,38 @@ export function scoreRecommendation(
   score -= recommendation.warnings.length * 10;
 
   return score;
+}
+
+/**
+ * Three results that differ only by switch read as one recommendation, not
+ * three. Take the best build per case first (so the ranking still decides which
+ * build represents each case), then backfill from what is left if the catalog
+ * cannot offer enough distinct cases.
+ */
+function diversifyByCase(
+  ranked: ValidatedRecommendationBuild[],
+  limit: number,
+) {
+  const picked: ValidatedRecommendationBuild[] = [];
+  const usedCaseIds = new Set<string>();
+
+  for (const recommendation of ranked) {
+    if (picked.length >= limit) break;
+
+    const caseId = recommendation.components.case.id;
+
+    if (!usedCaseIds.has(caseId)) {
+      usedCaseIds.add(caseId);
+      picked.push(recommendation);
+    }
+  }
+
+  for (const recommendation of ranked) {
+    if (picked.length >= limit) break;
+    if (!picked.includes(recommendation)) picked.push(recommendation);
+  }
+
+  return picked;
 }
 
 function collectWarnings(recommendations: ValidatedRecommendationBuild[]) {
@@ -583,11 +639,23 @@ function buildResultExplanations(
     ];
   }
 
+  // Deliberately short and plain. The raw per-combination rejection strings
+  // ("X uses plate_mount, but Y does not support that stabilizer type") are
+  // engine diagnostics — accurate, but they read as a wall of internal jargon to
+  // someone who just typed a sentence. They stay available on the result for
+  // debugging; what surfaces here is one reason and one next step.
+  //
+  // The suggestion is intentionally NOT included: the UI renders it separately,
+  // and returning it here printed it twice.
+  const nearMiss = buildBudgetNearMiss(intent, assembly.cheapestOverBudget);
+
+  if (nearMiss) {
+    return ["We couldn't find a build inside that budget.", nearMiss];
+  }
+
   return [
-    "No valid build could be assembled from the current Malaysia catalog after deterministic validation.",
-    ...buildNoBuildBlockers(intent, assembly.rejectionExplanations),
-    ...assembly.rejectionExplanations,
-    buildNoBuildSuggestion(intent, assembly.rejectionExplanations),
+    "We couldn't put together a complete build for that from the current catalog.",
+    ...buildNoBuildBlockers(intent, assembly.rejectionExplanations).slice(0, 1),
   ];
 }
 
@@ -673,6 +741,54 @@ function scoreSoundProfile(
     : -Math.round(weight * 0.45);
 }
 
+/**
+ * Honour material and descriptive words the user actually typed ("aluminium",
+ * "brass", "plastic"). These live in intent.constraints and previously reached
+ * nothing: cases are exempt from the free-text candidate filter, so an aluminium
+ * request could be answered with a plastic case and lose no points for it.
+ * Scoring — not filtering — keeps the pool wide while making the match matter.
+ */
+function scoreConstraintFit(
+  recommendation: ValidatedRecommendationBuild,
+  intent: ExtractedKeyboardIntent,
+) {
+  if (intent.constraints.length === 0) {
+    return 0;
+  }
+
+  const materialWords = intent.constraints
+    .join(" ")
+    .toLowerCase()
+    .match(
+      /\b(aluminium|aluminum|brass|steel|plastic|abs|polycarbonate|pom|fr4|carbon fibre|carbon fiber|wood)\b/g,
+    );
+
+  if (!materialWords || materialWords.length === 0) {
+    return 0;
+  }
+
+  const describes = (component: KeyboardComponent) =>
+    `${component.name} ${component.description ?? ""}`.toLowerCase();
+
+  const caseText = describes(recommendation.components.case);
+  const plateText = describes(recommendation.components.plate);
+
+  let score = 0;
+
+  for (const word of new Set(materialWords)) {
+    // "aluminium" and "aluminum" both have to hit the same catalog spelling.
+    const needles = word.startsWith("alumin")
+      ? ["aluminium", "aluminum"]
+      : [word];
+
+    if (needles.some((needle) => caseText.includes(needle))) score += 18;
+    else if (needles.some((needle) => plateText.includes(needle))) score += 8;
+    else score -= 12;
+  }
+
+  return score;
+}
+
 function scoreUseCaseFit(
   recommendation: ValidatedRecommendationBuild,
   intent: ExtractedKeyboardIntent,
@@ -689,7 +805,20 @@ function scoreUseCaseFit(
   }
 
   if (intent.useCase === "gaming") {
+    // Hall-effect/magnetic is the default competitive-gaming answer: adjustable
+    // actuation and rapid trigger are why it exists. Weighted at 30 so that with
+    // no budget stated it outranks a mechanical gaming build, while a stated
+    // budget still decides — an over-budget build takes -60 from scoreBudgetFit,
+    // so under roughly RM300 a mechanical build correctly wins on price. An
+    // explicit sound request also still wins, since switch sound is worth 28.
+    const isMagnetic =
+      recommendation.components.switch.switchTechnology === "hall_effect" &&
+      recommendation.components.pcb.switchTechnologySupport.includes(
+        "hall_effect",
+      );
+
     return (
+      (isMagnetic ? 30 : 0) +
       (switchDescription.toLowerCase().includes("linear") ? 12 : 0) +
       (switchSound === "clacky" ? 8 : 0) +
       (connection === "both" || connection === "wireless" ? 4 : 0)
@@ -797,6 +926,39 @@ function scoreCatalogConfidence(recommendation: ValidatedRecommendationBuild) {
   return score;
 }
 
+/**
+ * When every candidate build passed compatibility and failed only on price, say
+ * so with the actual numbers. "No validated build found" hides the fact that the
+ * catalog *does* have an answer and the budget is a little short.
+ */
+function buildBudgetNearMiss(
+  intent: ExtractedKeyboardIntent,
+  cheapestOverBudget: PriceEstimate | null,
+) {
+  const catalogBudget = normalizeBudgetForCatalogPricing(intent.budget);
+
+  if (
+    !cheapestOverBudget ||
+    !catalogBudget ||
+    cheapestOverBudget.currency !== catalogBudget.currency
+  ) {
+    return null;
+  }
+
+  const shortfall = Math.ceil(cheapestOverBudget.amount - catalogBudget.amount);
+
+  if (shortfall <= 0) {
+    return null;
+  }
+
+  return `The closest complete build comes to ${formatPrice(cheapestOverBudget)} — about ${formatPrice(
+    { amount: shortfall, currency: cheapestOverBudget.currency },
+  )} over your budget. Raising the budget to around ${formatPrice({
+    amount: Math.ceil(cheapestOverBudget.amount),
+    currency: cheapestOverBudget.currency,
+  })} would let it through.`;
+}
+
 function buildNoBuildBlockers(
   intent: ExtractedKeyboardIntent,
   rejectionExplanations: string[],
@@ -812,7 +974,7 @@ function buildNoBuildBlockers(
 
   if (/Estimated build price exceeds/.test(rejectionText)) {
     blockers.push(
-      "The validated component combinations found by the engine exceed the extracted budget.",
+      "The builds that would work come out above your budget.",
     );
   }
 
@@ -829,7 +991,7 @@ function buildNoBuildBlockers(
 
   if (blockers.length === 0) {
     blockers.push(
-      "The requested combination is not covered by the currently verified Malaysia catalog records.",
+      "Nothing in the catalog currently matches that combination of preferences.",
     );
   }
 
@@ -847,14 +1009,14 @@ function buildNoBuildSuggestion(
   }
 
   if (/Estimated build price exceeds/.test(rejectionText)) {
-    return "Try increasing the budget or relaxing the requested layout, sound profile, or premium-material constraint.";
+    return "Everything that fits comes out over budget. Try raising the budget, or relaxing the layout or sound preference.";
   }
 
   if (intent.switchTechnology && intent.switchTechnology !== "mechanical") {
     return "Try an MX mechanical build first; optical, Hall effect, and Topre paths need compatible boards in the catalog before they can be recommended.";
   }
 
-  return "Try adding a layout, sound profile, use case, or budget so sharkeys can narrow the validated catalog paths.";
+  return "Try adding a detail or two — a layout, a budget, or how it should sound — and I'll look again.";
 }
 
 async function enhanceRecommendationResultWithOpenAI(

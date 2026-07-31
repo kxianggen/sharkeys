@@ -45,7 +45,21 @@ const intentSystemPrompt =
 
 const visionIntentSystemPrompt = [
   "You extract keyboard build intent into structured criteria from an image and optional text.",
-  "Infer layout size, sound profile, switch feel, and aesthetic cues from visible case material, keycap colors/profile, and switch colors.",
+  // Layout was the weakest field: the model guessed "75" for a photo of a 65%
+  // board. Layout is *countable* from the picture, so give it a procedure
+  // instead of asking it to infer.
+  "LAYOUT — decide by counting rows and clusters, in this order, and do not skip a step:",
+  "1. Is there a function row (F1-F12) ABOVE the number row? If NO, the board is 60% or 65% and can never be 75%, TKL, or full.",
+  "2. No function row and no arrow keys -> 60%.",
+  "3. No function row but arrow keys present (usually with a short right-hand column such as Del/PgUp/PgDn) -> 65%.",
+  "4. Function row present, arrows present, compact right-hand column, no numpad -> 75%.",
+  "5. Function row present, full navigation cluster (Ins/Home/PgUp block), no numpad -> tkl.",
+  "6. A numpad on the right -> full.",
+  "A rotary knob is NOT a layout signal — knobs appear on 65%, 75% and TKL boards alike. Ignore it when choosing layout.",
+  "If you cannot see the top row clearly, set layout to null and set clarificationNeeded rather than guessing.",
+  "Infer sound profile ONLY from switch colour visible through or beside the keycaps; if no switch is visible, leave soundProfile null rather than guessing from the case.",
+  "Do NOT infer useCase from appearance — a photo shows what a board looks like, not what it is used for. Leave useCase 'unknown' unless the accompanying text says otherwise.",
+  "Infer case material and keycap colour/profile from what is visible.",
   "When text accompanies the image, let the text OVERRIDE conflicting image cues (e.g. 'like this, but silent').",
   "Do not recommend final products or complete builds.",
   "Do not invent component IDs, products, prices, vendors, or availability.",
@@ -241,7 +255,7 @@ function parseLocalFallbackIntent(message: string) {
     beginnerFriendly,
     switchTechnology,
     priorities,
-    constraints: connectionConstraints,
+    constraints: [...connectionConstraints, ...parseMaterialConstraints(text)],
     clarificationNeeded: clarificationQuestion !== null,
     clarificationQuestion,
   });
@@ -252,8 +266,32 @@ function normalizeText(message: string) {
 }
 
 function parseBudget(text: string) {
+  // A stated range means "I can stretch to the top of this" — take the upper
+  // bound, not the first number seen. Requires a currency marker on one side so
+  // that layout talk ("60-65%") can never be read as money.
+  // The separator allows bare whitespace because `normalizeText` has already
+  // rewritten "-" to a space by the time we get here: "RM200-250" arrives as
+  // "rm200 250". Without the `\s+` branch the hyphen form silently fell through
+  // to the single-amount rule and reported the lower bound.
+  const rangeMatch = text.match(
+    /\b(?:(rm|myr|usd|\$)\s*(\d+(?:\.\d{1,2})?)|(\d+(?:\.\d{1,2})?)\s*(rm|myr|usd))(?:\s*(?:-|–|—|to|hingga|sampai)\s*|\s+)(rm|myr|usd|\$)?\s*(\d+(?:\.\d{1,2})?)\b(?!\s*%)/,
+  );
+
+  if (rangeMatch) {
+    const upperBound = Number(rangeMatch[6]);
+    const currency =
+      parseCurrency(rangeMatch[5] ?? rangeMatch[1] ?? rangeMatch[4]) ?? "MYR";
+
+    if (Number.isFinite(upperBound)) {
+      return createBudgetIntent(upperBound, currency);
+    }
+  }
+
+  // `\b(?!\s*%)` is load-bearing: without it "RM200 budget 65%" matched
+  // "budget 65" and reported a RM65 budget. The word boundary also blocks the
+  // engine from backtracking to a shorter number ("6" out of "65%").
   const constrainedBudgetMatch = text.match(
-    /\b(?:under|below|less than|max|maximum|budget)\s*(rm|myr|usd|\$)?\s*(\d+(?:\.\d{1,2})?)(?:\s*(usd|dollars?|myr|rm))?\b/,
+    /\b(?:under|below|less than|max|maximum|budget|bajet|around|about|sekitar|bawah|dalam)\s*(rm|myr|usd|\$)?\s*(\d+(?:\.\d{1,2})?)\b(?!\s*%)(?:\s*(usd|dollars?|myr|rm))?/,
   );
 
   if (constrainedBudgetMatch) {
@@ -282,7 +320,7 @@ function parseBudget(text: string) {
   }
 
   const suffixedCurrencyMatch = text.match(
-    /\b(\d+(?:\.\d{1,2})?)\s*(usd|dollars?|myr|rm)\b/,
+    /\b(\d+(?:\.\d{1,2})?)\s*(usd|dollars?|myr|rm|ringgit)\b/,
   );
 
   if (suffixedCurrencyMatch) {
@@ -295,6 +333,17 @@ function parseBudget(text: string) {
   return null;
 }
 
+// Material words were being dropped on the floor: intent.constraints only ever
+// held wired/wireless, so "thocky 65% aluminium build" reached the ranker with
+// no idea aluminium had been asked for, and answered with a plastic case.
+function parseMaterialConstraints(text: string) {
+  const matches = text.match(
+    /\b(aluminium|aluminum|brass|steel|plastic|abs|polycarbonate|pom|fr4|carbon fibre|carbon fiber|wood)\b/g,
+  );
+
+  return matches ? [...new Set(matches)] : [];
+}
+
 function parseCurrency(value: string | undefined): CurrencyCode | undefined {
   if (!value) {
     return undefined;
@@ -304,7 +353,7 @@ function parseCurrency(value: string | undefined): CurrencyCode | undefined {
     return "USD";
   }
 
-  if (value === "rm" || value === "myr") {
+  if (value === "rm" || value === "myr" || value === "ringgit") {
     return "MYR";
   }
 
@@ -351,7 +400,13 @@ function parseLayout(text: string) {
     return "tkl";
   }
 
-  if (/\b(full size|fullsize|full)\b/.test(text)) {
+  // "full" alone is an adjective far more often than a layout ("deep and full
+  // sound"), so it only counts next to a size/board word or as 100%.
+  if (
+    /\bfull[\s]?sized?\b|\bfullsize\b|\b100\s*%|\bfull(?=\s+(?:layout|keyboard|board|kb))\b/.test(
+      text,
+    )
+  ) {
     return "full";
   }
 
@@ -366,17 +421,31 @@ function parseSoundProfile(text: string) {
     return "creamy";
   }
 
-  if (/\bthocky\b/.test(text)) {
+  // Buyers say "thock", "thocc" and "thocky" interchangeably, and usually with a
+  // modifier in front ("deep thock", "heavy thock"). Matching only the -y form
+  // dropped the profile entirely on the most common phrasing there is.
+  if (/\bthoc[ck]+(?:y|ey)?\b/.test(text)) {
     return "thocky";
   }
 
-  if (/\b(clacky|clicky)\b/.test(text)) {
+  if (/\b(clacky|clicky|clack)\b/.test(text)) {
     return "clacky";
   }
 
-  // "silent" is itself an explicit profile; "quiet" only implies it when no
-  // other descriptor is present.
-  if (/\b(silent|quiet)\b/.test(text)) {
+  if (/\bsilent\b/.test(text)) {
+    return "silent";
+  }
+
+  // Implied descriptors, checked only after every explicit one has missed.
+  // "buttery smooth" is the single most common way a Malaysian buyer describes
+  // a creamy linear without ever using the word "creamy".
+  if (/\b(buttery|marshmallow)\b/.test(text)) {
+    return "creamy";
+  }
+
+  // "quiet" only implies silent when no other descriptor is present, which is
+  // why it sits down here rather than beside "silent".
+  if (/\bquiet\b|\bsenyap\b|\btak\s+bising\b/.test(text)) {
     return "silent";
   }
 
@@ -384,7 +453,14 @@ function parseSoundProfile(text: string) {
 }
 
 function parseSwitchTechnology(text: string) {
-  if (/\bhall\s*effect\b/.test(text)) {
+  // Nobody shopping for these says "hall effect" — they say "magnetic
+  // switches", "rapid trigger", or they name Wooting. Matching only the
+  // textbook term made the entire hall-effect catalog unreachable by prompt.
+  if (
+    /\bhall\s*effect\b|\bmagnetic\b|\brapid\s*trigger\b|\banalog(?:ue)?\s+(?:switch|keyboard|input)\b|\bwooting\b|\blekker\b|\bhe\s+(?:switch|keyboard|board|pcb)\b/.test(
+      text,
+    )
+  ) {
     return "hall_effect";
   }
 
@@ -404,7 +480,15 @@ function parseSwitchTechnology(text: string) {
 }
 
 function parseUseCase(text: string) {
-  if (/\bgam(e|ing)\b/.test(text)) {
+  // "games" (plural) previously failed the word boundary, and buyers name the
+  // title far more often than they say "gaming" — Valorant and CS are the two
+  // that dominate the Malaysian market this catalog targets.
+  if (
+    /\bgam(?:e|es|ing|er|ers)\b/.test(text) ||
+    /\b(fps|valorant|csgo|cs:?go|cs2|counter[\s-]?strike|dota|apex|overwatch|pubg|fortnite|mobile legends|esports?)\b/.test(
+      text,
+    )
+  ) {
     return "gaming";
   }
 
@@ -412,11 +496,13 @@ function parseUseCase(text: string) {
     return "programming";
   }
 
-  if (/\boffice\b/.test(text)) {
+  // Work context implies office even when the word "office" never appears —
+  // "for typing at work" is an office build, not a generic typing build.
+  if (/\b(office|wfh|work from home|workplace|at work|for work)\b/.test(text)) {
     return "office";
   }
 
-  if (/\b(typing|studying|study)\b/.test(text)) {
+  if (/\b(typing|studying|study|menaip)\b|\bi type\b/.test(text)) {
     return "typing";
   }
 

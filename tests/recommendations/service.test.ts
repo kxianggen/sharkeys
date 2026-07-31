@@ -142,9 +142,9 @@ describe("recommendation service", () => {
     );
 
     expect(result.recommendations).toEqual([]);
-    expect(result.explanations[0]).toContain("No valid build");
+    expect(result.explanations[0]).toContain("couldn't put together");
     expect(result.clarificationPrompt).toBe(
-      "Try adding a layout, sound profile, use case, or budget so sharkeys can narrow the validated catalog paths.",
+      "Try adding a detail or two — a layout, a budget, or how it should sound — and I'll look again.",
     );
   });
 
@@ -323,9 +323,11 @@ describe("recommendation service", () => {
         50 * PROTOTYPE_USD_TO_MYR_RATE,
       );
       expect(result.recommendations).toEqual([]);
-      expect(result.explanations).toContain(
-        "Estimated build price exceeds the extracted budget.",
-      );
+      // Over-budget no-build must still say it is a budget problem, and now
+      // names the shortfall. Asserted by substring so the copy can carry the
+      // actual figures without pinning the test to a price.
+      expect(result.explanations[0]).toContain("inside that budget");
+      expect(result.explanations.join(" ")).toContain("over your budget");
     } finally {
       if (previousApiKey !== undefined) {
         process.env.OPENAI_API_KEY = previousApiKey;
@@ -350,9 +352,11 @@ describe("recommendation service", () => {
         50 * PROTOTYPE_USD_TO_MYR_RATE,
       );
       expect(result.recommendations).toEqual([]);
-      expect(result.explanations).toContain(
-        "Estimated build price exceeds the extracted budget.",
-      );
+      // Over-budget no-build must still say it is a budget problem, and now
+      // names the shortfall. Asserted by substring so the copy can carry the
+      // actual figures without pinning the test to a price.
+      expect(result.explanations[0]).toContain("inside that budget");
+      expect(result.explanations.join(" ")).toContain("over your budget");
     });
   });
 
