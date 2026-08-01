@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "analysis": "analyse-build-economics",
+    "startedAt": "2026-07-31T19:48:29.282Z",
+    "finishedAt": "2026-07-31T19:48:32.399Z",
+    "currency": "MYR",
+    "pricingSource": "Production assembler buildValidatedRecommendations (src/lib/recommendations/service.ts), which applies estimateBuildPrice. Prices are NOT recomputed by this script.",
+    "switchPricingNote": "Switches are priced per switch and multiplied by estimatedSwitchCount = 70 (service.ts:70,474). A script that sums component prices directly under-reports every build by roughly RM55.",
+    "basis": "Parts subtotal only — excludes shipping, assembly, lubing and vendor markup.",
+    "catalogState": {
+      "totalRecords": 60,
+      "note": "Catalog as committed at e021130 (60 records), working tree unmodified at time of measurement."
+    },
+    "validBuildsWithoutAPrice": 0,
+    "targetMarket": {
+      "minMyr": 150,
+      "maxMyr": 250,
+      "source": "CP1 target market and the project's expert persona (CLAUDE.md): RM150-250, Malaysia."
+    }
+  },
+  "validBuildCount": 3250,
+  "distributionMyr": {
+    "min": 281,
+    "p25": 533,
+    "median": 600,
+    "p75": 667,
+    "p95": 1047,
+    "max": 1228
+  },
+  "cumulativeCounts": {
+    "atOrUnder200": 0,
+    "atOrUnder250": 0,
+    "atOrUnder300": 4,
+    "atOrUnder400": 142
+  },
+  "targetMarketCoverage": {
+    "buildsWithinTargetBand": 0,
+    "pctOfValidBuildsWithinTargetBand": 0,
+    "cheapestPossibleBuildMyr": 281,
+    "servesAnyPointInTargetBand": false,
+    "shortfallAboveBandCeilingMyr": 31
+  },
+  "cheapestBuild": {
+    "total": 281,
+    "currency": "MYR",
+    "ids": {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_outemu_silent_peach_v2",
+      "keycap": "keycap_unknown_pudding_oem_pbt",
+      "stabilizer": "stab_gmk67_plate_mount"
+    }
+  }
+}

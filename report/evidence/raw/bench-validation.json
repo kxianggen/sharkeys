@@ -1,0 +1,185 @@
+{
+  "meta": {
+    "benchmark": "bench-validation",
+    "startedAt": "2026-07-31T19:48:21.249Z",
+    "finishedAt": "2026-07-31T19:48:21.953Z",
+    "nodeVersion": "v22.22.3",
+    "platform": "linux/arm64",
+    "environment": "Linux sandbox (containerised). Offline: seed catalog, no Supabase or OpenAI credentials required.",
+    "warmupIterations": 200,
+    "timedIterations": 1000,
+    "nfr": {
+      "source": "CP1 §3.2.4, Table 3.4 — Performance / Logic Engine Latency",
+      "requirement": "Compatibility validation completes in under 200ms",
+      "thresholdMs": 200
+    },
+    "catalog": {
+      "totalRecords": 60,
+      "byCategory": {
+        "case": 7,
+        "pcb": 8,
+        "plate": 19,
+        "stabilizer": 11,
+        "switch": 10,
+        "keycap": 5
+      },
+      "uniqueIds": 60,
+      "state": "Catalog as committed at e021130 (60 records), working tree unmodified at time of measurement."
+    },
+    "missingScenarios": []
+  },
+  "scenarios": [
+    {
+      "scenario": "valid_complete_build",
+      "componentIds": {
+        "case": "case_gmk67_65_plastic",
+        "pcb": "pcb_gmk67_65_hotswap",
+        "plate": "plate_gmk67_65_pc",
+        "switch": "switch_gateron_milky_yellow_pro",
+        "keycap": "keycap_unknown_pudding_oem_pbt",
+        "stabilizer": "stab_gmk67_plate_mount"
+      },
+      "isValid": true,
+      "errorCodes": [],
+      "catalogSize": 60,
+      "stats": {
+        "n": 1000,
+        "meanMs": 0.017062637000000012,
+        "medianMs": 0.006833,
+        "p95Ms": 0.024792,
+        "p99Ms": 0.075291,
+        "minMs": 0.0045,
+        "maxMs": 3.975542,
+        "stdDevMs": 0.14391993283494553
+      }
+    },
+    {
+      "scenario": "layout_or_mount_rejection",
+      "componentIds": {
+        "case": "case_gmk67_65_plastic",
+        "pcb": "pcb_gmk67_65_hotswap",
+        "plate": "plate_gh60_brass",
+        "switch": "switch_gateron_milky_yellow_pro",
+        "keycap": "keycap_unknown_pudding_oem_pbt",
+        "stabilizer": "stab_gmk67_plate_mount"
+      },
+      "isValid": false,
+      "errorCodes": [
+        "case_pcb_plate_layout_mismatch",
+        "plate_pcb_layout_mismatch",
+        "plate_case_layout_mismatch",
+        "case_plate_mount_mismatch"
+      ],
+      "catalogSize": 60,
+      "stats": {
+        "n": 1000,
+        "meanMs": 0.005481295000000003,
+        "medianMs": 0.004417,
+        "p95Ms": 0.005417,
+        "p99Ms": 0.014042,
+        "minMs": 0.004291,
+        "maxMs": 0.363167,
+        "stdDevMs": 0.014682472025717434
+      }
+    },
+    {
+      "scenario": "kit_integrity_rejection",
+      "componentIds": {
+        "case": "case_gmk67_65_plastic",
+        "pcb": "pcb_gmk67_65_hotswap",
+        "plate": "plate_gmk67_65_pc",
+        "switch": "switch_gateron_milky_yellow_pro",
+        "keycap": "keycap_unknown_pudding_oem_pbt",
+        "stabilizer": "stab_lucky65_v3_screw_in"
+      },
+      "isValid": false,
+      "errorCodes": [
+        "kit_structural_mismatch",
+        "stabilizer_pcb_type_mismatch"
+      ],
+      "catalogSize": 60,
+      "stats": {
+        "n": 1000,
+        "meanMs": 0.005068941999999954,
+        "medianMs": 0.004625,
+        "p95Ms": 0.005125,
+        "p99Ms": 0.015833,
+        "minMs": 0.004375,
+        "maxMs": 0.243375,
+        "stdDevMs": 0.007744054426244433
+      }
+    }
+  ],
+  "scaling": [
+    {
+      "catalogSize": 60,
+      "requestedSize": 60,
+      "stats": {
+        "n": 1000,
+        "meanMs": 0.004931068000000008,
+        "medianMs": 0.004375,
+        "p95Ms": 0.005292,
+        "p99Ms": 0.013334,
+        "minMs": 0.00425,
+        "maxMs": 0.24225,
+        "stdDevMs": 0.007801741761131036
+      }
+    },
+    {
+      "catalogSize": 100,
+      "requestedSize": 100,
+      "stats": {
+        "n": 1000,
+        "meanMs": 0.011347617000000029,
+        "medianMs": 0.009292,
+        "p95Ms": 0.017625,
+        "p99Ms": 0.057458,
+        "minMs": 0.006625,
+        "maxMs": 0.402166,
+        "stdDevMs": 0.0193351521218301
+      }
+    },
+    {
+      "catalogSize": 500,
+      "requestedSize": 500,
+      "stats": {
+        "n": 1000,
+        "meanMs": 0.025872866000000043,
+        "medianMs": 0.022292,
+        "p95Ms": 0.034125,
+        "p99Ms": 0.108667,
+        "minMs": 0.020667,
+        "maxMs": 0.319959,
+        "stdDevMs": 0.023425292265328173
+      }
+    },
+    {
+      "catalogSize": 1000,
+      "requestedSize": 1000,
+      "stats": {
+        "n": 1000,
+        "meanMs": 0.05019827300000001,
+        "medianMs": 0.043417,
+        "p95Ms": 0.06125,
+        "p99Ms": 0.311583,
+        "minMs": 0.040708,
+        "maxMs": 0.47875,
+        "stdDevMs": 0.037590191417449195
+      }
+    },
+    {
+      "catalogSize": 5000,
+      "requestedSize": 5000,
+      "stats": {
+        "n": 1000,
+        "meanMs": 0.36228044399999965,
+        "medianMs": 0.326667,
+        "p95Ms": 0.425583,
+        "p99Ms": 1.065708,
+        "minMs": 0.304209,
+        "maxMs": 1.412458,
+        "stdDevMs": 0.1453285085279033
+      }
+    }
+  ]
+}

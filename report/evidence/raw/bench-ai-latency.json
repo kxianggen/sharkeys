@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "benchmark": "bench-ai-latency",
+    "startedAt": "2026-07-31T20:16:45.794Z",
+    "finishedAt": "2026-07-31T20:18:15.537Z",
+    "nodeVersion": "v25.9.0",
+    "platform": "darwin/arm64",
+    "host": "jayson.local",
+    "model": "gpt-4.1-mini",
+    "runsPerPath": 20,
+    "measures": "TOTAL end-to-end response latency",
+    "doesNotMeasure": "Time to first token. Streaming is not implemented (no stream:true, ReadableStream or streamText in src/), so CP1 §3.2.4 'first text token under 2 seconds' is NOT EVALUABLE against this implementation.",
+    "environmentCaveat": "Latency is dominated by network round-trip and third-party provider queueing, not by project code. These figures characterise THIS machine and network only, and are not portable to a laptop, a different region, or a deployed host."
+  },
+  "results": [
+    {
+      "path": "intent_extraction",
+      "status": "MEASURED",
+      "stats": {
+        "n": 20,
+        "meanMs": 1672.8134790500003,
+        "medianMs": 1595.881917,
+        "p95Ms": 2219.859666,
+        "minMs": 1240.573292,
+        "maxMs": 3177.2035,
+        "stdDevMs": 436.29603175815106
+      },
+      "errorCount": 0
+    },
+    {
+      "path": "keybot_reply",
+      "status": "MEASURED",
+      "stats": {
+        "n": 20,
+        "meanMs": 2731.3528293000004,
+        "medianMs": 2410.15275,
+        "p95Ms": 4109.872125,
+        "minMs": 1523.592166,
+        "maxMs": 5457.195833,
+        "stdDevMs": 934.2150377565418
+      },
+      "errorCount": 0
+    },
+    {
+      "path": "vision_intent",
+      "status": "NOT MEASURED",
+      "reason": "Requires a representative inspiration image as input. No fixture image is committed to the repository, and generating a synthetic one would not represent real usage.",
+      "stats": null,
+      "errorCount": 0
+    }
+  ]
+}
