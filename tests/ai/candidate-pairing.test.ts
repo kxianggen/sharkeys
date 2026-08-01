@@ -21,6 +21,7 @@ const intentFor = (soundProfile: "clacky" | "thocky" | "creamy") =>
     beginnerFriendly: null,
     priorities: [],
     constraints: [],
+    colour: null,
     clarificationNeeded: false,
     clarificationQuestion: null,
   });

@@ -1,4 +1,5 @@
 import type { ExtractedKeyboardIntent } from "@/lib/ai";
+import type { ComponentColour } from "@/lib/types";
 
 export type EvalPersona =
   | "budget_gamer_thocky"
@@ -11,30 +12,6 @@ export type EvalPersona =
   | "wireless_seeker"
   | "colourway_seeker";
 
-/**
- * Controlled colour vocabulary (UAT finding 1). Deliberately closed: a fixed
- * discrete set is matched structurally in the recommendation service, so free
- * text would be unmatchable. Declared here rather than in the intent schema
- * because these eval cases must run — and fail — BEFORE the schema gains a
- * colour field. See the note on expectedColour below.
- */
-export const colourVocabulary = [
-  "black",
-  "white",
-  "grey",
-  "silver",
-  "purple",
-  "blue",
-  "pink",
-  "green",
-  "red",
-  "beige",
-  "pastel",
-  "multi",
-] as const;
-
-export type ComponentColour = (typeof colourVocabulary)[number];
-
 export interface IntentExtractionTestCase {
   id: string;
   persona: EvalPersona;
@@ -44,12 +21,12 @@ export interface IntentExtractionTestCase {
   /**
    * Colour expectation, deliberately OUTSIDE expectedIntent.
    *
-   * extractedKeyboardIntentSchema has no colour field yet, and must not gain
-   * one until the whole pipeline changes together. It is a strict schema used
-   * for OpenAI structured output: adding a required field the prompt never
-   * mentions would make the model's response fail Zod validation and silently
-   * drop semantic mode into the keyword fallback. The failing baseline would
-   * then be measuring my own instrumentation rather than the system.
+   * Kept separate because these cases were written BEFORE
+   * extractedKeyboardIntentSchema had a colour field, and had to run and fail
+   * against a schema that did not know about colour. Retained in this shape
+   * now the field exists, so the three-state distinction below stays explicit
+   * rather than being folded into Partial<ExtractedKeyboardIntent>, where
+   * "key absent" and "declared null" would be indistinguishable.
    *
    * Three states, and the distinction matters:
    *   undefined  — not declared. Skipped entirely, which is what keeps the

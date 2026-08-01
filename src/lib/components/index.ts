@@ -1,3 +1,4 @@
+export { getComponentColours } from "./colour";
 export {
   getComponentById,
   groupComponentsByCategory,

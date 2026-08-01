@@ -54,6 +54,7 @@ const NEUTRAL_INTENT = {
   switchTechnology: null,
   priorities: [],
   constraints: [],
+  colour: null,
   clarificationNeeded: false,
   clarificationQuestion: null,
 } as unknown as Parameters<

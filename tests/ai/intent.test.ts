@@ -34,6 +34,7 @@ describe("AI intent schemas", () => {
       switchTechnology: "mechanical",
       priorities: ["sound", "beginner_friendly"],
       constraints: ["coding"],
+      colour: null,
       clarificationNeeded: false,
       clarificationQuestion: null,
     });
@@ -172,6 +173,7 @@ describe("extractKeyboardIntent", () => {
                 switchTechnology: "mechanical",
                 priorities: ["sound", "feel"],
                 constraints: ["TKL"],
+                colour: null,
                 clarificationNeeded: false,
                 clarificationQuestion: null,
               },
@@ -217,6 +219,7 @@ describe("extractKeyboardIntent", () => {
                     switchTechnology: "mechanical",
                     priorities: ["sound", "feel"],
                     constraints: ["TKL"],
+                    colour: null,
                     clarificationNeeded: false,
                     clarificationQuestion: null,
                   },
@@ -274,6 +277,7 @@ describe("intent preparation", () => {
       useCase: "programming",
       beginnerFriendly: true,
       switchTechnology: "mechanical",
+      colour: null,
       priorities: ["sound"],
       constraints: ["quiet office"],
       clarificationNeeded: false,
@@ -287,6 +291,11 @@ describe("intent preparation", () => {
       beginnerFriendly: true,
       currency: "MYR",
     });
+    // The intent above declares colour: null (nullable — the key is required).
+    // The criteria schema makes colour OPTIONAL, so "no colour requested"
+    // becomes an omitted key rather than a null one. Asserted explicitly
+    // because the two schemas use different sentinels for the same state.
+    expect(criteria.colour).toBeUndefined();
     expect(criteria.maxPrice).toBeCloseTo(150 * PROTOTYPE_USD_TO_MYR_RATE);
   });
 
@@ -302,6 +311,7 @@ describe("intent preparation", () => {
       useCase: "programming",
       beginnerFriendly: true,
       switchTechnology: "mechanical",
+      colour: null,
       priorities: ["sound"],
       constraints: [],
       clarificationNeeded: false,
@@ -323,6 +333,7 @@ describe("intent preparation", () => {
       useCase: "programming",
       beginnerFriendly: true,
       switchTechnology: "mechanical",
+      colour: null,
       priorities: ["sound"],
       constraints: [],
       clarificationNeeded: false,
@@ -348,6 +359,7 @@ describe("intent preparation", () => {
       useCase: "typing",
       beginnerFriendly: false,
       switchTechnology: "mechanical",
+      colour: null,
       priorities: ["sound"],
       constraints: ["FR4"],
       clarificationNeeded: false,
@@ -368,6 +380,7 @@ describe("intent preparation", () => {
       useCase: "programming",
       beginnerFriendly: true,
       switchTechnology: "mechanical",
+      colour: null,
       priorities: ["sound"],
       constraints: ["nonexistent foam blend"],
       clarificationNeeded: false,

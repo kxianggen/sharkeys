@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  componentColourSchema,
   currencyCodeSchema,
   keyboardLayoutSchema,
   soundProfileSchema,
@@ -67,6 +68,11 @@ export const extractedKeyboardIntentSchema = z
     useCase: keyboardUseCaseSchema,
     beginnerFriendly: z.boolean().nullable(),
     switchTechnology: switchTechnologySchema.nullable(),
+    // Colourway intent (UAT finding 1). Nullable rather than optional: this
+    // schema drives OpenAI structured output, where every key must be present.
+    // null means "no colour requested", which is distinct from an empty array
+    // and is what the hallucination-control eval cases assert.
+    colour: z.array(componentColourSchema).nullable(),
     priorities: z.array(intentPrioritySchema),
     constraints: z.array(z.string().min(1)),
     clarificationNeeded: z.boolean(),
@@ -99,6 +105,10 @@ export const intentMatchingCriteriaSchema = z
     beginnerFriendly: z.boolean().optional(),
     maxPrice: z.number().nonnegative().optional(),
     currency: currencyCodeSchema.optional(),
+    // Carried through to ranking only. Candidate search never filters on
+    // colour: a colour request must never be able to empty the result set,
+    // and colour is not a compatibility constraint.
+    colour: z.array(componentColourSchema).optional(),
     query: z.string().min(1).optional(),
   })
   .strict();

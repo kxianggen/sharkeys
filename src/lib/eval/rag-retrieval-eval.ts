@@ -43,6 +43,11 @@ function makeIntent(
     useCase: "unknown",
     beginnerFriendly: null,
     switchTechnology: null,
+    // No RAG case expresses a colourway: colour is a ranking signal applied in
+    // the recommendation service, and this suite asserts over candidate SETS
+    // from prepareIntentMatchesAsync, which never reaches ranking. Colour is
+    // covered by the intent-extraction suite and by the service unit tests.
+    colour: null,
     priorities: [],
     constraints: [],
     clarificationNeeded: false,

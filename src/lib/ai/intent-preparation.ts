@@ -37,6 +37,10 @@ export function mapIntentToSearchCriteria(
     beginnerFriendly: intent.beginnerFriendly ?? undefined,
     maxPrice: catalogBudget?.amount,
     currency: catalogBudget?.currency,
+    // Carried for ranking only. searchCandidateIds never receives colour, so
+    // candidate sets are identical with and without a colour request — a
+    // colour preference reorders results, it never removes any.
+    colour: intent.colour ?? undefined,
     query: buildQueryFromIntent(intent),
   });
 }

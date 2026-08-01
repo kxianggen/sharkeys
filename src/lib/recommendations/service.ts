@@ -14,6 +14,7 @@ import {
 import {
   getCatalogComponents,
   getComponentById,
+  getComponentColours,
   validateBuildSelectionFromIds,
 } from "@/lib/components";
 import { readOptionalOpenAIConfig } from "@/lib/env";
@@ -21,6 +22,7 @@ import { createOpenAIClient } from "@/lib/openai";
 import {
   requiredComponentCategories,
   type ComponentCategory,
+  type ComponentColour,
   type CurrencyCode,
   type KeyboardComponent,
   type KeyboardBuildSelection,
@@ -535,6 +537,74 @@ function compareRecommendations(
     (right.estimatedPrice ?? Number.POSITIVE_INFINITY);
 }
 
+/**
+ * Colourway ranking (UAT finding 1).
+ *
+ * A tester asked for a "purple and blue themed" build and got keycaps
+ * unrelated to any colour. Colour now reorders candidates — it never filters
+ * them, and it is never a compatibility concern. Three properties this
+ * function is built to guarantee:
+ *
+ *   NO-OP WITHOUT A COLOUR REQUEST. Returns 0 when intent.colour is null or
+ *   empty, so every ranking for a colour-free prompt is bit-identical to
+ *   before this feature existed. That is what protects the pre-existing tests,
+ *   and the before/after screenshots taken with colour-free prompts.
+ *
+ *   ABSENT TAGS ARE NO SIGNAL. An untagged component scores 0 — the same as a
+ *   tagged component that does not match. Some catalog records genuinely have
+ *   no recorded colourway, and ranking them below tagged records would encode
+ *   how complete the metadata is rather than what the user asked for. It would
+ *   also undermine the claim the after-shot makes: a case must rank up because
+ *   it IS that colour, never because its rivals were penalised for lacking
+ *   data.
+ *
+ *   MATCHES ONLY EVER ADD. Nothing is subtracted, so a colour request can
+ *   never push a compatible build out of the result set. Compatibility remains
+ *   the rule engine's sole authority; this only decides presentation order.
+ *
+ * Keycaps carry more weight than the case because they are the dominant
+ * visible colour of a built board, and because keycaps are a free choice while
+ * a case is usually kit-locked — reordering keycaps is the more actionable
+ * response to an aesthetic request.
+ */
+const COLOUR_WEIGHT_KEYCAP = 24;
+const COLOUR_WEIGHT_CASE = 12;
+
+function scoreColourFit(
+  recommendation: ValidatedRecommendationBuild,
+  intent: ExtractedKeyboardIntent,
+) {
+  const requested = intent.colour;
+
+  if (!requested || requested.length === 0) return 0;
+
+  const { components } = recommendation;
+
+  return (
+    scoreComponentColour(components.keycap, requested, COLOUR_WEIGHT_KEYCAP) +
+    scoreComponentColour(components.case, requested, COLOUR_WEIGHT_CASE)
+  );
+}
+
+function scoreComponentColour(
+  component: KeyboardComponent,
+  requested: readonly ComponentColour[],
+  weight: number,
+) {
+  const tags = getComponentColours(component);
+
+  // Untagged, or tagged but unrelated: no signal either way.
+  if (tags.length === 0) return 0;
+
+  const matched = requested.filter((colour) => tags.includes(colour)).length;
+
+  if (matched === 0) return 0;
+
+  // Proportional, so "purple and blue" ranks a purple-and-blue set above one
+  // that is merely purple, rather than treating any single hit as a full match.
+  return Math.round((matched / requested.length) * weight);
+}
+
 export function scoreRecommendation(
   recommendation: ValidatedRecommendationBuild,
   intent: ExtractedKeyboardIntent,
@@ -568,6 +638,7 @@ export function scoreRecommendation(
     score += scoreSoundProfile(components.plate.soundProfile, intent.soundProfile, 4);
   }
 
+  score += scoreColourFit(recommendation, intent);
   score += scoreConstraintFit(recommendation, intent);
   score += scoreUseCaseFit(recommendation, intent);
   score += scoreBeginnerFit(recommendation, intent);

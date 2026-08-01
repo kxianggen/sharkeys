@@ -3,7 +3,8 @@ import type OpenAI from "openai";
 
 import { readOptionalOpenAIConfig } from "@/lib/env";
 import { createOpenAIClient } from "@/lib/openai";
-import type { CurrencyCode } from "@/lib/types";
+import { componentColourSchema } from "@/lib/types";
+import type { ComponentColour, CurrencyCode } from "@/lib/types";
 
 import {
   defaultIntentPromptVariant,
@@ -231,6 +232,7 @@ function parseLocalFallbackIntent(message: string) {
   const useCase = parseUseCase(text);
   const beginnerFriendly = parseBeginnerFriendly(text);
   const connectionConstraints = parseConnectionConstraints(text);
+  const colour = parseColour(text);
   const priorities = dedupe([
     budget ? "budget" : undefined,
     soundProfile ? "sound" : undefined,
@@ -238,6 +240,8 @@ function parseLocalFallbackIntent(message: string) {
     beginnerFriendly ? "beginner_friendly" : undefined,
     useCase === "gaming" ? "performance" : undefined,
     connectionConstraints.includes("wireless") ? "wireless" : undefined,
+    // Naming a colourway is an explicit statement that looks matter.
+    colour ? "aesthetics" : undefined,
   ]);
   const clarificationQuestion = buildFallbackClarificationQuestion({
     layout,
@@ -254,6 +258,7 @@ function parseLocalFallbackIntent(message: string) {
     useCase,
     beginnerFriendly,
     switchTechnology,
+    colour,
     priorities,
     constraints: [...connectionConstraints, ...parseMaterialConstraints(text)],
     clarificationNeeded: clarificationQuestion !== null,
@@ -263,6 +268,59 @@ function parseLocalFallbackIntent(message: string) {
 
 function normalizeText(message: string) {
   return message.toLowerCase().replace(/[_-]/g, " ").replace(/\s+/g, " ");
+}
+
+/**
+ * Colourway keywords (UAT finding 1), the offline counterpart to rule 5 of the
+ * structured prompt.
+ *
+ * Every pattern is anchored with word boundaries. Without them "red" matches
+ * inside "hundred", "required" and "considered", which would fire on ordinary
+ * budget phrasing.
+ *
+ * Deliberately NOT mapped, each corresponding to an adversarial eval control:
+ *
+ *   materials — "aluminium"/"aluminum" is not silver and "plastic" is not
+ *   white. Inferring colour from material is the single most tempting wrong
+ *   answer here, since silver is in the vocabulary (col-005).
+ *
+ *   appearance terms — "clear", "transparent", "shine-through", "backlit" and
+ *   "RGB" describe how a board looks without naming a colour. RGB is the
+ *   trap: it is chromatic language, and mapping it to "multi" would be wrong
+ *   (col-006, col-007).
+ *
+ *   "cream" — omitted even though it reads as beige, because "creamy" is a
+ *   SOUND profile in this domain and the two would be a step apart. The word
+ *   boundary would in fact keep them separate, but the collision is close
+ *   enough that the mapping is not worth its risk.
+ *
+ * Synonyms are included only where they name a colour unambiguously
+ * (lavender/lilac/violet are purple; ivory is beige).
+ */
+const COLOUR_KEYWORDS: ReadonlyArray<readonly [ComponentColour, RegExp]> = [
+  ["black", /\bblacks?\b/],
+  ["white", /\bwhites?\b/],
+  ["grey", /\b(?:greys?|grays?)\b/],
+  ["silver", /\bsilver\b/],
+  ["purple", /\b(?:purples?|violets?|lilac|lavender)\b/],
+  ["blue", /\bblues?\b/],
+  ["pink", /\bpinks?\b/],
+  ["green", /\bgreens?\b/],
+  ["red", /\breds?\b/],
+  ["beige", /\b(?:beige|ivory)\b/],
+  ["pastel", /\bpastels?\b/],
+  ["multi", /\b(?:multi|multicolou?red?|colou?rful|rainbow)\b/],
+];
+
+function parseColour(text: string): ComponentColour[] | null {
+  // Vocabulary order, not order of appearance, so the same request always
+  // produces the same array — the eval compares sorted sets, but the ranking
+  // and any stored intent should be reproducible too.
+  const matched = COLOUR_KEYWORDS.filter(([, pattern]) => pattern.test(text))
+    .map(([colour]) => colour)
+    .filter((colour) => componentColourSchema.safeParse(colour).success);
+
+  return matched.length > 0 ? matched : null;
 }
 
 function parseBudget(text: string) {

@@ -29,6 +29,7 @@ function makeIntent(
     switchTechnology: "mechanical",
     priorities: ["sound", "beginner_friendly"],
     constraints: [],
+    colour: null,
     clarificationNeeded: false,
     clarificationQuestion: null,
     ...overrides,
@@ -114,6 +115,7 @@ describe("recommendation service", () => {
 
   it("returns a clarification prompt when no valid build can be assembled", () => {
     const intent = makeIntent({
+      colour: null,
       clarificationNeeded: true,
       clarificationQuestion: "Would you prefer a 60% or 65% layout?",
     });
@@ -177,6 +179,97 @@ describe("recommendation service", () => {
     expect(result.explanations).toContain(
       "Estimated build price exceeds the extracted budget.",
     );
+  });
+
+  // ── UAT finding 1: colourway ranking ────────────────────────────────────
+  //
+  // The eval suite proves colour is EXTRACTED. These prove it is USED, which
+  // the eval cannot: the RAG suite asserts over candidate sets from
+  // prepareIntentMatchesAsync, and ranking is never reached on that path.
+  describe("colourway ranking", () => {
+    // Two keycap sets with opposite colour tags. gradient_shinethrough is
+    // tagged blue+purple; pudding is tagged black/white/grey.
+    const colourCandidates = {
+      ...validCandidateIds,
+      keycap: [
+        "keycap_unknown_pudding_oem_pbt",
+        "keycap_unknown_gradient_cherry_shinethrough",
+      ],
+    };
+
+    function assemble(intent: ExtractedKeyboardIntent) {
+      return buildValidatedRecommendations({
+        intent,
+        candidateComponentIds: colourCandidates,
+        maxRecommendations: 5,
+      });
+    }
+
+    function scoreFor(intent: ExtractedKeyboardIntent, keycapId: string) {
+      const build = assemble(intent).recommendations.find(
+        (recommendation) => recommendation.components.keycap.id === keycapId,
+      );
+
+      expect(build, `no build assembled with keycap ${keycapId}`).toBeDefined();
+
+      return scoreRecommendation(build!, intent);
+    }
+
+    const purpleAndBlue = makeIntent({ colour: ["purple", "blue"] });
+    const noColour = makeIntent({ colour: null });
+
+    it("ranks a matching colourway above a non-matching one", () => {
+      // The tester's exact request. gradient_shinethrough is the catalog's
+      // genuine purple-and-blue answer and must outrank the mono set.
+      expect(
+        scoreFor(purpleAndBlue, "keycap_unknown_gradient_cherry_shinethrough"),
+      ).toBeGreaterThan(
+        scoreFor(purpleAndBlue, "keycap_unknown_pudding_oem_pbt"),
+      );
+    });
+
+    it("never removes a build — colour reorders, it does not filter", () => {
+      // The reason colour ranks rather than filters: a colour request must not
+      // be able to empty the result set, and colour is not a compatibility
+      // concern. Same builds, different order.
+      const withColour = assemble(purpleAndBlue).recommendations.map(
+        (recommendation) => recommendation.components.keycap.id,
+      );
+      const without = assemble(noColour).recommendations.map(
+        (recommendation) => recommendation.components.keycap.id,
+      );
+
+      expect([...withColour].sort()).toEqual([...without].sort());
+      expect(withColour.length).toBeGreaterThan(0);
+    });
+
+    it("is a no-op when no colour is requested", () => {
+      // Guarantees every pre-existing ranking is bit-identical to before the
+      // feature existed. This is what protects the untouched eval cases and
+      // the before/after screenshots taken with colour-free prompts.
+      for (const keycapId of colourCandidates.keycap) {
+        expect(scoreFor(noColour, keycapId)).toBe(
+          scoreFor(makeIntent({ colour: [] }), keycapId),
+        );
+      }
+    });
+
+    it("does not penalise a component that has no colour tag", () => {
+      // Absent tags are no signal. An untagged record must score the same as a
+      // tagged one that simply does not match, or ranking would encode how
+      // complete our catalog metadata is rather than what the user asked for.
+      // Asserted against a colour no record carries, so every keycap is a
+      // non-match and all scores must be equal.
+      const unmatched = makeIntent({ colour: ["pink"] });
+      const scores = colourCandidates.keycap.map((keycapId) =>
+        scoreFor(unmatched, keycapId),
+      );
+      const baseline = colourCandidates.keycap.map((keycapId) =>
+        scoreFor(noColour, keycapId),
+      );
+
+      expect(scores).toEqual(baseline);
+    });
   });
 
   it.skip("ranks closer sound and use-case matches above looser valid builds", () => {

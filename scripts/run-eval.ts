@@ -113,21 +113,10 @@ function checkIntentField(
  * 30 intent cases declare, so their assertions are untouched — isolation by
  * construction rather than by convention.
  *
- * The accessor below is temporary. extractedKeyboardIntentSchema has no colour
- * field at the point these cases first run, and must not gain one until the
- * whole pipeline changes together (a strict schema demanding a field the
- * prompt never mentions would fail Zod validation and drop semantic mode into
- * the fallback, contaminating the very baseline this measures). Once the
- * schema carries colour, this cast comes out and `actual.colour` is read
- * directly.
+ * The temporary accessor this function used at Step 1 has been removed now
+ * that extractedKeyboardIntentSchema carries colour: actual.colour is read
+ * directly and type-checked.
  */
-function readExtractedColour(
-  actual: ExtractedKeyboardIntent,
-): readonly string[] | null | undefined {
-  return (actual as ExtractedKeyboardIntent & { colour?: string[] | null })
-    .colour;
-}
-
 function checkColour(
   tc: IntentExtractionTestCase,
   actual: ExtractedKeyboardIntent,
@@ -136,8 +125,7 @@ function checkColour(
   // Not declared — skip. This is what isolates the pre-existing cases.
   if (tc.expectedColour === undefined) return;
 
-  const extracted = readExtractedColour(actual);
-  const found = [...(extracted ?? [])].sort();
+  const found: readonly string[] = [...(actual.colour ?? [])].sort();
 
   // Declared null: a hallucination control. Absent, null and [] all count as
   // "no colour", since before the schema change the field does not exist at

@@ -802,6 +802,8 @@ const rawKeyboardComponents = [
     metadata: {
       sourceUrl: "https://mkb.gg/products/pudding",
       swatch: ["#232326", "#F2F3F5", "#C9CCD2"],
+      // #232326 L14 near-black, #F2F3F5 L96 white, #C9CCD2 L81 light grey.
+      colour: ["black", "white", "grey"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",
       sourceVendor: "MKB.MY",
@@ -827,6 +829,11 @@ const rawKeyboardComponents = [
     metadata: {
       sourceUrl: "https://www.keebsproject.com/product/ready-stock-gmk-icon-retro-9009-keycaps-pbt-cherry-profile-all-layouts-keebsproject",
       swatch: ["#DFD6C2", "#7C9082", "#C67E70"],
+      // #DFD6C2 H41 S31 cream-beige, #7C9082 H138 muted sage, #C67E70 H10
+      // dusty red. "pastel" is the one tag here not forced by the measured
+      // values — a judgement that this muted retro palette answers a "pastel"
+      // request. Recorded as such in report/evidence/uat-fixes.md.
+      colour: ["beige", "green", "red", "pastel"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",
       sourceVendor: "KeebsProject",
@@ -855,6 +862,8 @@ const rawKeyboardComponents = [
     metadata: {
       sourceUrl: "https://www.keebsproject.com/product/ready-stock-seasonic-sea-themed-keycap-set-xda-profile-pbt-dye-sub-blue-keycaps-keebs-project",
       swatch: ["#1F5F8B", "#7FB6D9", "#F0E9D8"],
+      // #1F5F8B H204 deep blue, #7FB6D9 H203 light blue, #F0E9D8 H43 cream.
+      colour: ["blue", "beige"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",
       sourceVendor: "KeebsProject",
@@ -880,6 +889,8 @@ const rawKeyboardComponents = [
     metadata: {
       sourceUrl: "https://www.keebsproject.com/product/ready-stock-gmk-illusion-sky-blue-cherry-profile-doubleshot-pbt-keycaps",
       swatch: ["#9CC3E5", "#4E7699", "#F4F6F8"],
+      // #9CC3E5 H208 sky blue, #4E7699 H208 mid blue, #F4F6F8 L97 white.
+      colour: ["blue", "white"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",
       sourceVendor: "KeebsProject",
@@ -907,6 +918,9 @@ const rawKeyboardComponents = [
     metadata: {
       sourceUrl: "https://mkb.gg/products/mkb-gradient-keycap",
       swatch: ["#3D6BDD", "#7A5AE0", "#B36AE2"],
+      // #3D6BDD H223 blue, #7A5AE0 H254 blue-violet, #B36AE2 H277 purple —
+      // the catalog's genuine answer to the tester's "purple and blue themed".
+      colour: ["blue", "purple"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",
       sourceVendor: "MKB.MY",

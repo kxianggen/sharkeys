@@ -11,6 +11,34 @@ export const componentCategorySchema = z.enum([
 
 export const keyboardLayoutSchema = z.enum(["60", "65", "75", "tkl", "full"]);
 
+/**
+ * Controlled colour vocabulary (UAT finding 1 — colourway intent).
+ *
+ * Closed on purpose. Colour is matched STRUCTURALLY against explicit catalog
+ * tags, not semantically: buildComponentEmbeddingText never includes colour, so
+ * colour tags do not reach pgvector, and free text would simply be unmatchable.
+ * A fixed discrete set is also easier to defend than "the embedding happened to
+ * retrieve purple things".
+ *
+ * Colour is a RANKING signal only. It is deliberately not a compatibility
+ * concern — the rule engine remains the sole authority there and never reads
+ * colour.
+ */
+export const componentColourSchema = z.enum([
+  "black",
+  "white",
+  "grey",
+  "silver",
+  "purple",
+  "blue",
+  "pink",
+  "green",
+  "red",
+  "beige",
+  "pastel",
+  "multi",
+]);
+
 export const switchTechnologySchema = z.enum([
   "mechanical",
   "optical",
@@ -167,6 +195,7 @@ export const compatibilityIssueSchema = z.object({
 export const keyboardComponentCatalogSchema = z.array(keyboardComponentSchema);
 
 export type ComponentCategory = z.infer<typeof componentCategorySchema>;
+export type ComponentColour = z.infer<typeof componentColourSchema>;
 export type KeyboardLayout = z.infer<typeof keyboardLayoutSchema>;
 export type SwitchTechnology = z.infer<typeof switchTechnologySchema>;
 export type MountStyle = z.infer<typeof mountStyleSchema>;
