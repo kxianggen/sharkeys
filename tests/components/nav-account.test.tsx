@@ -65,7 +65,7 @@ describe("MainNav account flyout", () => {
     vi.clearAllMocks();
   });
 
-  it("shows three route links + an account trigger, with Builds removed from the bar", () => {
+  it("shows four route links + an account trigger, including My Builds", () => {
     render(<MainNav />);
 
     expect(
@@ -75,8 +75,13 @@ describe("MainNav account flyout", () => {
     expect(
       screen.getByRole("link", { name: "Community Gallery" }),
     ).toBeInTheDocument();
-    // Builds is no longer a persistent top-nav link — it lives in the panel.
-    expect(screen.queryByRole("link", { name: "My Builds" })).toBeNull();
+    // UAT finding 3: My Builds is back in the bar as a first-class
+    // destination. It previously lived only in the account panel, behind an
+    // unlabelled avatar trigger, and testers could not find where their saved
+    // builds went. This assertion previously required the link to be ABSENT.
+    expect(
+      screen.getByRole("link", { name: "My Builds" }),
+    ).toHaveAttribute("href", "/my-builds");
 
     const trigger = screen.getByRole("button", { name: "Account" });
     expect(trigger).toHaveAttribute("aria-expanded", "false");

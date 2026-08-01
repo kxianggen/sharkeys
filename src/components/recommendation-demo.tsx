@@ -49,6 +49,10 @@ import {
 import { MainNav } from "@/components/main-nav";
 import { SwatchDots } from "@/components/swatch-dots";
 import { useKeybotThinkingStage } from "@/components/use-keybot-thinking-stage";
+// Deep import, not the "@/lib/components" barrel: that barrel re-exports
+// catalog-source, which pulls the server-side Supabase client into this client
+// component. colour.ts is pure (zod + types).
+import { getComponentColours } from "@/lib/components/colour";
 import { getOptionConflicts } from "@/lib/rules";
 import type { CompatibilityResult, KeyboardComponent } from "@/lib/types";
 import type {
@@ -1691,7 +1695,21 @@ export function RecommendationDemo({
                         </Link>
                       </>
                     ) : (
-                      `${savedBuildMessage} View saved builds on the My Builds page.`
+                      // UAT finding 3: this previously named the My Builds page
+                      // in plain text, so the confirmation told people where the
+                      // build had gone without giving them any way to get there.
+                      // Mirrors the logged-out branch above, which was already a
+                      // real link.
+                      <>
+                        {savedBuildMessage} View them on{" "}
+                        <Link
+                          className="font-semibold text-primary underline"
+                          href="/my-builds"
+                        >
+                          My Builds
+                        </Link>
+                        .
+                      </>
                     )
                   }
                   tone="sky"
@@ -2231,7 +2249,17 @@ export function RecommendationDemo({
                     </Link>
                   </>
                 ) : (
-                  `${savedBuildMessage} View saved builds on the My Builds page.`
+                  // UAT finding 3 — same fix as the configurator branch above.
+                  <>
+                    {savedBuildMessage} View them on{" "}
+                    <Link
+                      className="font-semibold text-primary underline"
+                      href="/my-builds"
+                    >
+                      My Builds
+                    </Link>
+                    .
+                  </>
                 )
               }
               tone="sky"
@@ -2477,6 +2505,17 @@ function RecommendationCarousel({
     .filter(Boolean)
     .join(" · ");
   const keycapSwatch = getComponentSwatch(recommendation.components.keycap);
+  // UAT finding 4 (and the tail of finding 1): the swatch dots show hex, which
+  // is the palette but not its NAME. After the colourway work the build carries
+  // semantic colour tags, so the card can say what colour it actually is —
+  // which is what the tester asked for in the first place. Case and keycap
+  // colours are merged because a board's colour identity is both.
+  const buildColours = [
+    ...new Set([
+      ...getComponentColours(recommendation.components.keycap),
+      ...getComponentColours(recommendation.components.case),
+    ]),
+  ];
   const price =
     recommendation.estimatedPrice === null
       ? "Estimate unavailable"
@@ -2555,6 +2594,14 @@ function RecommendationCarousel({
               >
                 <span className="truncate">{partSummary}</span>
                 {keycapSwatch ? <SwatchDots colors={keycapSwatch} /> : null}
+                {buildColours.length > 0 ? (
+                  <span
+                    className="flex-none capitalize text-secondary"
+                    data-testid="build-colour-summary"
+                  >
+                    {buildColours.join(", ")}
+                  </span>
+                ) : null}
               </span>
             ) : null}
 

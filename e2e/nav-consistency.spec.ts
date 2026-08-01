@@ -30,8 +30,15 @@ for (const { name, path } of pages) {
     await expect(
       nav.getByRole("link", { name: "Community Gallery" }),
     ).toBeVisible();
-    // Builds moved into the account panel; the bar exposes the flyout trigger.
-    await expect(nav.getByRole("link", { name: "My Builds" })).toHaveCount(0);
+    // UAT finding 3: My Builds is now a first-class destination in the shared
+    // bar. It previously lived only inside the account flyout, and testers
+    // could not find where their saved builds went. This assertion is the
+    // inverse of what it used to be — it asserted the link was absent.
+    const myBuilds = nav.getByRole("link", { name: "My Builds" });
+    await expect(myBuilds).toBeVisible();
+    await expect(myBuilds).toHaveAttribute("href", "/my-builds");
+    // The account flyout trigger remains; the panel keeps its own "View all"
+    // link, so the two do not collide on accessible name.
     await expect(nav.getByRole("button", { name: "Account" })).toBeVisible();
 
     await page.screenshot({

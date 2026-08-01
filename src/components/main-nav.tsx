@@ -32,10 +32,16 @@ import type { Database } from "@/lib/types/database";
 const PLACEHOLDER_URL = "https://your-project.supabase.co";
 const PLACEHOLDER_ANON_KEY = "your-supabase-anon-key";
 
+// UAT finding 3: testers could not find where saved builds go. /my-builds was
+// reachable only from the account flyout, which is behind an unlabelled avatar
+// icon — discoverable if you already know it is there. Promoted to the shared
+// bar so the destination is visible without opening anything. The flyout keeps
+// its own "View all" link; the two are complementary, not duplicates.
 const NAV_LINKS = [
   { label: "Configurator", href: "/configurator" },
   { label: "Browse", href: "/browse" },
   { label: "Community", href: "/community-gallery", ariaLabel: "Community Gallery" },
+  { label: "My Builds", href: "/my-builds" },
 ] as const;
 
 const PANEL_ID = "account-flyout-panel";

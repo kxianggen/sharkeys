@@ -394,9 +394,12 @@ describe("RecommendationDemo", () => {
       "href",
       "/community-gallery",
     );
-    // Builds moved out of the top nav into the account flyout panel; the bar
-    // now exposes only the account trigger for it.
-    expect(screen.queryByRole("link", { name: /My Builds/i })).toBeNull();
+    // UAT finding 3: My Builds is a first-class bar destination again, not
+    // only an entry inside the account flyout.
+    expect(screen.getByRole("link", { name: /My Builds/i })).toHaveAttribute(
+      "href",
+      "/my-builds",
+    );
     expect(
       screen.getByRole("button", { name: "Account" }),
     ).toBeInTheDocument();
