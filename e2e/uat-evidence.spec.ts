@@ -49,6 +49,12 @@ import { expect, test } from "@playwright/test";
  * the C1 after-shot is traceable to the exact tree that produced it, and pairs
  * uat-before-colourway-* with uat-after-c1-colourway-* for finding 1.
  *
+ * NOTE ON THE COLOUR TAGS: the running app reads the catalog from Supabase
+ * when credentials are configured, NOT from src/data/components.ts. Colour
+ * tags must exist in the database or every component reports no colour, the
+ * ranking term contributes nothing, and the after-shot is identical to the
+ * before-shot for reasons that have nothing to do with the code.
+ *
  * The before-run at the start is NOT split — run the whole spec in one go.
  *
  * The other three findings accept conflation: their after-shots reflect the
@@ -158,15 +164,20 @@ test("finding 1: colourway intent is dropped from the recommendation @c1", async
     path: shot("colourway-full"),
   });
 
-  // The money shot: the keycap options offered in response to an explicitly
-  // colour-led request. In the "before" state these are the catalog's default
-  // keycap set, unfiltered and unordered by colour.
-  const keycaps = page.locator("#configurator-section-keycaps");
-  await keycaps.scrollIntoViewIfNeeded();
-  await expect(keycaps).toBeVisible();
-  await keycaps.screenshot({
+  // The money shot: the "Start from a build" carousel.
+  //
+  // This MUST be the carousel, not #configurator-section-keycaps. scoreColourFit
+  // is applied inside scoreRecommendation, which ranks whole assembled builds —
+  // exactly what the carousel presents. The keycap picker below it renders a
+  // plain catalog listing and is deliberately not colour-ordered, so cropping
+  // it would photograph a component the fix does not touch and appear to refute
+  // a claim that is true.
+  const carousel = page.locator('section[aria-label="Start from a build"]');
+  await carousel.scrollIntoViewIfNeeded();
+  await expect(carousel).toBeVisible();
+  await carousel.screenshot({
     animations: "disabled",
-    path: shot("colourway-keycaps"),
+    path: shot("colourway-carousel"),
   });
 });
 
