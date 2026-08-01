@@ -1,0 +1,376 @@
+=== SHA ===
+4f019d3
+=== TYPECHECK ===
+
+> sharkeys@0.1.0 typecheck
+> tsc --noEmit
+
+=== TEST ===
+(node:51506) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/rules/catalog-expansion.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m tests/api/routes.test.ts [2m([22m[2m7 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[32m 14[2mms[22m[39m
+(node:51507) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/ai/intent.test.ts [2m([22m[2m15 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/rules/compatibility.test.ts [2m([22m[2m17 tests[22m[2m | [22m[33m9 skipped[39m[2m)[22m[32m 36[2mms[22m[39m
+(node:51510) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/components/catalog-source.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+(node:51511) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/ai/vision-intent.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+(node:51512) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/api/ai-intent-route.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+(node:51513) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:51514) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/data/hero-demo-build.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/components/repository.test.ts [2m([22m[2m9 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[32m 12[2mms[22m[39m
+(node:51515) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/components/kits.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+(node:51517) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/gallery/comment-threads.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/app/community-gallery-action.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/gallery/post-image.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+(node:51518) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/keybot/builder-knowledge.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m37 passed[39m[22m[90m (37)[39m
+[2m      Tests [22m [1m[32m211 passed[39m[22m[2m | [22m[33m42 skipped[39m[90m (253)[39m
+[2m   Start at [22m 04:13:22
+[2m   Duration [22m 8.73s[2m (transform 2.81s, setup 2.25s, import 14.73s, tests 12.37s, environment 22.75s)[22m
+
+=== BUILD ===
+├ ƒ /api/account/builds-preview
+├ ƒ /api/ai/intent
+├ ƒ /api/ai/vision-intent
+├ ƒ /api/builds/validate
+├ ƒ /api/components
+├ ƒ /api/components/[id]
+├ ƒ /api/components/category/[category]
+├ ƒ /api/keybot
+├ ƒ /api/recommendations
+├ ƒ /auth/callback
+├ ○ /browse
+├ ƒ /community-gallery
+├ ƒ /community-gallery/[postId]
+├ ƒ /community-gallery/new
+├ ƒ /configurator
+├ ƒ /login
+├ ƒ /my-builds
+└ ƒ /signup
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+=== ESLINT ===
+
+/Users/fluffyunicorn/Documents/New project/src/components/recommendation-demo.tsx
+   783:7   warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/fluffyunicorn/Documents/New project/src/components/recommendation-demo.tsx:783:7
+  781 |       window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  782 |     ) {
+> 783 |       setHeroEntrance("instant");
+      |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  784 |       return;
+  785 |     }
+  786 |  react-hooks/set-state-in-effect
+  2324:10  warning  'ConfiguratorSidebar' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  3592:3   warning  'onSaveRecommendation' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+
+/Users/fluffyunicorn/Documents/New project/src/components/use-typewriter.ts
+  100:5  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/fluffyunicorn/Documents/New project/src/components/use-typewriter.ts:100:5
+   98 |
+   99 |   useEffect(() => {
+> 100 |     setMounted(true);
+      |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  101 |
+  102 |     const reducedMotion = readReducedMotion();
+  103 |     setPrefersReducedMotion(reducedMotion);  react-hooks/set-state-in-effect
+
+/Users/fluffyunicorn/Documents/New project/tests/components/recommendation-demo.test.tsx
+  83:7  warning  'tklRecommendationResult' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 13 problems (0 errors, 13 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+
+=== EVAL OFFLINE ===
+  [32m✓[0m al-002
+  [32m✓[0m al-003
+  [32m✓[0m pb-001
+  [32m✓[0m pb-002
+  [32m✓[0m ws-001
+  [32m✓[0m nt-001
+
+  [1m[32m30 passed[0m
+
+[1m[36m── Keybot Grounding (10 cases) ──[0m
+  [32m✓[0m kg-001
+  [32m✓[0m kg-002
+  [32m✓[0m kg-003
+  [32m✓[0m kg-004
+  [32m✓[0m kg-005
+  [32m✓[0m kg-006
+  [32m✓[0m kg-007
+  [31m✗[0m kg-008
+      [2manswer missing all of: "MZ Z1", "KTT Cabbage Tofu"[0m
+  [32m✓[0m kg-009
+  [31m✗[0m kg-010
+      [2manswer missing all of: "Krytox 205g0", "205g0"[0m
+      [2manswer missing required term: "205g0"[0m
+      [2manswer missing required term: "XHT-BDZ"[0m
+
+  [1m[32m8 passed[0m  [1m[31m2 failed[0m
+
+[1m[36m── RAG Retrieval (10 cases) ──[0m
+  [32m✓[0m rr-001
+  [32m✓[0m rr-002
+  [32m✓[0m rr-003
+  [32m✓[0m rr-004
+  [32m✓[0m rr-005
+  [32m✓[0m rr-006
+  [33m~[0m rr-007 [2m(expected — semantic gap; run with EVAL_SEMANTIC=true after seeding)[0m
+      [2mswitch "switch_gateron_milky_yellow_pro" has soundProfile "thocky", expected "creamy"[0m
+  [33m~[0m rr-008 [2m(expected — semantic gap; run with EVAL_SEMANTIC=true after seeding)[0m
+      [2mswitch "switch_outemu_silent_peach_v2" has soundProfile "silent", expected "thocky"[0m
+  [2m○ rr-009 (pending — requires catalog seed)[0m
+  [2m○ rr-010 (pending — requires catalog seed)[0m
+
+  [1m[32m6 passed[0m  [33m2 expected-fail[0m  [2m2 pending[0m
+
+[1mTotal: [32m44 pass[0m  [1m[31m2 fail[0m  [33m2 expected-fail[0m  [2m2 pending[0m
+
+=== EVAL SEMANTIC RUN 1 ===
+  [32m✓[0m s-003
+  [32m✓[0m s-004
+  [32m✓[0m al-001
+  [32m✓[0m al-002
+  [32m✓[0m al-003
+  [32m✓[0m pb-001
+  [32m✓[0m pb-002
+  [32m✓[0m ws-001
+  [32m✓[0m nt-001
+
+  [1m[32m30 passed[0m
+
+[1m[36m── Keybot Grounding (10 cases) ──[0m
+  [31m✗[0m kg-001
+      [2manswer missing all of: "kit-derived", "kitId", "same kit", "kit-locked", "not compatible"[0m
+  [32m✓[0m kg-002
+  [31m✗[0m kg-003
+      [2manswer contains banned term: "recommend"[0m
+  [32m✓[0m kg-004
+  [32m✓[0m kg-005
+  [32m✓[0m kg-006
+  [32m✓[0m kg-007
+  [31m✗[0m kg-008
+      [2manswer missing all of: "MZ Z1", "KTT Cabbage Tofu"[0m
+  [32m✓[0m kg-009
+  [32m✓[0m kg-010
+
+  [1m[32m7 passed[0m  [1m[31m3 failed[0m
+
+[1m[36m── RAG Retrieval (10 cases) ──[0m
+  [32m✓[0m rr-001
+  [32m✓[0m rr-002
+  [32m✓[0m rr-003
+  [32m✓[0m rr-004
+  [32m✓[0m rr-005
+  [32m✓[0m rr-006
+  [32m✓[0m rr-007
+  [32m✓[0m rr-008
+  [2m○ rr-009 (pending — requires catalog seed)[0m
+  [2m○ rr-010 (pending — requires catalog seed)[0m
+
+  [1m[32m8 passed[0m  [2m2 pending[0m
+
+[1mTotal: [32m45 pass[0m  [1m[31m3 fail[0m  [33m0 expected-fail[0m  [2m2 pending[0m
+
+=== EVAL SEMANTIC RUN 2 ===
+  [32m✓[0m s-002
+  [32m✓[0m s-003
+  [32m✓[0m s-004
+  [32m✓[0m al-001
+  [32m✓[0m al-002
+  [32m✓[0m al-003
+  [32m✓[0m pb-001
+  [32m✓[0m pb-002
+  [32m✓[0m ws-001
+  [32m✓[0m nt-001
+
+  [1m[32m30 passed[0m
+
+[1m[36m── Keybot Grounding (10 cases) ──[0m
+  [32m✓[0m kg-001
+  [32m✓[0m kg-002
+  [31m✗[0m kg-003
+      [2manswer contains banned term: "recommend"[0m
+  [32m✓[0m kg-004
+  [32m✓[0m kg-005
+  [32m✓[0m kg-006
+  [32m✓[0m kg-007
+  [31m✗[0m kg-008
+      [2manswer missing all of: "MZ Z1", "KTT Cabbage Tofu"[0m
+  [32m✓[0m kg-009
+  [32m✓[0m kg-010
+
+  [1m[32m8 passed[0m  [1m[31m2 failed[0m
+
+[1m[36m── RAG Retrieval (10 cases) ──[0m
+  [32m✓[0m rr-001
+  [32m✓[0m rr-002
+  [32m✓[0m rr-003
+  [32m✓[0m rr-004
+  [32m✓[0m rr-005
+  [32m✓[0m rr-006
+  [32m✓[0m rr-007
+  [32m✓[0m rr-008
+  [2m○ rr-009 (pending — requires catalog seed)[0m
+  [2m○ rr-010 (pending — requires catalog seed)[0m
+
+  [1m[32m8 passed[0m  [2m2 pending[0m
+
+[1mTotal: [32m46 pass[0m  [1m[31m2 fail[0m  [33m0 expected-fail[0m  [2m2 pending[0m
+
+=== EVAL SEMANTIC RUN 3 ===
+  [32m✓[0m s-002
+  [32m✓[0m s-003
+  [32m✓[0m s-004
+  [32m✓[0m al-001
+  [32m✓[0m al-002
+  [32m✓[0m al-003
+  [32m✓[0m pb-001
+  [32m✓[0m pb-002
+  [32m✓[0m ws-001
+  [32m✓[0m nt-001
+
+  [1m[32m30 passed[0m
+
+[1m[36m── Keybot Grounding (10 cases) ──[0m
+  [31m✗[0m kg-001
+      [2manswer missing all of: "kit-derived", "kitId", "same kit", "kit-locked", "not compatible"[0m
+  [32m✓[0m kg-002
+  [32m✓[0m kg-003
+  [32m✓[0m kg-004
+  [32m✓[0m kg-005
+  [32m✓[0m kg-006
+  [32m✓[0m kg-007
+  [31m✗[0m kg-008
+      [2manswer missing all of: "MZ Z1", "KTT Cabbage Tofu"[0m
+  [32m✓[0m kg-009
+  [32m✓[0m kg-010
+
+  [1m[32m8 passed[0m  [1m[31m2 failed[0m
+
+[1m[36m── RAG Retrieval (10 cases) ──[0m
+  [32m✓[0m rr-001
+  [32m✓[0m rr-002
+  [32m✓[0m rr-003
+  [32m✓[0m rr-004
+  [32m✓[0m rr-005
+  [32m✓[0m rr-006
+  [32m✓[0m rr-007
+  [32m✓[0m rr-008
+  [2m○ rr-009 (pending — requires catalog seed)[0m
+  [2m○ rr-010 (pending — requires catalog seed)[0m
+
+  [1m[32m8 passed[0m  [2m2 pending[0m
+
+[1mTotal: [32m46 pass[0m  [1m[31m2 fail[0m  [33m0 expected-fail[0m  [2m2 pending[0m
+
+=== P3 AI LATENCY ===
+┌─────────┬─────────────────────┬────────────────┬────┬────────┬────────┬────────┬────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ (index) │ path                │ status         │ n  │ mean   │ median │ p95    │ errors │ reason                                                                                                                                                                  │
+├─────────┼─────────────────────┼────────────────┼────┼────────┼────────┼────────┼────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 0       │ 'intent_extraction' │ 'MEASURED'     │ 20 │ '1673' │ '1596' │ '2220' │ 0      │ ''                                                                                                                                                                      │
+│ 1       │ 'keybot_reply'      │ 'MEASURED'     │ 20 │ '2731' │ '2410' │ '4110' │ 0      │ ''                                                                                                                                                                      │
+│ 2       │ 'vision_intent'     │ 'NOT MEASURED' │ 0  │ '—'    │ '—'    │ '—'    │ 0      │ 'Requires a representative inspiration image as input. No fixture image is committed to the repository, and generating a synthetic one would not represent real usage.' │
+└─────────┴─────────────────────┴────────────────┴────┴────────┴────────┴────────┴────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Wrote report/evidence/raw/bench-ai-latency.json
+=== BENCH-RECOMMENDATIONS RUN 1 ===
+│ (index) │ n   │ mean      │ median    │ p95       │ p99       │ min     │ max       │ stdDev   │
+├─────────┼─────┼───────────┼───────────┼───────────┼───────────┼─────────┼───────────┼──────────┤
+│ 0       │ 200 │ '122.820' │ '101.448' │ '248.604' │ '274.367' │ '2.040' │ '338.759' │ '90.570' │
+└─────────┴─────┴───────────┴───────────┴───────────┴───────────┴─────────┴───────────┴──────────┘
+P2b — builds returned per prompt (stage 2)
+┌─────────┬─────────────────────────────────────────────────┬──────────┬───────────────┬──────────┬───────────┐
+│ (index) │ prompt                                          │ returned │ clarification │ allValid │ inCatalog │
+├─────────┼─────────────────────────────────────────────────┼──────────┼───────────────┼──────────┼───────────┤
+│ 0       │ 'I want a thocky keyboard under RM250 for off…' │ 0        │ true          │ true     │ true      │
+│ 1       │ 'creamy sounding 65% keyboard for gaming…'      │ 3        │ true          │ true     │ true      │
+│ 2       │ 'budget mechanical keyboard for a beginner…'    │ 3        │ true          │ true     │ true      │
+│ 3       │ 'quiet keyboard for a shared office under RM2…' │ 0        │ true          │ true     │ true      │
+│ 4       │ 'I want something that sounds deep and premiu…' │ 3        │ true          │ true     │ true      │
+│ 5       │ '75% layout, hot swappable, wireless if possi…' │ 3        │ true          │ true     │ true      │
+│ 6       │ 'best value build for typing all day…'          │ 3        │ true          │ true     │ true      │
+│ 7       │ "I don't really know what I want, something n…" │ 3        │ true          │ true     │ true      │
+└─────────┴─────────────────────────────────────────────────┴──────────┴───────────────┴──────────┴───────────┘
+mean returned: 2.25  range: 0-3  cap: 3
+Pipeline conformance: allBuildsValid=true allComponentsInCatalog=true (18 builds)
+Wrote report/evidence/raw/bench-recommendations.json
+=== BENCH-RECOMMENDATIONS RUN 2 ===
+│ (index) │ n   │ mean      │ median   │ p95       │ p99       │ min     │ max       │ stdDev   │
+├─────────┼─────┼───────────┼──────────┼───────────┼───────────┼─────────┼───────────┼──────────┤
+│ 0       │ 200 │ '117.215' │ '95.053' │ '236.579' │ '237.933' │ '1.998' │ '244.330' │ '85.689' │
+└─────────┴─────┴───────────┴──────────┴───────────┴───────────┴─────────┴───────────┴──────────┘
+P2b — builds returned per prompt (stage 2)
+┌─────────┬─────────────────────────────────────────────────┬──────────┬───────────────┬──────────┬───────────┐
+│ (index) │ prompt                                          │ returned │ clarification │ allValid │ inCatalog │
+├─────────┼─────────────────────────────────────────────────┼──────────┼───────────────┼──────────┼───────────┤
+│ 0       │ 'I want a thocky keyboard under RM250 for off…' │ 0        │ true          │ true     │ true      │
+│ 1       │ 'creamy sounding 65% keyboard for gaming…'      │ 3        │ true          │ true     │ true      │
+│ 2       │ 'budget mechanical keyboard for a beginner…'    │ 3        │ true          │ true     │ true      │
+│ 3       │ 'quiet keyboard for a shared office under RM2…' │ 0        │ true          │ true     │ true      │
+│ 4       │ 'I want something that sounds deep and premiu…' │ 3        │ true          │ true     │ true      │
+│ 5       │ '75% layout, hot swappable, wireless if possi…' │ 3        │ true          │ true     │ true      │
+│ 6       │ 'best value build for typing all day…'          │ 3        │ true          │ true     │ true      │
+│ 7       │ "I don't really know what I want, something n…" │ 3        │ true          │ true     │ true      │
+└─────────┴─────────────────────────────────────────────────┴──────────┴───────────────┴──────────┴───────────┘
+mean returned: 2.25  range: 0-3  cap: 3
+Pipeline conformance: allBuildsValid=true allComponentsInCatalog=true (18 builds)
+Wrote report/evidence/raw/bench-recommendations.json
+=== BENCH-RECOMMENDATIONS RUN 3 ===
+│ (index) │ n   │ mean      │ median   │ p95       │ p99       │ min     │ max       │ stdDev   │
+├─────────┼─────┼───────────┼──────────┼───────────┼───────────┼─────────┼───────────┼──────────┤
+│ 0       │ 200 │ '118.863' │ '91.559' │ '239.857' │ '241.621' │ '2.015' │ '244.839' │ '86.834' │
+└─────────┴─────┴───────────┴──────────┴───────────┴───────────┴─────────┴───────────┴──────────┘
+P2b — builds returned per prompt (stage 2)
+┌─────────┬─────────────────────────────────────────────────┬──────────┬───────────────┬──────────┬───────────┐
+│ (index) │ prompt                                          │ returned │ clarification │ allValid │ inCatalog │
+├─────────┼─────────────────────────────────────────────────┼──────────┼───────────────┼──────────┼───────────┤
+│ 0       │ 'I want a thocky keyboard under RM250 for off…' │ 0        │ true          │ true     │ true      │
+│ 1       │ 'creamy sounding 65% keyboard for gaming…'      │ 3        │ true          │ true     │ true      │
+│ 2       │ 'budget mechanical keyboard for a beginner…'    │ 3        │ true          │ true     │ true      │
+│ 3       │ 'quiet keyboard for a shared office under RM2…' │ 0        │ true          │ true     │ true      │
+│ 4       │ 'I want something that sounds deep and premiu…' │ 3        │ true          │ true     │ true      │
+│ 5       │ '75% layout, hot swappable, wireless if possi…' │ 3        │ true          │ true     │ true      │
+│ 6       │ 'best value build for typing all day…'          │ 3        │ true          │ true     │ true      │
+│ 7       │ "I don't really know what I want, something n…" │ 3        │ true          │ true     │ true      │
+└─────────┴─────────────────────────────────────────────────┴──────────┴───────────────┴──────────┴───────────┘
+mean returned: 2.25  range: 0-3  cap: 3
+Pipeline conformance: allBuildsValid=true allComponentsInCatalog=true (18 builds)
+Wrote report/evidence/raw/bench-recommendations.json

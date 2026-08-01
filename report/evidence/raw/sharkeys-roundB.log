@@ -1,0 +1,168 @@
+=== VERIFY ===
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /api/account/builds-preview
+├ ƒ /api/ai/intent
+├ ƒ /api/ai/vision-intent
+├ ƒ /api/builds/validate
+├ ƒ /api/components
+├ ƒ /api/components/[id]
+├ ƒ /api/components/category/[category]
+├ ƒ /api/keybot
+├ ƒ /api/recommendations
+├ ƒ /auth/callback
+├ ○ /browse
+├ ƒ /community-gallery
+├ ƒ /community-gallery/[postId]
+├ ƒ /community-gallery/new
+├ ƒ /configurator
+├ ƒ /login
+├ ƒ /my-builds
+└ ƒ /signup
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+=== EVAL OFFLINE (exits 1 by design) ===
+  [32m✓[0m pb-002
+  [32m✓[0m ws-001
+  [32m✓[0m nt-001
+  [31m✗[0m col-001
+      [2mcolour: missing [blue, purple] — expected [blue, purple], got none[0m
+  [31m✗[0m col-002
+      [2mcolour: missing [black] — expected [black], got none[0m
+  [31m✗[0m col-003
+      [2mcolour: missing [pastel] — expected [pastel], got none[0m
+  [31m✗[0m col-004
+      [2mcolour: missing [multi] — expected [multi], got none[0m
+  [32m✓[0m col-005
+  [32m✓[0m col-006
+  [32m✓[0m col-007
+  [31m✗[0m col-008
+      [2mcolour: missing [purple] — expected [purple], got none[0m
+
+  [1m[32m33 passed[0m  [1m[31m5 failed[0m
+
+[1m[36m── Keybot Grounding (10 cases) ──[0m
+  [32m✓[0m kg-001
+  [32m✓[0m kg-002
+  [32m✓[0m kg-003
+  [32m✓[0m kg-004
+  [32m✓[0m kg-005
+  [32m✓[0m kg-006
+  [32m✓[0m kg-007
+  [31m✗[0m kg-008
+      [2manswer missing all of: "MZ Z1", "KTT Cabbage Tofu"[0m
+  [32m✓[0m kg-009
+  [31m✗[0m kg-010
+      [2manswer missing all of: "Krytox 205g0", "205g0"[0m
+      [2manswer missing required term: "205g0"[0m
+      [2manswer missing required term: "XHT-BDZ"[0m
+
+  [1m[32m8 passed[0m  [1m[31m2 failed[0m
+
+[1m[36m── RAG Retrieval (10 cases) ──[0m
+  [32m✓[0m rr-001
+  [32m✓[0m rr-002
+  [32m✓[0m rr-003
+  [32m✓[0m rr-004
+  [32m✓[0m rr-005
+  [32m✓[0m rr-006
+  [33m~[0m rr-007 [2m(expected — semantic gap; run with EVAL_SEMANTIC=true after seeding)[0m
+      [2mswitch "switch_gateron_milky_yellow_pro" has soundProfile "thocky", expected "creamy"[0m
+  [33m~[0m rr-008 [2m(expected — semantic gap; run with EVAL_SEMANTIC=true after seeding)[0m
+      [2mswitch "switch_outemu_silent_peach_v2" has soundProfile "silent", expected "thocky"[0m
+  [2m○ rr-009 (pending — requires catalog seed)[0m
+  [2m○ rr-010 (pending — requires catalog seed)[0m
+
+  [1m[32m6 passed[0m  [33m2 expected-fail[0m  [2m2 pending[0m
+
+[1mTotal: [32m47 pass[0m  [1m[31m7 fail[0m  [33m2 expected-fail[0m  [2m2 pending[0m
+
+=== EVAL SEMANTIC — CHECKPOINT 2 ===
+  [32m✓[0m s-004
+  [32m✓[0m al-001
+  [32m✓[0m al-002
+  [32m✓[0m al-003
+  [32m✓[0m pb-001
+  [32m✓[0m pb-002
+  [32m✓[0m ws-001
+  [32m✓[0m nt-001
+  [31m✗[0m col-001
+      [2mcolour: missing [blue, purple] — expected [blue, purple], got none[0m
+  [31m✗[0m col-002
+      [2mcolour: missing [black] — expected [black], got none[0m
+  [31m✗[0m col-003
+      [2mcolour: missing [pastel] — expected [pastel], got none[0m
+  [31m✗[0m col-004
+      [2mcolour: missing [multi] — expected [multi], got none[0m
+  [32m✓[0m col-005
+  [32m✓[0m col-006
+  [32m✓[0m col-007
+  [31m✗[0m col-008
+      [2mcolour: missing [purple] — expected [purple], got none[0m
+
+  [1m[32m33 passed[0m  [1m[31m5 failed[0m
+
+[1m[36m── Keybot Grounding (10 cases) ──[0m
+  [32m✓[0m kg-001
+  [32m✓[0m kg-002
+  [32m✓[0m kg-003
+  [32m✓[0m kg-004
+  [32m✓[0m kg-005
+  [32m✓[0m kg-006
+  [32m✓[0m kg-007
+  [31m✗[0m kg-008
+      [2manswer missing all of: "MZ Z1", "KTT Cabbage Tofu"[0m
+  [32m✓[0m kg-009
+  [32m✓[0m kg-010
+
+  [1m[32m9 passed[0m  [1m[31m1 failed[0m
+
+[1m[36m── RAG Retrieval (10 cases) ──[0m
+  [32m✓[0m rr-001
+  [32m✓[0m rr-002
+  [32m✓[0m rr-003
+  [32m✓[0m rr-004
+  [32m✓[0m rr-005
+  [32m✓[0m rr-006
+  [32m✓[0m rr-007
+  [32m✓[0m rr-008
+  [2m○ rr-009 (pending — requires catalog seed)[0m
+  [2m○ rr-010 (pending — requires catalog seed)[0m
+
+  [1m[32m8 passed[0m  [2m2 pending[0m
+
+[1mTotal: [32m50 pass[0m  [1m[31m6 fail[0m  [33m0 expected-fail[0m  [2m2 pending[0m
+
+=== PLAYWRIGHT BEFORE-SHOTS ===
+[WebServer] ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+Running 5 tests using 1 worker
+
+[WebServer] [browser] Image with src "/logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. (file:///Users/fluffyunicorn/Documents/New project/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2477:13)
+  ✓  1 e2e/uat-evidence.spec.ts:127:5 › finding 1: colourway intent is dropped from the recommendation @c1 (9.1s)
+[WebServer] [browser] Image with src "/logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. (file:///Users/fluffyunicorn/Documents/New project/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2477:13)
+  ✓  2 e2e/uat-evidence.spec.ts:174:5 › finding 2: community gallery index (1.2s)
+[WebServer] [browser] Image with src "/logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. (file:///Users/fluffyunicorn/Documents/New project/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2477:13)
+  ✓  3 e2e/uat-evidence.spec.ts:189:5 › finding 3a: main nav link set (337ms)
+[WebServer] [browser] Image with src "/logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. (file:///Users/fluffyunicorn/Documents/New project/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2477:13)
+  ✓  4 e2e/uat-evidence.spec.ts:212:5 › finding 3b: post-save confirmation (9.9s)
+[WebServer] [browser] Image with src "/logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. (file:///Users/fluffyunicorn/Documents/New project/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2477:13)
+  ✓  5 e2e/uat-evidence.spec.ts:251:5 › finding 4: recommendation output visual density (11.2s)
+
+  5 passed (36.2s)
+=== FILES WRITTEN ===
+-rw-r--r--@ 1 fluffyunicorn  staff    6785 Aug  1 04:41 screenshots/uat-before-c2-nav.png
+-rw-r--r--@ 1 fluffyunicorn  staff  535930 Aug  1 04:42 screenshots/uat-before-c2-save-confirmation.png
+-rw-r--r--@ 1 fluffyunicorn  staff  316053 Aug  1 04:41 screenshots/uat-before-c3-community-index.png
+-rw-r--r--@ 1 fluffyunicorn  staff  531529 Aug  1 04:42 screenshots/uat-before-c4-visual-density-full.png
+-rw-r--r--@ 1 fluffyunicorn  staff   24660 Aug  1 04:42 screenshots/uat-before-c4-visual-density-summary.png
+-rw-r--r--@ 1 fluffyunicorn  staff  513920 Aug  1 04:41 screenshots/uat-before-colourway-full.png
+-rw-r--r--@ 1 fluffyunicorn  staff   76872 Aug  1 04:41 screenshots/uat-before-colourway-keycaps.png
