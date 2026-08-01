@@ -81,6 +81,7 @@ async function runIntentExtractionSuite(): Promise<CaseResult[]> {
     checkIntentField("useCase", tc, actual, failures);
     checkIntentField("layout", tc, actual, failures);
     checkBudget(tc, actual, failures);
+    checkColour(tc, actual, failures);
 
     results.push({
       id: tc.id,
@@ -102,6 +103,77 @@ function checkIntentField(
   if (expected === undefined) return;
   if (actual[field] !== expected) {
     failures.push(`${field}: expected "${expected}", got "${actual[field]}"`);
+  }
+}
+
+/**
+ * Colour check (UAT finding 1).
+ *
+ * Additive by design: it reads tc.expectedColour, which none of the original
+ * 30 intent cases declare, so their assertions are untouched — isolation by
+ * construction rather than by convention.
+ *
+ * The accessor below is temporary. extractedKeyboardIntentSchema has no colour
+ * field at the point these cases first run, and must not gain one until the
+ * whole pipeline changes together (a strict schema demanding a field the
+ * prompt never mentions would fail Zod validation and drop semantic mode into
+ * the fallback, contaminating the very baseline this measures). Once the
+ * schema carries colour, this cast comes out and `actual.colour` is read
+ * directly.
+ */
+function readExtractedColour(
+  actual: ExtractedKeyboardIntent,
+): readonly string[] | null | undefined {
+  return (actual as ExtractedKeyboardIntent & { colour?: string[] | null })
+    .colour;
+}
+
+function checkColour(
+  tc: IntentExtractionTestCase,
+  actual: ExtractedKeyboardIntent,
+  failures: string[],
+) {
+  // Not declared — skip. This is what isolates the pre-existing cases.
+  if (tc.expectedColour === undefined) return;
+
+  const extracted = readExtractedColour(actual);
+  const found = [...(extracted ?? [])].sort();
+
+  // Declared null: a hallucination control. Absent, null and [] all count as
+  // "no colour", since before the schema change the field does not exist at
+  // all and afterwards an empty array is the honest representation.
+  if (tc.expectedColour === null) {
+    if (found.length > 0) {
+      failures.push(
+        `colour: expected none, got [${found.join(", ")}] — hallucinated on a colour-free prompt`,
+      );
+    }
+    return;
+  }
+
+  // Widened to string[]: `found` is whatever the extractor returned, which is
+  // not yet constrained to the vocabulary, so both sides must compare as
+  // plain strings.
+  const expected: readonly string[] = [...tc.expectedColour].sort();
+  const missing = expected.filter((colour) => !found.includes(colour));
+
+  if (missing.length > 0) {
+    failures.push(
+      `colour: missing [${missing.join(", ")}] — expected [${expected.join(", ")}], got ${
+        found.length > 0 ? `[${found.join(", ")}]` : "none"
+      }`,
+    );
+  }
+
+  // Precision, asserted only where the correct answer is unambiguous.
+  if ((tc.colourMatch ?? "contains") === "exact") {
+    const extra = found.filter((colour) => !expected.includes(colour));
+
+    if (extra.length > 0) {
+      failures.push(
+        `colour: unexpected [${extra.join(", ")}] — "${tc.input}" admits exactly [${expected.join(", ")}]`,
+      );
+    }
   }
 }
 
