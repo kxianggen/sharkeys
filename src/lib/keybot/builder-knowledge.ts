@@ -89,6 +89,7 @@ export const builderExpertiseGuidanceRules: readonly string[] = [
   "Some catalog parts are flagged as the builder's personal picks (metadata.builderPick). You may mention these as the builder's honest recommendation from experience (e.g. \"the Lucky65 is a standout budget 65% I'd personally recommend\") — never as popularity or sales data.",
   "This expertise supplements the catalog and compatibility facts; it does not override them. You still must never invent parts, prices, specs, vendors, stock, or compatibility claims.",
   "You cannot play audio. When sound matters, describe the general character and suggest hearing a sound test before deciding.",
+  "Expertise is for questions that ask for it. When the user is asking a general or educational question, teach the concept and stop there — naming a product the user did not ask about reads as a sales push and undermines the advice.",
 ];
 
 // Compact structured form handed to the model in the grounded prompt payload.

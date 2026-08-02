@@ -1,0 +1,240 @@
+================ RUN 1 ================
+
+> sharkeys@0.1.0 eval
+> tsx --tsconfig tsconfig.json scripts/run-eval.ts
+
+
+[1mSharkeys Eval Runner[0m — [36msemantic mode[0m (pgvector + OpenAI enabled)
+
+[1m[36m── Intent Extraction (38 cases) ──[0m
+  [32m✓[0m bgt-001
+  [32m✓[0m bgt-002
+  [32m✓[0m bgt-003
+  [32m✓[0m bgt-004
+  [32m✓[0m bgt-005
+  [32m✓[0m bgt-006
+  [32m✓[0m bgt-007
+  [32m✓[0m bgc-001
+  [32m✓[0m bgc-002
+  [32m✓[0m bgc-003
+  [32m✓[0m bgc-004
+  [32m✓[0m bgc-005
+  [32m✓[0m ot-001
+  [32m✓[0m ot-002
+  [32m✓[0m ot-003
+  [32m✓[0m ot-004
+  [32m✓[0m oc-001
+  [32m✓[0m oc-002
+  [32m✓[0m oc-003
+  [32m✓[0m s-001
+  [32m✓[0m s-002
+  [32m✓[0m s-003
+  [32m✓[0m s-004
+  [32m✓[0m al-001
+  [32m✓[0m al-002
+  [32m✓[0m al-003
+  [32m✓[0m pb-001
+  [32m✓[0m pb-002
+  [32m✓[0m ws-001
+  [32m✓[0m nt-001
+  [32m✓[0m col-001
+  [32m✓[0m col-002
+  [32m✓[0m col-003
+  [32m✓[0m col-004
+  [32m✓[0m col-005
+  [32m✓[0m col-006
+  [32m✓[0m col-007
+  [32m✓[0m col-008
+
+  [1m[32m38 passed[0m
+
+[1m[36m── Keybot Grounding (10 cases) ──[0m
+  [32m✓[0m kg-001
+  [32m✓[0m kg-002
+  [32m✓[0m kg-003
+  [32m✓[0m kg-004
+  [32m✓[0m kg-005
+  [32m✓[0m kg-006
+  [32m✓[0m kg-007
+  [32m✓[0m kg-008
+  [32m✓[0m kg-009
+  [32m✓[0m kg-010
+
+  [1m[32m10 passed[0m
+
+[1m[36m── RAG Retrieval (10 cases) ──[0m
+  [32m✓[0m rr-001
+  [32m✓[0m rr-002
+  [32m✓[0m rr-003
+  [32m✓[0m rr-004
+  [32m✓[0m rr-005
+  [32m✓[0m rr-006
+  [32m✓[0m rr-007
+  [32m✓[0m rr-008
+  [32m✓[0m rr-009
+  [32m✓[0m rr-010
+
+  [1m[32m10 passed[0m
+
+[1mTotal: [32m58 pass[0m  [33m0 expected-fail[0m  [2m0 pending[0m
+
+================ RUN 2 ================
+
+> sharkeys@0.1.0 eval
+> tsx --tsconfig tsconfig.json scripts/run-eval.ts
+
+
+[1mSharkeys Eval Runner[0m — [36msemantic mode[0m (pgvector + OpenAI enabled)
+
+[1m[36m── Intent Extraction (38 cases) ──[0m
+  [32m✓[0m bgt-001
+  [32m✓[0m bgt-002
+  [32m✓[0m bgt-003
+  [32m✓[0m bgt-004
+  [32m✓[0m bgt-005
+  [32m✓[0m bgt-006
+  [32m✓[0m bgt-007
+  [32m✓[0m bgc-001
+  [32m✓[0m bgc-002
+  [32m✓[0m bgc-003
+  [32m✓[0m bgc-004
+  [32m✓[0m bgc-005
+  [32m✓[0m ot-001
+  [32m✓[0m ot-002
+  [32m✓[0m ot-003
+  [32m✓[0m ot-004
+  [32m✓[0m oc-001
+  [32m✓[0m oc-002
+  [32m✓[0m oc-003
+  [32m✓[0m s-001
+  [32m✓[0m s-002
+  [32m✓[0m s-003
+  [32m✓[0m s-004
+  [32m✓[0m al-001
+  [32m✓[0m al-002
+  [32m✓[0m al-003
+  [32m✓[0m pb-001
+  [32m✓[0m pb-002
+  [32m✓[0m ws-001
+  [32m✓[0m nt-001
+  [32m✓[0m col-001
+  [32m✓[0m col-002
+  [32m✓[0m col-003
+  [32m✓[0m col-004
+  [32m✓[0m col-005
+  [32m✓[0m col-006
+  [32m✓[0m col-007
+  [32m✓[0m col-008
+
+  [1m[32m38 passed[0m
+
+[1m[36m── Keybot Grounding (10 cases) ──[0m
+  [32m✓[0m kg-001
+  [32m✓[0m kg-002
+  [32m✓[0m kg-003
+  [32m✓[0m kg-004
+  [32m✓[0m kg-005
+  [32m✓[0m kg-006
+  [32m✓[0m kg-007
+  [32m✓[0m kg-008
+  [32m✓[0m kg-009
+  [32m✓[0m kg-010
+
+  [1m[32m10 passed[0m
+
+[1m[36m── RAG Retrieval (10 cases) ──[0m
+  [32m✓[0m rr-001
+  [32m✓[0m rr-002
+  [32m✓[0m rr-003
+  [32m✓[0m rr-004
+  [32m✓[0m rr-005
+  [32m✓[0m rr-006
+  [32m✓[0m rr-007
+  [32m✓[0m rr-008
+  [32m✓[0m rr-009
+  [32m✓[0m rr-010
+
+  [1m[32m10 passed[0m
+
+[1mTotal: [32m58 pass[0m  [33m0 expected-fail[0m  [2m0 pending[0m
+
+================ RUN 3 ================
+
+> sharkeys@0.1.0 eval
+> tsx --tsconfig tsconfig.json scripts/run-eval.ts
+
+
+[1mSharkeys Eval Runner[0m — [36msemantic mode[0m (pgvector + OpenAI enabled)
+
+[1m[36m── Intent Extraction (38 cases) ──[0m
+  [32m✓[0m bgt-001
+  [32m✓[0m bgt-002
+  [32m✓[0m bgt-003
+  [32m✓[0m bgt-004
+  [32m✓[0m bgt-005
+  [32m✓[0m bgt-006
+  [32m✓[0m bgt-007
+  [32m✓[0m bgc-001
+  [32m✓[0m bgc-002
+  [32m✓[0m bgc-003
+  [32m✓[0m bgc-004
+  [32m✓[0m bgc-005
+  [32m✓[0m ot-001
+  [32m✓[0m ot-002
+  [32m✓[0m ot-003
+  [32m✓[0m ot-004
+  [32m✓[0m oc-001
+  [32m✓[0m oc-002
+  [32m✓[0m oc-003
+  [32m✓[0m s-001
+  [32m✓[0m s-002
+  [32m✓[0m s-003
+  [32m✓[0m s-004
+  [32m✓[0m al-001
+  [32m✓[0m al-002
+  [32m✓[0m al-003
+  [32m✓[0m pb-001
+  [32m✓[0m pb-002
+  [32m✓[0m ws-001
+  [32m✓[0m nt-001
+  [32m✓[0m col-001
+  [32m✓[0m col-002
+  [32m✓[0m col-003
+  [32m✓[0m col-004
+  [32m✓[0m col-005
+  [32m✓[0m col-006
+  [32m✓[0m col-007
+  [32m✓[0m col-008
+
+  [1m[32m38 passed[0m
+
+[1m[36m── Keybot Grounding (10 cases) ──[0m
+  [32m✓[0m kg-001
+  [32m✓[0m kg-002
+  [32m✓[0m kg-003
+  [32m✓[0m kg-004
+  [32m✓[0m kg-005
+  [32m✓[0m kg-006
+  [32m✓[0m kg-007
+  [32m✓[0m kg-008
+  [32m✓[0m kg-009
+  [32m✓[0m kg-010
+
+  [1m[32m10 passed[0m
+
+[1m[36m── RAG Retrieval (10 cases) ──[0m
+  [32m✓[0m rr-001
+  [32m✓[0m rr-002
+  [32m✓[0m rr-003
+  [32m✓[0m rr-004
+  [32m✓[0m rr-005
+  [32m✓[0m rr-006
+  [32m✓[0m rr-007
+  [32m✓[0m rr-008
+  [32m✓[0m rr-009
+  [32m✓[0m rr-010
+
+  [1m[32m10 passed[0m
+
+[1mTotal: [32m58 pass[0m  [33m0 expected-fail[0m  [2m0 pending[0m
+

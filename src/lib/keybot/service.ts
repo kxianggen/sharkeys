@@ -1219,6 +1219,7 @@ export function buildOpenAIPromptPayload(facts: KeybotFacts) {
       "Do not add product, price, vendor, stock, or compatibility facts beyond those provided here.",
       "Only reference component IDs from the provided facts.",
       "builderExpertise is the builder's genuine advice — you may use it, but frame it as recommendation/experience, never as statistics.",
+      "If the userMessage is conceptual or educational — asking what something is, how it works, or how two things differ — explain the concept only. Do not name specific products, do not suggest what to buy, and avoid recommendation framing such as 'I recommend'. Name products only when the user asks for a suggestion or states a preference to match.",
     ],
     relevantComponents: facts.relevantComponents.map(toComponentFact),
     selectedComponents: facts.selectedComponents.map(toComponentFact),
