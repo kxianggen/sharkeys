@@ -46,7 +46,7 @@ export const builderKnowledge: readonly BuilderKnowledgeEntry[] = [
   {
     topic: "budget_value_picks",
     guidance:
-      "If you want the most sound for the least money, the two I keep coming back to are the MZ Z1 for budget thock and the KTT Cabbage Tofu for a creamy profile. Both punch well above their price, and for most builds I'd take either over a switch costing several times more. On the case side the Lucky65 is the standout aluminium pick — dense and thocky for what it costs.",
+      "If you want the most sound for the least money, the two I keep coming back to are the Gateron Milky Yellow Pro for budget thock and the MMD Princess Linear V3 for a creamy profile. Both punch well above their price, and for most builds I'd take either over a switch costing several times more. On the case side the Lucky65 is the standout aluminium pick — dense and thocky for what it costs, and the GMK67 plastic case is the one I'd point a tighter budget towards.",
   },
   {
     topic: "hotswap_vs_soldered",

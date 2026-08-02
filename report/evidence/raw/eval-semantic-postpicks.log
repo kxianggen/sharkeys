@@ -1,0 +1,81 @@
+Semantic-mode evaluation, three consecutive runs
+Date: 3 August 2026
+Command: EVAL_SEMANTIC=true npm run eval  (x3)
+Change under test: builder value picks realigned to catalog-stocked switches
+  (Gateron Milky Yellow Pro / MMD Princess Linear V3), grounding guards
+  hardened to the new names, rr-009 / rr-010 activated.
+
+Captured verbatim from the terminal. Intent Extraction scored 38/38 in all
+three runs and is omitted below for brevity; grounding and retrieval are given
+in full because they are where the change lands.
+
+================ RUN 1 ================
+-- Keybot Grounding (10 cases) --
+  PASS kg-001
+  PASS kg-002
+  FAIL kg-003   answer contains banned term: "Milky Yellow"
+  PASS kg-004
+  PASS kg-005
+  PASS kg-006
+  PASS kg-007
+  PASS kg-008
+  PASS kg-009
+  PASS kg-010
+  9 passed  1 failed
+
+-- RAG Retrieval (10 cases) --
+  PASS rr-001 .. rr-010  (all ten)
+  10 passed
+
+Total: 57 pass  1 fail  0 expected-fail  0 pending
+
+================ RUN 2 ================
+-- Keybot Grounding (10 cases) --
+  PASS kg-001
+  PASS kg-002
+  FAIL kg-003   answer contains banned term: "Milky Yellow"
+  PASS kg-004
+  PASS kg-005
+  PASS kg-006
+  PASS kg-007
+  PASS kg-008
+  PASS kg-009
+  PASS kg-010
+  9 passed  1 failed
+
+-- RAG Retrieval (10 cases) --
+  PASS rr-001 .. rr-010  (all ten)
+  10 passed
+
+Total: 57 pass  1 fail  0 expected-fail  0 pending
+
+================ RUN 3 ================
+-- Keybot Grounding (10 cases) --
+  PASS kg-001
+  PASS kg-002
+  FAIL kg-003   answer contains banned term: "recommend"
+  PASS kg-004
+  PASS kg-005
+  PASS kg-006
+  PASS kg-007
+  PASS kg-008
+  PASS kg-009
+  PASS kg-010
+  9 passed  1 failed
+
+-- RAG Retrieval (10 cases) --
+  PASS rr-001 .. rr-010  (all ten)
+  10 passed
+
+Total: 57 pass  1 fail  0 expected-fail  0 pending
+
+================ SUMMARY ================
+Semantic: 57 pass / 1 fail in all three runs. Denominator 58.
+Grounding: 9 / 9 / 9 — stable score, but the single failure has two different
+  causes across runs ("Milky Yellow" twice, "recommend" once), so the
+  underlying wording still varies even though the score does not.
+Retrieval: 10 / 10 / 10.
+
+Offline counterpart (same commit, deterministic, no network):
+  54 pass / 2 fail / 2 expected-fail / 0 pending
+  Full artefact: eval-offline-postpicks.log

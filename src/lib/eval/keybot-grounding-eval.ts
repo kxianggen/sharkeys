@@ -23,7 +23,7 @@ export interface KeybotGroundingTestCase {
  *   kg-007 to kg-010  — expert tips, ONLY when the user explicitly asks a subjective
  *                        tuning or budget-value question
  *
- * The secret-sauce picks (Lucky65, MZ Z1, XHT-BDZ) belong only in kg-007–010,
+ * The secret-sauce picks (Lucky65, Milky Yellow, MMD Princess, XHT-BDZ) belong only in kg-007–010,
  * where surfacing expert opinion is appropriate. They must NOT bleed into
  * objective configurator answers.
  */
@@ -51,7 +51,7 @@ export const keybotGroundingEvalCases: KeybotGroundingTestCase[] = [
     description: "Sound profile education → explains thocky vs clacky without product push",
     input: "What's the difference between thocky and clacky?",
     mustContainAny: ["thocky", "clacky", "sound", "deep", "high-pitched"],
-    mustNotContain: ["MZ Z1", "KTT", "buy", "recommend"],
+    mustNotContain: ["Milky Yellow", "Princess", "buy", "recommend"],
     tags: ["sound-profile", "education", "no-product-push"],
   },
   {
@@ -59,7 +59,7 @@ export const keybotGroundingEvalCases: KeybotGroundingTestCase[] = [
     description: "Catalog-wide recommendation → searches full catalog, not just owner favorites",
     input: "Recommend a quiet office keyboard under RM300",
     mustContainAny: ["silent", "office", "validated", "compatibility"],
-    mustNotContain: ["Lucky65", "MZ Z1", "KTT Cabbage Tofu"],
+    mustNotContain: ["Lucky65", "Milky Yellow", "MMD Princess"],
     tags: ["recommendation", "catalog-wide", "silent", "grounding"],
   },
   {
@@ -67,7 +67,7 @@ export const keybotGroundingEvalCases: KeybotGroundingTestCase[] = [
     description: "Switch type education → linear vs tactile, no upsell",
     input: "What's the difference between linear and tactile switches?",
     mustContainAny: ["linear", "tactile", "bump", "smooth"],
-    mustNotContain: ["MZ Z1", "KTT", "buy", "I recommend"],
+    mustNotContain: ["Milky Yellow", "Princess", "buy", "I recommend"],
     tags: ["switches", "education", "no-product-push"],
   },
   {
@@ -93,7 +93,7 @@ export const keybotGroundingEvalCases: KeybotGroundingTestCase[] = [
     id: "kg-008",
     description: "Budget value expert tip — owner picks appropriate when user asks 'best bang for buck'",
     input: "What's the best bang for buck thocky switch right now?",
-    mustContainAny: ["MZ Z1", "KTT Cabbage Tofu"],
+    mustContainAny: ["Milky Yellow", "MMD Princess", "Princess"],
     mustNotContain: ["Topre", "Holy Pandas", "Zeal", "expensive"],
     tags: ["expert-tip", "budget-value", "subjective-question", "secret-sauce"],
   },

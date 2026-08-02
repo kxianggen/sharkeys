@@ -172,21 +172,19 @@ export const ragRetrievalEvalCases: RagRetrievalTestCase[] = [
   {
     id: "rr-009",
     description:
-      "Expert combo: MZ Z1 surfaces as thocky budget switch (requires catalog seed)",
+      "Expert combo: Gateron Milky Yellow Pro surfaces as the thocky budget switch",
     intent: makeIntent({ soundProfile: "thocky" }),
     assertions: {
-      switchCandidatesIncludeAny: ["switch_mz_z1"],
+      switchCandidatesIncludeAny: ["switch_gateron_milky_yellow_pro"],
     },
-    futureWhenSeeded: true,
   },
   {
     id: "rr-010",
     description:
-      "Expert combo: KTT Cabbage Tofu surfaces as creamy budget switch (requires catalog seed)",
+      "Expert combo: MMD Princess Linear V3 surfaces as the creamy budget switch",
     intent: makeIntent({ soundProfile: "creamy" }),
     assertions: {
-      switchCandidatesIncludeAny: ["switch_ktt_cabbage_tofu"],
+      switchCandidatesIncludeAny: ["switch_mmd_princess_linear_v3"],
     },
-    futureWhenSeeded: true,
   },
 ];

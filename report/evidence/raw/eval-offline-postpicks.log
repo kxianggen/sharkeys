@@ -1,0 +1,85 @@
+
+> sharkeys@0.1.0 eval
+> tsx --tsconfig tsconfig.json scripts/run-eval.ts
+
+
+[1mSharkeys Eval Runner[0m — [2moffline baseline[0m (keyword-fallback, no API key)
+
+[1m[36m── Intent Extraction (38 cases) ──[0m
+  [32m✓[0m bgt-001
+  [32m✓[0m bgt-002
+  [32m✓[0m bgt-003
+  [32m✓[0m bgt-004
+  [32m✓[0m bgt-005
+  [32m✓[0m bgt-006
+  [32m✓[0m bgt-007
+  [32m✓[0m bgc-001
+  [32m✓[0m bgc-002
+  [32m✓[0m bgc-003
+  [32m✓[0m bgc-004
+  [32m✓[0m bgc-005
+  [32m✓[0m ot-001
+  [32m✓[0m ot-002
+  [32m✓[0m ot-003
+  [32m✓[0m ot-004
+  [32m✓[0m oc-001
+  [32m✓[0m oc-002
+  [32m✓[0m oc-003
+  [32m✓[0m s-001
+  [32m✓[0m s-002
+  [32m✓[0m s-003
+  [32m✓[0m s-004
+  [32m✓[0m al-001
+  [32m✓[0m al-002
+  [32m✓[0m al-003
+  [32m✓[0m pb-001
+  [32m✓[0m pb-002
+  [32m✓[0m ws-001
+  [32m✓[0m nt-001
+  [32m✓[0m col-001
+  [32m✓[0m col-002
+  [32m✓[0m col-003
+  [32m✓[0m col-004
+  [32m✓[0m col-005
+  [32m✓[0m col-006
+  [32m✓[0m col-007
+  [32m✓[0m col-008
+
+  [1m[32m38 passed[0m
+
+[1m[36m── Keybot Grounding (10 cases) ──[0m
+  [32m✓[0m kg-001
+  [32m✓[0m kg-002
+  [32m✓[0m kg-003
+  [32m✓[0m kg-004
+  [32m✓[0m kg-005
+  [32m✓[0m kg-006
+  [32m✓[0m kg-007
+  [31m✗[0m kg-008
+      [2manswer missing all of: "Milky Yellow", "MMD Princess", "Princess"[0m
+  [32m✓[0m kg-009
+  [31m✗[0m kg-010
+      [2manswer missing all of: "Krytox 205g0", "205g0"[0m
+      [2manswer missing required term: "205g0"[0m
+      [2manswer missing required term: "XHT-BDZ"[0m
+
+  [1m[32m8 passed[0m  [1m[31m2 failed[0m
+
+[1m[36m── RAG Retrieval (10 cases) ──[0m
+  [32m✓[0m rr-001
+  [32m✓[0m rr-002
+  [32m✓[0m rr-003
+  [32m✓[0m rr-004
+  [32m✓[0m rr-005
+  [32m✓[0m rr-006
+  [33m~[0m rr-007 [2m(expected — semantic gap; run with EVAL_SEMANTIC=true after seeding)[0m
+      [2mswitch "switch_gateron_milky_yellow_pro" has soundProfile "thocky", expected "creamy"[0m
+  [33m~[0m rr-008 [2m(expected — semantic gap; run with EVAL_SEMANTIC=true after seeding)[0m
+      [2mswitch "switch_outemu_silent_peach_v2" has soundProfile "silent", expected "thocky"[0m
+  [32m✓[0m rr-009
+  [32m✓[0m rr-010
+
+  [1m[32m8 passed[0m  [33m2 expected-fail[0m
+
+[1mTotal: [32m54 pass[0m  [1m[31m2 fail[0m  [33m2 expected-fail[0m  [2m0 pending[0m
+
