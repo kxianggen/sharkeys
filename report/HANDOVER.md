@@ -58,6 +58,12 @@ Formatting throughout: Times New Roman 12pt, 1.5 line spacing (`w:line="360"`), 
 
 **Evaluation results are three separate claims, never one total.** Capability (the colour cases, 0/5 → 5/5), Control A (adversarial guards, 3/3 → 3/3), Control B (the original 50 cases, unchanged). The denominator changed from 50 to 58 when eight cases were added, so raw totals are not comparable across that change.
 
+**NEVER regenerate the whole docx from markdown.** `CP2_Chapter4.md` and `CP2_Chapter5.md` are source for Chapters 4 and 5 **ONLY**. The abstract, §3.3.4 and Appendix A exist solely in the docx and would be lost. Re-syncing Chapters 4 and 5 in place is safe; a full rebuild is not.
+
+There is no markdown source for the abstract, for Chapters 1–3, or for Appendix A. Chapter 4's opening paragraph refers the reader to Appendix A for reproduction commands; that reference resolves in the document but **not** in the markdown alone, so `CP2_Chapter4.md` is not a standalone artefact and must not be read as one.
+
+Before editing chapter content, change the markdown first and re-sync the docx section in place — not the other way round. The 622-line engine figure was corrected in the docx alone and the two files diverged until it was caught; that is the failure mode this rule exists to prevent.
+
 **Don't re-derive the evidence.** Everything is measured, verified and committed. The remaining work is document editing, not analysis.
 
 ## The five headline results, for the abstract

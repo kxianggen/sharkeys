@@ -53,3 +53,6 @@ playwright-report/
 
 # local Claude session settings
 .claude/
+
+# Word lock files
+~$*
