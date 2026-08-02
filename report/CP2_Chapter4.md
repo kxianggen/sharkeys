@@ -23,7 +23,7 @@ Quality gates are enforced by a single `verify` script chaining type checking, l
 
 ## 4.2 The compatibility engine
 
-Objective 1 required a constraint satisfaction engine preventing physically incompatible selections. The engine is a 622-line module evaluating a complete build across seven validation categories: layout, preferred layout, mount, kit structural integrity, switch, keycap and stabiliser compatibility, plus a separate advisory layer producing non-blocking warnings.
+Objective 1 required a constraint satisfaction engine preventing physically incompatible selections. The engine is a 713-line module evaluating a complete build across seven validation categories: layout, preferred layout, mount, kit structural integrity, switch, keycap and stabiliser compatibility, plus a separate advisory layer producing non-blocking warnings.
 
 It does not short-circuit. All validators execute unconditionally and accumulate issues, so rejection costs approximately the same as acceptance. This matters for interpreting the timings in Section 4.6: there is no fast path for invalid builds.
 
@@ -255,7 +255,7 @@ Two explanations are consistent with the data and cannot be distinguished withou
 
 | Objective | Evidence | Status |
 |---|---|---|
-| 1. Logic-driven configurator with constraint engine | 622-line engine, 7 categories, 99.44% space reduction, 20/20 independent agreement, no invalid build emitted in any run | **Achieved** |
+| 1. Logic-driven configurator with constraint engine | 713-line engine, 7 categories, 99.44% space reduction, 20/20 independent agreement, no invalid build emitted in any run | **Achieved** |
 | 2. RAG recommendation translating sensory intent | Both semantic-gap cases closed and reproducible; no hallucinated component in any grounding run; colour extraction 5/5 in both implementations | **Achieved** |
 | 3. Full-stack application with social features | Accounts, persistent builds, publishing, threaded gallery with AI replies delivered; one-click cloning not delivered | **Substantially achieved** |
 
