@@ -1,0 +1,108 @@
+{
+  "meta": {
+    "benchmark": "bench-recommendations",
+    "startedAt": "2026-08-02T15:38:23.881Z",
+    "finishedAt": "2026-08-02T15:39:20.494Z",
+    "nodeVersion": "v22.19.0",
+    "platform": "win32/x64",
+    "environment": "Linux sandbox. DETERMINISTIC MODE: OPENAI_API_KEY and Supabase vars deleted before module load, so the local keyword fallback and seed catalog are used. No network calls.",
+    "warmupIterations": 20,
+    "timedIterations": 200,
+    "promptCount": 8,
+    "catalogState": {
+      "totalRecords": 60,
+      "note": "Catalog as committed at e021130 (60 records), working tree unmodified at time of measurement."
+    }
+  },
+  "latency": {
+    "n": 200,
+    "meanMs": 248.56819000000007,
+    "medianMs": 217.1542,
+    "p95Ms": 537.425,
+    "p99Ms": 577.2768,
+    "minMs": 3.7612,
+    "maxMs": 602.0621,
+    "stdDevMs": 185.36812124887038
+  },
+  "stageTwoReduction": {
+    "description": "Stage 2 of the choice reduction. Stage 1 (sweep-selectivity.ts) reduces the combinatorial space to the accepted set; this is how many builds a user is actually shown.",
+    "perPrompt": [
+      {
+        "prompt": "I want a thocky keyboard under RM250 for office work",
+        "recommendationCount": 0,
+        "clarificationNeeded": true,
+        "clarificationPrompt": "Everything that fits comes out over budget. Try raising the budget, or relaxing the layout or sound preference.",
+        "allBuildsValid": true,
+        "allComponentsInCatalog": true
+      },
+      {
+        "prompt": "creamy sounding 65% keyboard for gaming",
+        "recommendationCount": 3,
+        "clarificationNeeded": true,
+        "clarificationPrompt": "What budget range should sharkeys stay within?",
+        "allBuildsValid": true,
+        "allComponentsInCatalog": true
+      },
+      {
+        "prompt": "budget mechanical keyboard for a beginner",
+        "recommendationCount": 3,
+        "clarificationNeeded": true,
+        "clarificationPrompt": "Do you prefer quiet office typing, creamy study sound, or clacky gaming feedback?",
+        "allBuildsValid": true,
+        "allComponentsInCatalog": true
+      },
+      {
+        "prompt": "quiet keyboard for a shared office under RM200",
+        "recommendationCount": 0,
+        "clarificationNeeded": true,
+        "clarificationPrompt": "Everything that fits comes out over budget. Try raising the budget, or relaxing the layout or sound preference.",
+        "allBuildsValid": true,
+        "allComponentsInCatalog": true
+      },
+      {
+        "prompt": "I want something that sounds deep and premium",
+        "recommendationCount": 3,
+        "clarificationNeeded": true,
+        "clarificationPrompt": "Do you prefer quiet office typing, creamy study sound, or clacky gaming feedback?",
+        "allBuildsValid": true,
+        "allComponentsInCatalog": true
+      },
+      {
+        "prompt": "75% layout, hot swappable, wireless if possible",
+        "recommendationCount": 3,
+        "clarificationNeeded": true,
+        "clarificationPrompt": "Do you prefer quiet office typing, creamy study sound, or clacky gaming feedback?",
+        "allBuildsValid": true,
+        "allComponentsInCatalog": true
+      },
+      {
+        "prompt": "best value build for typing all day",
+        "recommendationCount": 3,
+        "clarificationNeeded": true,
+        "clarificationPrompt": "Do you want a compact 65%, 75%, or TKL layout?",
+        "allBuildsValid": true,
+        "allComponentsInCatalog": true
+      },
+      {
+        "prompt": "I don't really know what I want, something nice",
+        "recommendationCount": 3,
+        "clarificationNeeded": true,
+        "clarificationPrompt": "Do you prefer quiet office typing, creamy study sound, or clacky gaming feedback?",
+        "allBuildsValid": true,
+        "allComponentsInCatalog": true
+      }
+    ],
+    "meanRecommendationsReturned": 2.25,
+    "minRecommendationsReturned": 0,
+    "maxRecommendationsReturned": 3,
+    "hardCap": 3,
+    "hardCapSource": "defaultMaxRecommendations, src/lib/recommendations/service.ts:69"
+  },
+  "pipelineConformance": {
+    "description": "Non-circular integrity check: every build emitted by the recommendation service is re-validated through the rule engine, and every referenced component id is checked against the catalog. This tests the architectural guarantee that no unvalidated build can reach a user (CP1 §3.2.4 Reliability).",
+    "promptsChecked": 8,
+    "buildsChecked": 18,
+    "allBuildsValid": true,
+    "allComponentsInCatalog": true
+  }
+}

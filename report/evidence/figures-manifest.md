@@ -85,6 +85,7 @@ The five numbers most worth putting in front of an examiner.
 | F3 | Kit rejection — median | 0.0046 ms | §2 | `bench-validation.ts` 📊 | Quote to 2 s.f. |
 | F4 | Verdict vs 200 ms | **MET**, ~29,000× margin | §1, §2 | `bench-validation.ts` | **Frame as a requirements-setting observation, not an achievement.** CP1 budgeted 200 ms for the cheapest step in the pipeline. |
 | F5 | No short-circuit | All 7 validators run unconditionally | §2 | `compatibility.ts:64–71` 🔒 | Rejection costs ≈ acceptance. Do not describe "early" vs "late" rejection. |
+| F5b | Rule engine size | **713 lines** (`src/lib/rules/compatibility.ts`) | Ch.4 §4.2, §4.9 | `wc -l` 🔒 ⚠️ | **A fourth stale number reached the report: Chapter 4 and the abstract say "622-line". The file has been 713 lines since `f59ff0b` (31 Jul), which precedes the `4f019d3` measurement baseline, so 622 was already wrong when written.** 622 appears nowhere in this evidence set — it was carried from the obsolete `report/CP2_Final_Report.md` draft, which is the same stale-documentation contamination that produced the 42-record, 52-case and 182-test errors. Verified at `7b1a61e`. |
 | F6 | Scaling — 60 → 5,000 records | 0.0044 → 0.3267 ms median | §3 | `bench-validation.ts` 📊 | Synthetic records vary layout/mount/switch tech; identical clones would give a false flat curve. |
 | F7 | Scaling relationship | **Linear**, 83× records → ~74× time | §3 | `bench-validation.ts` 📊 | Ratio ranged 70–74× across runs. Linearity is stable; the multiplier is not. |
 | F8 | Cause of linearity | `new Map(catalog.map(...))` per call | §3 | `compatibility.ts:131–133` 🔒 | Entire linear term is **index construction, not validation**. Rules are O(1) in catalog size. |
@@ -185,11 +186,11 @@ Measured on macOS arm64, SHA `4f019d3`.
 | # | Figure | Value | Section | Source | Caveat |
 |---|---|---|---|---|---|
 | F47 | Test files | **37 passed / 37** | §6a | `npm run test` 🔒 | — |
-| F48 | Tests passed | **211** | §6a | `npm run test` 🔒 | Matches the static `it(`/`test(` count exactly. **Never cite without F49b** — see the attribution limit. |
-| F49 | Tests **skipped** | **42 of 253 (16.6%)** — all one cause: pinned to the pre-19-part seed catalog, `TODO(catalog-rewrite)` | §6a, §7.1 | `npm run test` + skip audit 🔒 ⚠️ | **Must accompany F48 wherever it appears.** None is credential-conditional. Audited — see F49b for the attribution limit, which is the real finding. |
+| F48 | Tests passed | **215** (was 211 at `4f019d3`) | §6a | `npm run test` 🔒 | **Re-measured at `7b1a61e`: 215 passed / 42 skipped / 257 total, 37 files.** The four added tests are the UAT work (three inverted nav assertions plus colour ranking). Matches the static `it(`/`test(` count exactly. **Never cite without F49b** — see the attribution limit. |
+| F49 | Tests **skipped** | **42 of 257 (16.3%)** — all one cause: pinned to the pre-19-part seed catalog, `TODO(catalog-rewrite)` | §6a, §7.1 | `npm run test` + skip audit 🔒 ⚠️ | **Must accompany F48 wherever it appears.** Skip count is unchanged by the UAT work; only the denominator moved. None is credential-conditional. Audited — see F49b for the attribution limit, which is the real finding. |
 | F49b | **Coverage attribution limit** | Kit integrity, stabilizer compatibility and the warning/error split have **NO active unit test**; layout only partial | §6a | skip audit 🔒 ⚠️ | **"211 tests passed" must NEVER be cited as evidence for:** kit integrity · stabilizer compatibility · warning/error split · grounding · anti-hallucination · budget enforcement · graceful degradation on OpenAI failure. **The properties are still verified — by F10–F14 (exhaustive sweep), F19 (independent 20-sample) and F18 (conformance), which are exhaustive rather than exemplary and arguably stronger.** This is a limitation of what the *test suite* can be credited with, not of the system's verification. Compounds with F15. |
 | F49c | Disabled tests in the rule engine's own suite | **10**, including the happy path, kit integrity and stabilizer rules | §6a | skip audit 🔒 | Restoring these against the 60-part catalog is well-defined future work; the valid component IDs already exist in `raw/bench-validation.json`. Not attempted — rewriting fixtures is implementation work and would change the artefact being measured. |
-| F50 | Suite duration | **8.73 s** | §6a | `npm run test` 📊 | Single run, unranged. Quote as "under 9 seconds". |
+| F50 | Suite duration | **8.73 s** | §6a | `npm run test` 📊 | Single run, unranged, macOS. Quote as "under 9 seconds". The `7b1a61e` re-measurement on Windows took 25.5 s — a different machine, not a regression. Do not merge (§0). |
 | F51 | Build | **Succeeded**; 18 routes (9 API, 8 pages, 1 auth callback, + middleware) | §6b | `npm run build` 🔒 | Only `/browse` prerenders — expected, since other pages depend on session state or live data. Not a defect. |
 | F52 | E2E — executed | `uat-evidence.spec.ts`: **5 tests, 5 passed, 36.2 s** (macOS) | §6a | `npx playwright test` 🔒 | Produced all 7 before-shots. |
 | F52b | E2E — **not executed** | **7 of 8 specs**: account-flyout, browse, configurator, landing-sections, meg-comment-label, my-builds, nav-consistency | §6a | ⏳ | Not "Playwright wasn't run" — 1 of 8 ran. A bare `npx playwright test` closes it **and** demonstrates the `UAT_PHASE` skip guard firing in practice rather than only by design. |
@@ -239,6 +240,26 @@ Round-B suite breakdown, totalling 58: intent 33 pass / 5 fail (38 cases) · gro
 
 **Earlier arithmetic in this manifest was wrong.** A previous revision computed the round-B denominator as 47 + 7 = 54, omitting the 2 expected-fail and 2 pending cases. The correct denominator is **58**. Expected-fail and pending cases are part of the suite and must be counted in it.
 
+### F56 — Semantic-mode after-state for the colour work ⚠️ TRANSCRIBED, NOT ARTEFACT-BACKED
+
+`uat-fixes.md` §3.4 recorded the semantic after-state as **not captured**. It was in fact run three times after the colour work landed, but the log was never copied into `raw/` and is not present on this machine. **The figures below are transcribed from the author's record, not from a committed artefact.** They are the least citable numbers in the evidence set and must carry this label wherever they appear.
+
+| Run | Intent (38) | Grounding (10) | RAG (10) | Total |
+|---|---|---|---|---|
+| 1 | 38 pass | 8 pass, 2 fail (`kg-003`, `kg-008`) | 8 pass, 2 pending | **54 pass, 2 fail** |
+| 2 | 38 pass | 9 pass, 1 fail (`kg-008`) | 8 pass, 2 pending | **55 pass, 1 fail** |
+| 3 | 38 pass | 8 pass, 2 fail (`kg-001`, `kg-008`) | 8 pass, 2 pending | **54 pass, 2 fail** |
+
+**Mean 54.33, range 54–55, denominator 58 in every run.** All eight `col-*` cases passed in all three runs, so **Claim 1 (Capability) is 0/5 → 5/5 in both modes** and the Chapter 4 table cell stands as written. This closes the outstanding measurement flagged in `uat-fixes.md` §3.4 — but on transcription, not on an artefact.
+
+**Three independent cross-checks support the transcription:**
+
+1. **Arithmetic closes in every run.** 54 + 2 fail + 2 pending = 58; 55 + 1 + 2 = 58. The denominator is 58 throughout, as F54 requires.
+2. **The grounding sequence decomposes exactly.** Chapter 4 §4.4.4 reports seven semantic grounding runs scoring 7, 8, 8, 9, 8, 9, 8. The four logged baseline runs in `raw/` scored 7, 8, 8, 9 (F53); these three scored 8, 9, 8. The two sets concatenate to precisely the reported sequence, which would be an unlikely coincidence had the runs not occurred.
+3. **The failure pattern matches F53 independently.** F53 records `kg-008` failing every run with `kg-001` and `kg-003` flipping. These three runs show exactly that: `kg-008` fails all three, `kg-003` fails run 1, `kg-001` fails run 3. The variation sits inside the established 7–9 noise band and is attributable to model non-determinism, not to the colour work.
+
+**Standing caveat.** Report these as semantic-mode figures with the range, never a single run, and do not present them as artefact-backed. If a networked run happens for any other reason, `EVAL_SEMANTIC=true npm run eval` with the output committed to `raw/` would convert F56 from transcription into evidence at no analytical cost.
+
 ### Provenance gap — the one weak point in the evidence set
 
 Every other figure here has a regenerable artefact in `raw/`. The eval figures do not: they exist only as terminal output, which makes them the least citable numbers in the set. `sharkeys-batch.log` and `sharkeys-roundB.log` are being moved into `report/evidence/raw/` and committed, after which every eval figure has a dated source carrying its own commit SHA. **Cite those logs once they land**; until then F53–F55 rest on transcription rather than on an artefact.
@@ -260,11 +281,29 @@ Every other figure here has a regenerable artefact in `raw/`. The eval figures d
 | Time-to-first-chunk under streaming | **NOT MEASURED** | No streaming call has ever been made | Would convert F23b from inference to measurement. ~1 API call — piggyback on a networked run, no dedicated trip scheduled |
 | Restored rule-engine test fixtures | **NOT ATTEMPTED** | Implementation work; would change the artefact being measured | Future work (F49c). Valid IDs already in `raw/bench-validation.json` |
 
-**Static counts now confirmed against the runner:** 37 test files / 211 blocks matched vitest exactly. The 8 Playwright specs / 24 blocks remain static-only — Playwright was not run.
+**Static counts now confirmed against the runner:** at `4f019d3`, 37 test files / 211 blocks matched vitest exactly; **re-confirmed at `7b1a61e` as 37 files / 215 blocks / 215 passing.** The 8 Playwright specs / 24 blocks remain static-only — Playwright was not run.
 
 ---
 
-## 10. Re-verification required after the colour-metadata commit
+## 10. Re-verification after the colour-metadata commit ✅ DONE — nothing moved
+
+**Status: performed at `7b1a61e`. Every figure held. H2 is confirmed against the delivered code.**
+
+The requirement below was outstanding until this run: every artefact in `raw/` was written at `37505f5`, which precedes the colour commit `46ea4e1` by about fifteen hours, so the re-run had never been done.
+
+| Figure | Before | After | Verdict |
+|---|---|---|---|
+| F10–F16 (space, cascade, independent rates, overlap, dead rules) | as tabled in §3 | identical | unchanged |
+| **F17 stage-2 counts** | `[0,3,3,0,3,3,3,3]`, mean 2.25 | **identical** | **unchanged** |
+| **F18 pipeline conformance** | 18/18 valid, 18/18 in catalog | **identical** | **unchanged** |
+| F30–F34 build economics | RM281 floor, median 600, 0 in band | identical | unchanged |
+
+Compared field by field with `meta` and `latency` excluded: **every substantive value matches exactly.** **H2 (585,200 → 3,250 → 3, 99.9995%) stands as written and Chapter 4 needs no change.** This is the expected result — `scoreColourFit` is unit-tested as a no-op when no colour is requested, and none of the eight benchmark prompts contains a colour word — but it is now measured rather than assumed.
+
+**F20 was not re-measured by this run and must not be revised from it.** The re-run executed on Windows x64, a third environment, giving a median of 217.2 ms against macOS's 91.6 ms. Environments are never merged (§0), so the original macOS artefacts were restored to `raw/` and the re-run kept separately in **`raw/reverify-postcolour/`** with its own README. Cite `raw/` for every figure; cite `reverify-postcolour/` only for the fact that re-verification was performed and nothing moved. The Windows figure is **not** evidence that the colour work slowed the pipeline — the deterministic counts from that same run are bit-identical.
+
+<details>
+<summary>Original requirement, retained for the record</summary>
 
 All figures above are pinned to `e021130`. After the implementation agent commits the colour work:
 
@@ -290,6 +329,10 @@ npx tsx --tsconfig tsconfig.json scripts/analyse-build-economics.ts # confirm F3
 ```
 
 Then update the catalog commit reference in the header of `performance.md`, `competitive-audit.md` and this manifest, and re-check that §4.2 and §7.3 still agree with each other — that internal cross-check is what caught the pricing error.
+
+</details>
+
+**The §4.2 / §7.3 cross-check still agrees.** The re-run returned 0 builds for both the RM250 and RM200 prompts, and build economics independently returned 0 builds at or under RM250. That is the same internal consistency check that caught the pricing error, and it passes.
 
 ---
 

@@ -1,0 +1,225 @@
+{
+  "meta": {
+    "benchmark": "sweep-selectivity",
+    "startedAt": "2026-08-02T15:39:03.257Z",
+    "finishedAt": "2026-08-02T15:39:08.100Z",
+    "nodeVersion": "v22.19.0",
+    "platform": "win32/x64",
+    "elapsedMs": 4841.6742,
+    "exhaustive": true,
+    "samplingMethod": "none — every combination evaluated",
+    "catalog": {
+      "totalRecords": 60,
+      "byCategory": {
+        "case": 7,
+        "pcb": 8,
+        "plate": 19,
+        "switch": 10,
+        "keycap": 5,
+        "stabilizer": 11
+      }
+    },
+    "combinationSpace": 585200,
+    "note": "Catalog as committed at e021130 (60 records); working tree unmodified at measurement time. 5 keycap records already carry metadata.swatch. The combination space is a function of catalog composition and will change if categories gain or lose records."
+  },
+  "cascade": [
+    {
+      "layer": "All possible combinations",
+      "surviving": 585200,
+      "pctOfTotal": 100
+    },
+    {
+      "layer": "After layout compatibility",
+      "surviving": 45650,
+      "pctOfTotal": 7.8007518796992485
+    },
+    {
+      "layer": "After mount compatibility",
+      "surviving": 27500,
+      "pctOfTotal": 4.6992481203007515
+    },
+    {
+      "layer": "After kit structural integrity",
+      "surviving": 11300,
+      "pctOfTotal": 1.9309637730690363
+    },
+    {
+      "layer": "After switch / keycap / stabilizer fitment",
+      "surviving": 3250,
+      "pctOfTotal": 0.5553656869446343
+    }
+  ],
+  "cascadeNote": "ANALYTICAL ORDERING, not engine behaviour. The engine does not short-circuit; every validator runs on every call. Applied first, layout absorbs rejections it shares with mount and kit. See independentRejection for an order-free view.",
+  "independentRejection": [
+    {
+      "rule": "Layout compatibility",
+      "codes": [
+        "case_pcb_plate_layout_mismatch",
+        "case_pcb_layout_mismatch",
+        "plate_pcb_layout_mismatch",
+        "plate_case_layout_mismatch"
+      ],
+      "rejects": 539550,
+      "pctOfTotal": 92.19924812030075
+    },
+    {
+      "rule": "Mount compatibility",
+      "codes": [
+        "case_pcb_mount_mismatch",
+        "case_plate_mount_mismatch"
+      ],
+      "rejects": 339900,
+      "pctOfTotal": 58.08270676691729
+    },
+    {
+      "rule": "Kit structural integrity",
+      "codes": [
+        "kit_structural_mismatch"
+      ],
+      "rejects": 505500,
+      "pctOfTotal": 86.38072453861928
+    },
+    {
+      "rule": "Switch compatibility",
+      "codes": [
+        "switch_pcb_technology_mismatch",
+        "switch_plate_technology_mismatch",
+        "switch_keycap_technology_mismatch"
+      ],
+      "rejects": 170170,
+      "pctOfTotal": 29.078947368421055
+    },
+    {
+      "rule": "Keycap compatibility",
+      "codes": [
+        "keycap_layout_mismatch",
+        "keycap_preferred_layout_mismatch"
+      ],
+      "rejects": 0,
+      "pctOfTotal": 0
+    },
+    {
+      "rule": "Stabilizer compatibility",
+      "codes": [
+        "stabilizer_pcb_type_mismatch",
+        "stabilizer_layout_requirements_mismatch"
+      ],
+      "rejects": 296700,
+      "pctOfTotal": 50.70061517429938
+    }
+  ],
+  "overlap": {
+    "description": "Each rule applied alone against the full space. The sum exceeds the combined rejection count because a single combination is commonly rejected by several rules at once; the difference is the overlap.",
+    "sumOfIndependentRejections": 1851820,
+    "combinedRejected": 581950,
+    "overlapCount": 1269870,
+    "sumPctOfTotal": 316.44224196855777,
+    "combinedRejectedPctOfTotal": 99.44463431305537
+  },
+  "accepted": {
+    "count": 3250,
+    "pctOfTotal": 0.5553656869446343
+  },
+  "kitIntegrityIsolation": {
+    "description": "Physical rules only (layout, mount, switch/keycap/stabilizer fitment), kit integrity NOT applied.",
+    "survivingPhysicalOnly": 6130,
+    "pctOfTotal": 1.0475051264524948,
+    "prunedByKitIntegrityAlone": 2880,
+    "pctPrunedByKitIntegrityAlone": 0.49213943950786054
+  },
+  "errorCodeFrequency": {
+    "case_pcb_plate_layout_mismatch": 539550,
+    "kit_structural_mismatch": 505500,
+    "case_pcb_layout_mismatch": 449350,
+    "plate_case_layout_mismatch": 431200,
+    "plate_pcb_layout_mismatch": 419650,
+    "stabilizer_pcb_type_mismatch": 285950,
+    "case_plate_mount_mismatch": 237600,
+    "case_pcb_mount_mismatch": 188100,
+    "switch_pcb_technology_mismatch": 160930,
+    "switch_plate_technology_mismatch": 73920,
+    "stabilizer_layout_requirements_mismatch": 19350
+  },
+  "acceptedExamples": [
+    {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_unknown_pudding_oem_pbt",
+      "stabilizer": "stab_gmk67_plate_mount"
+    },
+    {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_unknown_pudding_oem_pbt",
+      "stabilizer": "stab_flcmmk_fulin_v3_plate_mount"
+    },
+    {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_unknown_pudding_oem_pbt",
+      "stabilizer": "stab_sp_star_plate_mount"
+    },
+    {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_unknown_retro_9009_cherry_pbt",
+      "stabilizer": "stab_gmk67_plate_mount"
+    },
+    {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_unknown_retro_9009_cherry_pbt",
+      "stabilizer": "stab_flcmmk_fulin_v3_plate_mount"
+    },
+    {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_unknown_retro_9009_cherry_pbt",
+      "stabilizer": "stab_sp_star_plate_mount"
+    },
+    {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_unknown_seasonic_xda_pbt",
+      "stabilizer": "stab_gmk67_plate_mount"
+    },
+    {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_unknown_seasonic_xda_pbt",
+      "stabilizer": "stab_flcmmk_fulin_v3_plate_mount"
+    },
+    {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_unknown_seasonic_xda_pbt",
+      "stabilizer": "stab_sp_star_plate_mount"
+    },
+    {
+      "case": "case_gmk67_65_plastic",
+      "pcb": "pcb_gmk67_65_hotswap",
+      "plate": "plate_gmk67_65_pc",
+      "switch": "switch_gateron_milky_yellow_pro",
+      "keycap": "keycap_unknown_illusion_sky_blue_cherry_pbt",
+      "stabilizer": "stab_gmk67_plate_mount"
+    }
+  ]
+}
