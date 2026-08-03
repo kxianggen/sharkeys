@@ -359,87 +359,81 @@ compatibility constraint, and the rule engine never sees it.
 
 ### 4.5.2 A configuration-dependent defect
 
-The first screenshot taken after implementing colour showed no change whatsoever,
+The first screenshot taken after implementing colour showed no change at all,
 despite extraction passing 5 out of 5, the ranking unit tests passing, and a
-direct probe confirming the scoring function reordered candidates correctly. Every
-signal indicated the feature worked, and in the running application it did nothing.
+direct probe confirming the scoring function reordered candidates correctly.
+Every signal said the feature worked. In the running application it did nothing.
 
 The cause was configuration rather than code. The application reads its catalog
 from the Supabase database whenever credentials are present, falling back to the
 local seed file only when they are absent, and the colour tags had been added to
-the seed file. Every component therefore reported no colour, the ranking
-contributed zero, and output was identical to before for reasons unconnected to
-the code just written. It was resolved by merging the colour data directly into
-the five keycap rows in the database, verified afterwards as 60 rows with colour
-on 5 and kit data intact on 30.
+the seed file. Every component therefore reported no colour and the ranking
+contributed zero. It was resolved by merging the colour data directly into the
+five keycap rows in the database.
 
-This is the most transferable finding in the project. A change can pass every unit
-test, every evaluation case and a direct functional probe while doing nothing in
-the deployed system, because the tests and the running application may not read
-the same data source. It was caught only because the design cycle required a
+This is the most transferable finding in the project. A change can pass every
+unit test, every evaluation case and a direct functional probe while doing
+nothing in the deployed system, because the tests and the running application may
+not read the same data. It was caught only because the design cycle required a
 before-and-after screenshot rather than permitting a passing test to be trusted.
 
 ### 4.5.3 Remaining findings
 
-Finding 3 was diagnosed precisely. The saved builds page existed and worked, but
-was reachable only through an unlabelled avatar icon, and the confirmation shown
-after saving referred to "the My Builds page" in plain text, telling users where
-their build had gone while giving them no way to get there. Both were corrected.
-Three existing tests asserted the opposite by requiring the navigation link to be
-absent; these were inverted rather than deleted, since they encoded precisely the
-behaviour user testing rejected. This is the classic implemented-but-not-usable
-result, in which the feature was complete and the signpost missing.
+Finding 3 was a signposting problem rather than a missing feature. The saved
+builds page existed and worked, but was reachable only through an unlabelled
+avatar icon, and the confirmation shown after saving named "the My Builds page"
+in plain text while giving the user no way to get there. Both were corrected.
+Three existing tests had asserted the opposite by requiring the navigation link
+to be absent; these were inverted rather than deleted, since they encoded exactly
+the behaviour user testing rejected. This is the classic implemented-but-not-usable
+result: the feature was complete and the signpost missing.
 
 Finding 2 was addressed presentationally. The gallery had been a three-column
-image grid, carrying the conventions of a photo gallery where the image leads and
-author, timestamp and discussion are secondary. It was rebuilt as a single-column
-feed using the conventions readers recognise as posts, with byline above title,
-title dominant, an excerpt, and an invitation into the discussion. No data model
-or server code changed. A requested per-post reply count was deliberately not
-implemented, since the count is absent from the query loading the list and adding
-it would have exceeded the presentational scope agreed.
+image grid, which carries the conventions of a photo album rather than a
+discussion. It was rebuilt as a single-column feed using the conventions readers
+recognise as posts, with the byline above the title and an invitation into the
+thread. No data model or server code changed. A requested per-post reply count
+was deliberately not implemented, since it would have required changing the
+database query and so exceeded the presentational scope agreed.
 
-Finding 4 was timeboxed, and an audit found that two of the three scoped items had
-already been implemented before user testing, while the third targeted a component
-nothing in the product renders. Rather than perform work either already complete
-or invisible, the scope was reduced to one substantive change: the recommendation
+Finding 4 was timeboxed, and an audit found two of the three scoped items already
+implemented before user testing, while the third targeted a component nothing in
+the product renders. Rather than perform work either already complete or
+invisible, the scope was reduced to one substantive change: the recommendation
 card now names the build's colourway in words rather than only showing swatches,
 closing the loop on the tester's original request. Claiming to have completed all
-three would have placed statements in this report that were untrue or described
-work predating the finding.
+three would have placed statements in this report that were untrue.
 
 ### 4.5.4 Realigning expert recommendations
 
-A later check of the assistant's answers found that it never mentioned the
-switches the builder's own guidance recommends, even when asked directly which
-switch offered the best value for money. The evaluation had been recording this
-as a failure for some time without the cause being understood.
+A later check found that the assistant never mentioned the switches the builder's
+own guidance recommends, even when asked directly which switch offered the best
+value for money. The evaluation had been recording this as a failure for some
+time without the cause being understood.
 
 The cause was not the AI. The guidance recommended two switches that are not
 stocked in the catalog, and the grounding rules forbid naming any part the system
 cannot verify, so the assistant correctly declined to mention them. The
 equivalent question about cases passed throughout, because the case it
-recommends is a stocked item. The system was behaving exactly as designed; the
-guidance had simply fallen out of step with the catalog.
+recommends is stocked. The system was behaving exactly as designed; the guidance
+had fallen out of step with the catalog.
 
-The two recommendations were realigned to switches actually carried, preserving
-the original structure of one pick per sound profile: the Gateron Milky Yellow
-Pro at RM0.90 for thock, and the MMD Princess Linear V3 at RM0.94 for a creamy
-profile. The latter was already flagged in the catalog as the builder's personal
-pick, which confirms the guidance rather than the data was at fault.
+The recommendations were realigned to switches actually carried, keeping one pick
+per sound profile: the Gateron Milky Yellow Pro at RM0.90 for thock and the MMD
+Princess Linear V3 at RM0.94 for a creamy profile. The latter was already flagged
+in the catalog as the builder's personal pick, confirming that the guidance
+rather than the data was at fault.
 
-Two further problems surfaced during the same work. Three grounding checks
-designed to confirm the assistant does not push products during educational
-questions were forbidding the names of the unstocked switches, so they had been
-passing without testing anything. Once corrected to the stocked names, one of
-them failed immediately: asked to explain the difference between thocky and
-clacky, the assistant answered by naming a product and using recommendation
-language. This was a genuine defect that had been invisible while the check was
-ineffective. It was resolved by adding a rule that conceptual questions receive
-an explanation only, with products named solely when the user asks for a
-suggestion. Separately, two retrieval cases that had been marked pending against
-component identifiers which never existed were activated against the stocked
-switches, and both pass.
+Two further problems surfaced during the same work. Three grounding checks meant
+to confirm the assistant does not push products during educational questions were
+guarding against the names of the unstocked switches, so they had been passing
+without testing anything. Once corrected, one failed immediately: asked to
+explain the difference between thocky and clacky, the assistant answered by
+naming a product and using recommendation language. This defect had been
+invisible while the check was ineffective, and was resolved by adding a rule that
+conceptual questions receive an explanation only. Separately, two retrieval cases
+marked pending against component identifiers that never existed were activated
+against the stocked switches, and both pass.
 
 | Evaluation state | Offline | AI mode |
 |---|---|---|
@@ -449,21 +443,15 @@ switches, and both pass.
 
 Table 4.7: Evaluation results across the three design cycles
 
-The final state carries two observations worth recording. The offline mode still
-fails the two cases that depend on the builder's expertise, and this is
-structural rather than a defect: that expertise is supplied only to the language
-model, so the deterministic path cannot reproduce advice which depends on it.
-This gives the AI layer a second and distinct contribution beyond closing the
-semantic gap, since it is the only route capable of delivering curated
-practitioner knowledge. Taking offline and AI mode together, the AI now gains
-four cases rather than the two reported in Section 4.4.1, while losing one to
-model non-determinism.
-
-The wider lesson repeats the one in Section 4.5.2 in a different form. A test
-that passes may be testing nothing, and a failure whose cause is assumed rather
-than investigated can be attributed to the wrong component for a considerable
-time. Both were only caught by examining why a result occurred rather than
-accepting the result itself.
+Offline mode still fails the two cases depending on the builder's expertise, and
+this is structural rather than a defect: that expertise is supplied only to the
+language model, so the deterministic path cannot reproduce advice which depends
+on it. This gives the AI layer a second and distinct contribution beyond closing
+the semantic gap, since it is the only route capable of delivering curated
+practitioner knowledge. Taking both modes together, the AI now gains four cases
+rather than the two reported in Section 4.4.1, while losing one to model
+non-determinism. As in Section 4.5.2, both problems were found by examining why a
+result occurred rather than accepting the result itself.
 
 ## 4.6 Evaluation against non-functional requirements
 
@@ -488,31 +476,30 @@ its least interesting aspect. CP1 allocated 200 ms to validation, implying an
 expectation that it would account for a meaningful share of user waiting time. It
 uses roughly four thousandths of one percent of that allowance, while the offline
 pipeline, performing no network calls, takes about 95 ms typically and about 240
-ms in its slowest 5%. The surrounding logic can therefore exceed the entire budget
-assigned to validation alone. The requirement was placed on the cheapest step in
-the process, which reflects on how requirements were set at proposal stage rather
-than constituting an engineering achievement. A related observation is that
-validation scales linearly rather than flatly with catalog size, because a lookup
-index is rebuilt on every call while the rules themselves examine only the six
-chosen components; the catalog would need roughly 3.1 million records before this
-breached 200 ms, so it is carried forward as future work rather than a risk.
+ms in its slowest 5%. The surrounding logic can therefore exceed the entire
+budget assigned to validation alone. The requirement was placed on the cheapest
+step in the process, which reflects on how requirements were set at proposal
+stage rather than constituting an engineering achievement. Validation also scales
+linearly rather than flatly with catalog size, though the catalog would need
+roughly 3.1 million records before this breached 200 ms, so it is carried forward
+as future work rather than a risk.
 
-Requirement 2 is the project's only failure, and it fails three ways. It cannot be
-evaluated as written, because time to first token presupposes streaming and no
-streaming exists in the implementation; there is one complete response rather than
-a first token distinct from the last. On the closest measurable equivalent it
-fails outright, with the assistant's median total response at 2,410 ms against a
-2,000 ms budget and intent extraction exceeding the budget in its slowest 5%. Most
-importantly, because nothing streams the user sees nothing until the entire
-response arrives, so total response time is not a substitute for what the
-requirement asked but the same quantity. Whether streaming would have delivered
-first text within two seconds is plausible, untested, and explicitly not claimed.
+Requirement 2 is the project's only failure, and it fails three ways. It cannot
+be evaluated as written, because time to first token presupposes streaming and no
+streaming exists in the implementation. On the closest measurable equivalent it
+fails outright, with the assistant's median response at 2,410 ms against a
+2,000 ms budget. Most importantly, because nothing streams the user sees nothing
+until the entire response arrives, so total response time is not a substitute for
+what the requirement asked but the same quantity. Whether streaming would have
+delivered first text within two seconds is plausible, untested, and explicitly
+not claimed.
 
-Requirement 7 is met, but not by the mechanism CP1 named. No bcrypt implementation
-exists in the codebase, because password hashing is delegated entirely to Supabase
-Auth and the application never handles a raw password. The security property is
-satisfied, arguably more safely than a hand-written implementation would achieve,
-but the named mechanism is absent, and both facts are reported.
+Requirement 7 is met, but not by the mechanism CP1 named. No bcrypt
+implementation exists in the codebase, because password hashing is delegated
+entirely to Supabase Auth and the application never handles a raw password. The
+security property is satisfied, arguably more safely than a hand-written
+implementation would achieve, but the named mechanism is absent, and both facts
+are reported.
 
 ## 4.7 Competitive position of the delivered system
 
@@ -543,13 +530,10 @@ engine deviates from CP1's specification of real-time AI validation, being
 entirely deterministic and containing no AI. This is an architectural inversion
 rather than a shortfall, since validation that cannot hallucinate is a stronger
 guarantee than validation by a model that can, which is the risk Huang et al.
-(2025) and Yaprak (2024) identify; nevertheless it is not what the proposal
-described. Separately, one competitor has since added a guided, jargon-free quiz,
-narrowing the differentiation CP1 claimed on two dimensions, though the core
-distinction holds since that competitor recommends finished keyboards rather than
-configuring components. Two capabilities were also delivered beyond what CP1's
-instrument measures and are therefore invisible in its table, namely image-based
-intent extraction and the evaluation suite itself.
+(2025) and Yaprak (2024) identify, but it is not what the proposal described.
+Separately, one competitor has since added a guided, jargon-free quiz, narrowing
+the differentiation CP1 claimed, though the core distinction holds since that
+competitor recommends finished keyboards rather than configuring components.
 
 ## 4.8 Target-market economics
 
@@ -565,23 +549,22 @@ produced a result the proposal did not anticipate.
 Table 4.10: Price distribution across all 3,250 valid builds
 
 CP1 targets the RM150–250 segment of the Malaysian market, and no valid build
-exists below RM281, which is RM31 above the ceiling of the target band and RM131
-above its floor. Not one of the 3,250 valid builds falls within the stated target
-market, and the median costs roughly 2.4 times the top of the range.
+exists below RM281, which is RM31 above the ceiling of the target band. Not one
+of the 3,250 valid builds falls within the stated target market, and the median
+costs roughly 2.4 times the top of the range.
 
 This explains the two zero-result prompts noted in Section 4.3 and confirms they
 are not defects. Intent extraction parsed both correctly, the engine genuinely
-found no build within budget, and the system degraded gracefully with an accurate
-message inviting the user to raise the budget or relax a preference. The economics
-rather than the software constitute the finding.
+found no build within budget, and the system degraded gracefully with a message
+inviting the user to raise the budget or relax a preference. The economics rather
+than the software constitute the finding.
 
 Two explanations fit the evidence and cannot be distinguished without vendor
 survey work not undertaken here. Either the catalog under-samples the budget
-segment, meaning cheaper components exist and were not curated in, which is a data
-limitation with an obvious remedy; or a complete build from separately purchased
-parts genuinely does not exist below approximately RM280 in this market, which
-would invalidate an assumption carried forward from the proposal. Distinguishing
-them is listed as future work.
+segment, which is a data limitation with an obvious remedy; or a complete build
+from separately purchased parts genuinely does not exist below approximately
+RM280 in this market, which would invalidate an assumption carried forward from
+the proposal. Distinguishing them is listed as future work.
 
 ## 4.9 Achievement of objectives and deviations from the proposal
 
@@ -593,40 +576,39 @@ them is listed as future work.
 
 Table 4.11: Achievement against the three CP1 objectives
 
-Three commitments changed during implementation. For accuracy, the 2D visual
-builder and the acoustic library appear in CP1 Section 1.4 as proposed modules
-rather than among the three formal objectives, but they were promised and are
-accounted for here.
+Three commitments changed during implementation. The 2D visual builder and the
+acoustic library appear in CP1 Section 1.4 as proposed modules rather than among
+the three formal objectives, but they were promised and are accounted for here.
 
-The 2D layered visual builder was removed for two reasons. Feasibility: the
-approach requires photographically consistent layered images for every component
-in every category, unachievable in the time available. More importantly, evidence:
-the measured weakness at the mid-point was recommendation accuracy rather than
-visual feedback, and Chapter 2 offers only qualified support for rich
-visualisation, with Geelhaar and Rausch (2014) noting the cost of high-fidelity
-assets and Ya and Xing (2021) reporting diminishing returns against that cost. The
-freed capacity went into semantic retrieval, the agent architecture and the
-evaluation suite, producing the gains reported in Section 4.4.
+The 2D layered visual builder was removed for two reasons. The first was
+feasibility, since the approach requires photographically consistent layered
+images for every component in every category, which was unachievable in the time
+available. The second, and more important, was evidence: the measured weakness at
+the mid-point was recommendation accuracy rather than visual feedback, and
+Chapter 2 offers only qualified support for rich visualisation, with Geelhaar and
+Rausch (2014) noting the cost of high-fidelity assets and Ya and Xing (2021)
+reporting diminishing returns against that cost. The freed capacity went into
+semantic retrieval, the agent architecture and the evaluation suite, producing
+the gains reported in Section 4.4.
 
 User testing then demonstrated the decision carried a real cost. Finding 4 was
-raised independently and unprompted, corroborating the need-for-touch and
-visual-compensation literature from Chapter 2, particularly Jiang et al. (2024) on
-sensory substitution, from the opposite direction: removing the visual channel
-produced exactly the dissatisfaction that literature predicts. This is reported as
-a limitation rather than a vindication, because the trade-off carried a measurable
-cost on both sides, which is a genuine Design Science Research finding rather than
-a defence of the original decision.
+raised independently and unprompted, corroborating the visual-compensation
+literature from Chapter 2, particularly Jiang et al. (2024) on sensory
+substitution, from the opposite direction: removing the visual channel produced
+exactly the dissatisfaction that literature predicts. This is reported as a
+limitation rather than a vindication, since the trade-off carried a measurable
+cost on both sides, which is a genuine Design Science Research finding rather
+than a defence of the original decision.
 
-The acoustic library was not implemented, for the same capacity reasons compounded
-by its dependence on recording consistent audio samples under controlled
-conditions, a data-collection problem of similar scale. The data model anticipates
-it, with a sound URL field and a sound-samples table both present and unpopulated.
-Its absence is a genuine limitation and accordingly the first item of future work.
-Community cloning was partially delivered: publishing, browsing and threaded
-discussion were implemented but one-click cloning was not, so following Wang and
-Yu (2017) on observational learning the gallery delivers the inspiration half of
-the social proof mechanism while the path from inspiration to ownership remains
-absent.
+The acoustic library was not implemented, for the same capacity reasons
+compounded by its dependence on recording consistent audio samples under
+controlled conditions. The data model anticipates it, with a sound URL field and
+a sound-samples table both present and unpopulated. Its absence is a genuine
+limitation and accordingly the first item of future work. Community cloning was
+partially delivered: publishing, browsing and threaded discussion were
+implemented but one-click cloning was not, so following Wang and Yu (2017) on
+observational learning the gallery delivers the inspiration half of the social
+proof mechanism while the path from inspiration to ownership remains absent.
 
 ## 4.10 Threats to validity
 
@@ -640,8 +622,8 @@ them apologetically.
 | Unreachable rules | Two implemented rules never fire against this catalog, compounding the coverage gap above. | Section 4.2.3 |
 | Catalog scale | Sixty components may not generalise; retrieval faces more competing candidates as a catalog grows, and the reduction ratios are specific to this composition. | Section 5.2 |
 | Partial colour coverage | All five keycap sets carry colour tags; none of the seven cases do, as that data does not exist in vendor sources and was not fabricated. | Section 5.2 |
-| Model non-determinism | AI-mode output varies between runs without any change to the system, currently by one case across six runs. All AI-mode figures are reported as averages with ranges across three or more runs, never as a single result. | Section 4.4.2 |
-| Ineffective evaluation checks | Three grounding checks were found to be testing nothing, because they guarded against product names the system could no longer produce. Corrected in Section 4.5.4, but the same pattern may exist elsewhere in the suite. | Section 4.5.4 |
+| Model non-determinism | AI-mode output varies between runs without any change to the system, currently by one case across six runs. All AI-mode figures are reported as averages with ranges, never as a single result. | Section 4.4.2 |
+| Ineffective evaluation checks | Three grounding checks were found to be testing nothing, guarding against product names the system could no longer produce. Corrected in Section 4.5.4, but the pattern may exist elsewhere. | Section 4.5.4 |
 | Environment-specific timings | Figures were taken on the development machine and a containerised Linux environment. Neither represents a production deployment. | Section 4.6 |
 
 Table 4.12: Threats to the validity of the reported results
@@ -651,15 +633,15 @@ skipped tests were all disabled for one reason, having been pinned to an older
 catalog and never restored, and the disabled set includes ten tests in the rule
 engine's own suite, among them the basic valid-build case, both kit-integrity
 tests and the stabiliser rule. Those properties are nonetheless verified by the
-exhaustive sweep, the independent hand-check and the conformance runs described in
-Section 4.2.3, which are arguably stronger because they are exhaustive rather than
-exemplary: a unit test asserts one case, whereas the sweep tests every case the
-catalog admits. The figure of 215 passing tests must not, however, be read as
+exhaustive sweep, the independent hand-check and the conformance runs described
+in Section 4.2.3, which are arguably stronger because they are exhaustive rather
+than exemplary: a unit test asserts one case, whereas the sweep tests every case
+the catalog admits. The figure of 215 passing tests must not, however, be read as
 covering them, and this report does not use it that way.
 
-Finally, a methodological note. Cross-checking independent measurements against
-one another was used deliberately as an error-detection technique, and it caught
-two genuine faults: a pricing calculation that disagreed with the recommendation
-service's own output, and latency figures that had drifted from the raw data they
-derived from. The working rule was that when two measurements of the same system
-disagree, the disagreement is a defect in the measurement until proven otherwise.
+Finally, cross-checking independent measurements against one another was used
+deliberately as an error-detection technique, and it caught two genuine faults: a
+pricing calculation that disagreed with the recommendation service's own output,
+and latency figures that had drifted from the raw data they derived from. The
+working rule was that when two measurements of the same system disagree, the
+disagreement is a defect in the measurement until proven otherwise.
