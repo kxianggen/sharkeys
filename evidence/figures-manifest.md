@@ -206,7 +206,7 @@ Measured on macOS arm64, SHA `4f019d3`.
 | Container run of `bench-recommendations` | median 132–167 ms | **SUPERSEDED as a quantity** by F20 (macOS, ~95 ms) — but **retained as F20b**, which corroborates the p95 stability property on a second architecture. Do not cite the median; do cite the 1.05× agreement. |
 | Earlier revision of `analyse-build-economics` | RM225.80 floor, 14 builds in band | **WRONG** — omitted the per-switch multiplier. See F30–F33. |
 
-**No figure in this manifest derives from `docs/eval-report.md`.** The only eval reference in the evidence set is the *case count* (50: 30 intent / 10 grounding / 10 retrieval) in `competitive-audit.md` §3, which is structural rather than a score and is unaffected. If the report cites eval *scores*, they must come from the implementation agent's current run, not the 13 June document.
+**No figure in this manifest derives from `docs/eval-report.md`, which has since been deleted from the repository for exactly this reason.** The only eval reference in the evidence set is the *case count* (50: 30 intent / 10 grounding / 10 retrieval) in `competitive-audit.md` §3, which is structural rather than a score and is unaffected. If the report cites eval *scores*, they must come from the implementation agent's current run, not the 13 June document.
 
 ---
 

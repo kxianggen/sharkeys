@@ -92,7 +92,8 @@ pre-C1 tree (`c62e56c`) after the crop was corrected; see §6.
 
 ### 3.1 Corrected current-state baseline
 
-The figures in `docs/eval-report.md` (13 June: 34 offline, 46 semantic) describe
+The figures in the superseded `docs/eval-report.md` (13 June: 34 offline, 46
+semantic), since removed from the repository, describe
 code roughly six weeks out of date and **must not be used**. Re-measured at
 `4f019d3` against the 50 pre-existing cases:
 
