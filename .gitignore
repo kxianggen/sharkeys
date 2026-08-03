@@ -56,3 +56,7 @@ playwright-report/
 
 # Word lock files
 ~$*
+
+# raw image inputs for scripts/import-kit-images.ts (outputs live in public/)
+/kit-images-inbox/
+/part-images-inbox/

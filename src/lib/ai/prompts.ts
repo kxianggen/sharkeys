@@ -49,5 +49,5 @@ export const intentPromptVariants: Record<IntentPromptVariant, string> = {
 
 // The active default. A/B winner (Phase 5): "structured" scored 100% mean
 // pass-rate over 3 runs of the 30 intent cases (baseline 92.2%, conversational
-// 96.7%). See docs/eval-report.md.
+// 96.7%). Measured by the evaluation suite; see report/evidence/.
 export const defaultIntentPromptVariant: IntentPromptVariant = "structured";

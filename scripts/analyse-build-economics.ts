@@ -160,7 +160,7 @@ function main() {
       targetMarket: {
         ...TARGET_MARKET,
         source:
-          "CP1 target market and the project's expert persona (CLAUDE.md): RM150-250, Malaysia.",
+          "CP1 target market and the project's expert persona: RM150-250, Malaysia.",
       },
     },
     validBuildCount: totals.length,
