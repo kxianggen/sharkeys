@@ -137,9 +137,9 @@ async function main() {
         "OPENAI_API_KEY is not set. P3 cannot be measured without live API access.",
       results: [],
     };
-    mkdirSync("report/evidence/raw", { recursive: true });
+    mkdirSync("evidence/raw", { recursive: true });
     writeFileSync(
-      "report/evidence/raw/bench-ai-latency.json",
+      "evidence/raw/bench-ai-latency.json",
       `${JSON.stringify(output, null, 2)}\n`,
     );
     console.log("NOT MEASURED — OPENAI_API_KEY absent.");
@@ -175,9 +175,9 @@ async function main() {
       reason: `api.openai.com is unreachable from this host (${reachable.error}). OPENAI_API_KEY was present and loaded, so this is a network/environment limitation rather than a configuration fault. Run this script from a host with outbound internet access.`,
       results: [],
     };
-    mkdirSync("report/evidence/raw", { recursive: true });
+    mkdirSync("evidence/raw", { recursive: true });
     writeFileSync(
-      "report/evidence/raw/bench-ai-latency.json",
+      "evidence/raw/bench-ai-latency.json",
       `${JSON.stringify(output, null, 2)}\n`,
     );
     console.log(`NOT MEASURED — ${output.reason}`);
@@ -234,9 +234,9 @@ async function main() {
     results,
   };
 
-  mkdirSync("report/evidence/raw", { recursive: true });
+  mkdirSync("evidence/raw", { recursive: true });
   writeFileSync(
-    "report/evidence/raw/bench-ai-latency.json",
+    "evidence/raw/bench-ai-latency.json",
     `${JSON.stringify(output, null, 2)}\n`,
   );
 
@@ -252,7 +252,7 @@ async function main() {
       reason: result.reason ?? "",
     })),
   );
-  console.log("Wrote report/evidence/raw/bench-ai-latency.json");
+  console.log("Wrote evidence/raw/bench-ai-latency.json");
 }
 
 void main();

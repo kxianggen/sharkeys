@@ -93,7 +93,7 @@ supabase/                 database schema
 tests/                    unit and component tests
 e2e/                      browser tests
 scripts/                  benchmarks and the evaluation runner
-report/                   the final report and all measurement evidence
+evidence/                 raw measurement output and evidence documents
 ```
 
 ## Evidence and measurements
@@ -101,13 +101,13 @@ report/                   the final report and all measurement evidence
 Every figure quoted in the project report is produced by a script in `scripts/`
 rather than recorded by hand, and the raw output is committed alongside it.
 
-- `report/evidence/figures-manifest.md` — every reported number, what produced it
+- `evidence/figures-manifest.md` — every reported number, what produced it
   and the caveat that belongs with it
-- `report/evidence/performance.md` — the system measured against its stated
+- `evidence/performance.md` — the system measured against its stated
   requirements
-- `report/evidence/uat-fixes.md` — user testing, what was changed in response,
+- `evidence/uat-fixes.md` — user testing, what was changed in response,
   and before-and-after evidence
-- `report/evidence/raw/` — unedited output from every benchmark and evaluation run
+- `evidence/raw/` — unedited output from every benchmark and evaluation run
 
 To reproduce the main figures, with no credentials needed:
 

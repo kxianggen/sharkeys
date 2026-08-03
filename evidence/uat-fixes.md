@@ -199,7 +199,7 @@ well as the source.
 | Save confirmation (authenticated) | `screenshots/uat-before-c2-save-confirmation-authed.png` | `screenshots/uat-after-c2-save-confirmation-authed.png` |
 
 The authenticated pair was captured manually, following
-`report/evidence/manual-capture-procedure.md`. Playwright begins from a clean
+`evidence/manual-capture-procedure.md`. Playwright begins from a clean
 browser context with no Supabase session, so it only ever reaches the
 logged-out branch — while the confirmation C2 changes is the authenticated one.
 The automated pair (`uat-*-c2-save-confirmation.png`) is retained for

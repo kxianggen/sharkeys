@@ -1,11 +1,11 @@
 {
   "meta": {
     "benchmark": "sweep-selectivity",
-    "startedAt": "2026-07-31T19:48:22.279Z",
-    "finishedAt": "2026-07-31T19:48:25.668Z",
-    "nodeVersion": "v22.22.3",
-    "platform": "linux/arm64",
-    "elapsedMs": 3388.638127,
+    "startedAt": "2026-08-03T13:44:10.627Z",
+    "finishedAt": "2026-08-03T13:44:15.323Z",
+    "nodeVersion": "v22.19.0",
+    "platform": "win32/x64",
+    "elapsedMs": 4695.1616,
     "exhaustive": true,
     "samplingMethod": "none — every combination evaluated",
     "catalog": {

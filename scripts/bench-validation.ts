@@ -373,9 +373,9 @@ function main() {
     scaling: scalingResults,
   };
 
-  mkdirSync("report/evidence/raw", { recursive: true });
+  mkdirSync("evidence/raw", { recursive: true });
   writeFileSync(
-    "report/evidence/raw/bench-validation.json",
+    "evidence/raw/bench-validation.json",
     `${JSON.stringify(output, null, 2)}\n`,
   );
 
@@ -415,7 +415,7 @@ function main() {
     console.log(`NOT MEASURED scenarios: ${missingScenarios.join(", ")}`);
   }
 
-  console.log("Wrote report/evidence/raw/bench-validation.json");
+  console.log("Wrote evidence/raw/bench-validation.json");
 }
 
 main();

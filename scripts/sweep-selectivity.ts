@@ -278,9 +278,9 @@ function main() {
     acceptedExamples,
   };
 
-  mkdirSync("report/evidence/raw", { recursive: true });
+  mkdirSync("evidence/raw", { recursive: true });
   writeFileSync(
-    "report/evidence/raw/sweep-selectivity.json",
+    "evidence/raw/sweep-selectivity.json",
     `${JSON.stringify(output, null, 2)}\n`,
   );
 
@@ -319,7 +319,7 @@ function main() {
   );
   console.log("\nError code frequency:");
   console.table(output.errorCodeFrequency);
-  console.log("Wrote report/evidence/raw/sweep-selectivity.json");
+  console.log("Wrote evidence/raw/sweep-selectivity.json");
 }
 
 main();

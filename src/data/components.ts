@@ -832,7 +832,7 @@ const rawKeyboardComponents = [
       // #DFD6C2 H41 S31 cream-beige, #7C9082 H138 muted sage, #C67E70 H10
       // dusty red. "pastel" is the one tag here not forced by the measured
       // values — a judgement that this muted retro palette answers a "pastel"
-      // request. Recorded as such in report/evidence/uat-fixes.md.
+      // request. Recorded as such in evidence/uat-fixes.md.
       colour: ["beige", "green", "red", "pastel"],
       observedAt: "2026-05-17",
       sourceType: "vendor_listed",

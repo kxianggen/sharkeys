@@ -29,7 +29,7 @@ const eslintConfig = defineConfig([
       //   timing inside a choreographed animation sequence, which is not a
       //   change worth making late in the project. The source carries the same
       //   note at the call site, and it is listed as future work in
-      //   report/evidence/uat-fixes.md.
+      //   evidence/uat-fixes.md.
       //
       // Warn, not off: the signal stays visible.
       "react-hooks/refs": "warn",

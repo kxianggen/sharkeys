@@ -188,9 +188,9 @@ function main() {
     cheapestBuild: cheapest,
   };
 
-  mkdirSync("report/evidence/raw", { recursive: true });
+  mkdirSync("evidence/raw", { recursive: true });
   writeFileSync(
-    "report/evidence/raw/build-economics.json",
+    "evidence/raw/build-economics.json",
     `${JSON.stringify(output, null, 2)}\n`,
   );
 
@@ -207,7 +207,7 @@ function main() {
   console.log(
     `Shortfall above band ceiling: RM${output.targetMarketCoverage.shortfallAboveBandCeilingMyr.toFixed(2)}`,
   );
-  console.log("Wrote report/evidence/raw/build-economics.json");
+  console.log("Wrote evidence/raw/build-economics.json");
 }
 
 main();

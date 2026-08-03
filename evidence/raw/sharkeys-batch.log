@@ -310,7 +310,7 @@ Calling setState synchronously within an effect body causes cascading renders th
 │ 1       │ 'keybot_reply'      │ 'MEASURED'     │ 20 │ '2731' │ '2410' │ '4110' │ 0      │ ''                                                                                                                                                                      │
 │ 2       │ 'vision_intent'     │ 'NOT MEASURED' │ 0  │ '—'    │ '—'    │ '—'    │ 0      │ 'Requires a representative inspiration image as input. No fixture image is committed to the repository, and generating a synthetic one would not represent real usage.' │
 └─────────┴─────────────────────┴────────────────┴────┴────────┴────────┴────────┴────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-Wrote report/evidence/raw/bench-ai-latency.json
+Wrote evidence/raw/bench-ai-latency.json
 === BENCH-RECOMMENDATIONS RUN 1 ===
 │ (index) │ n   │ mean      │ median    │ p95       │ p99       │ min     │ max       │ stdDev   │
 ├─────────┼─────┼───────────┼───────────┼───────────┼───────────┼─────────┼───────────┼──────────┤
@@ -331,7 +331,7 @@ P2b — builds returned per prompt (stage 2)
 └─────────┴─────────────────────────────────────────────────┴──────────┴───────────────┴──────────┴───────────┘
 mean returned: 2.25  range: 0-3  cap: 3
 Pipeline conformance: allBuildsValid=true allComponentsInCatalog=true (18 builds)
-Wrote report/evidence/raw/bench-recommendations.json
+Wrote evidence/raw/bench-recommendations.json
 === BENCH-RECOMMENDATIONS RUN 2 ===
 │ (index) │ n   │ mean      │ median   │ p95       │ p99       │ min     │ max       │ stdDev   │
 ├─────────┼─────┼───────────┼──────────┼───────────┼───────────┼─────────┼───────────┼──────────┤
@@ -352,7 +352,7 @@ P2b — builds returned per prompt (stage 2)
 └─────────┴─────────────────────────────────────────────────┴──────────┴───────────────┴──────────┴───────────┘
 mean returned: 2.25  range: 0-3  cap: 3
 Pipeline conformance: allBuildsValid=true allComponentsInCatalog=true (18 builds)
-Wrote report/evidence/raw/bench-recommendations.json
+Wrote evidence/raw/bench-recommendations.json
 === BENCH-RECOMMENDATIONS RUN 3 ===
 │ (index) │ n   │ mean      │ median   │ p95       │ p99       │ min     │ max       │ stdDev   │
 ├─────────┼─────┼───────────┼──────────┼───────────┼───────────┼─────────┼───────────┼──────────┤
@@ -373,4 +373,4 @@ P2b — builds returned per prompt (stage 2)
 └─────────┴─────────────────────────────────────────────────┴──────────┴───────────────┴──────────┴───────────┘
 mean returned: 2.25  range: 0-3  cap: 3
 Pipeline conformance: allBuildsValid=true allComponentsInCatalog=true (18 builds)
-Wrote report/evidence/raw/bench-recommendations.json
+Wrote evidence/raw/bench-recommendations.json

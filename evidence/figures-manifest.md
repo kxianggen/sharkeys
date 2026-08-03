@@ -262,7 +262,7 @@ Round-B suite breakdown, totalling 58: intent 33 pass / 5 fail (38 cases) · gro
 
 ### Provenance gap — the one weak point in the evidence set
 
-Every other figure here has a regenerable artefact in `raw/`. The eval figures do not: they exist only as terminal output, which makes them the least citable numbers in the set. `sharkeys-batch.log` and `sharkeys-roundB.log` are being moved into `report/evidence/raw/` and committed, after which every eval figure has a dated source carrying its own commit SHA. **Cite those logs once they land**; until then F53–F55 rest on transcription rather than on an artefact.
+Every other figure here has a regenerable artefact in `raw/`. The eval figures do not: they exist only as terminal output, which makes them the least citable numbers in the set. `sharkeys-batch.log` and `sharkeys-roundB.log` are being moved into `evidence/raw/` and committed, after which every eval figure has a dated source carrying its own commit SHA. **Cite those logs once they land**; until then F53–F55 rest on transcription rather than on an artefact.
 
 ---
 

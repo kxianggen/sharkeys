@@ -24,7 +24,7 @@ Makes real, billable OpenAI calls: 20 intent-extraction runs plus 20 keybot runs
 npx tsx --tsconfig tsconfig.json scripts/bench-ai-latency.ts
 ```
 
-This writes `report/evidence/raw/bench-ai-latency.json` directly, so pasting output below is optional — but please note **where you ran it** (home wifi, campus network, tethered) since latency figures are meaningless without that context.
+This writes `evidence/raw/bench-ai-latency.json` directly, so pasting output below is optional — but please note **where you ran it** (home wifi, campus network, tethered) since latency figures are meaningless without that context.
 
 ```
 Network / location:

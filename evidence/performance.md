@@ -636,7 +636,7 @@ grep -rn -i "jsonb" supabase/
 
 Raw figures, including per-scenario fixture component IDs and full metadata:
 
-- `report/evidence/raw/bench-validation.json`
-- `report/evidence/raw/sweep-selectivity.json`
-- `report/evidence/raw/bench-recommendations.json`
-- `report/evidence/raw/build-economics.json`
+- `evidence/raw/bench-validation.json`
+- `evidence/raw/sweep-selectivity.json`
+- `evidence/raw/bench-recommendations.json`
+- `evidence/raw/build-economics.json`

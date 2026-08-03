@@ -45,7 +45,7 @@ import { expect, test } from "@playwright/test";
  * fails loudly on the @c1 test rather than quietly producing a confounded
  * figure that still looks correct.
  *
- * Record the commit SHA at step 1; report/evidence/uat-fixes.md cites it, so
+ * Record the commit SHA at step 1; evidence/uat-fixes.md cites it, so
  * the C1 after-shot is traceable to the exact tree that produced it, and pairs
  * uat-before-colourway-* with uat-after-c1-colourway-* for finding 1.
  *
@@ -74,7 +74,7 @@ import { expect, test } from "@playwright/test";
  * seeded test user. c2-save-confirmation therefore documents the save
  * affordance and the notice region only; the authenticated confirmation needs
  * one manual logged-in capture. This is called out in
- * report/evidence/uat-fixes.md rather than papered over.
+ * evidence/uat-fixes.md rather than papered over.
  */
 const PHASES = ["before", "after-c1", "after"] as const;
 

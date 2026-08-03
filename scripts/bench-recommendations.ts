@@ -202,9 +202,9 @@ async function main() {
     },
   };
 
-  mkdirSync("report/evidence/raw", { recursive: true });
+  mkdirSync("evidence/raw", { recursive: true });
   writeFileSync(
-    "report/evidence/raw/bench-recommendations.json",
+    "evidence/raw/bench-recommendations.json",
     `${JSON.stringify(output, null, 2)}\n`,
   );
 
@@ -239,7 +239,7 @@ async function main() {
   console.log(
     `Pipeline conformance: allBuildsValid=${output.pipelineConformance.allBuildsValid} allComponentsInCatalog=${output.pipelineConformance.allComponentsInCatalog} (${output.pipelineConformance.buildsChecked} builds)`,
   );
-  console.log("Wrote report/evidence/raw/bench-recommendations.json");
+  console.log("Wrote evidence/raw/bench-recommendations.json");
 }
 
 void main();
