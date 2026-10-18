@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { RotateCcw, Send, X } from "lucide-react";
 
+import { isRateLimited, RATE_LIMIT_MESSAGE } from "@/lib/api/rate-limit";
 import type { KeybotApiResponse } from "@/lib/keybot/schemas";
 import { useKeybotThinkingStage } from "@/components/use-keybot-thinking-stage";
 
@@ -101,6 +102,19 @@ export function GlobalKeybotLauncher() {
           },
         }),
       });
+
+      if (isRateLimited(response)) {
+        setMessages((current) => [
+          ...current,
+          {
+            id: createMessageId("assistant"),
+            role: "assistant",
+            content: RATE_LIMIT_MESSAGE,
+          },
+        ]);
+        return;
+      }
+
       const body = (await response.json()) as KeybotApiResponse | ApiErrorResponse;
 
       if (!response.ok || !body.success) {

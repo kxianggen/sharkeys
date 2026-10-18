@@ -14,6 +14,7 @@ import {
   type RecommendationResult,
 } from "@/lib/recommendations";
 import { extractedKeyboardIntentSchema } from "@/lib/ai";
+import { RATE_LIMIT_MESSAGE } from "@/lib/api/rate-limit";
 import { keybotApiResponseSchema, type KeybotApiResponse } from "@/lib/keybot";
 
 const navigationMocks = vi.hoisted(() => ({
@@ -35,6 +36,27 @@ const savedBuildActionMocks = vi.hoisted(() => ({
 vi.mock("@/app/my-builds/actions", () => ({
   saveBuildAction: savedBuildActionMocks.saveBuildAction,
 }));
+
+// The real ImageDrop compresses a File via canvas, which jsdom lacks; a stub
+// button hands the demo a ready data URL instead.
+vi.mock("@/components/image-drop", () => ({
+  ImageDrop: ({ onChange }: { onChange: (dataUrl: string | null) => void }) => (
+    <button
+      onClick={() => onChange("data:image/png;base64,AAAA")}
+      type="button"
+    >
+      Use test image
+    </button>
+  ),
+}));
+
+// A 429 from the host or a rate-limit layer may not be JSON.
+function rateLimitedResponse() {
+  return new Response("Too Many Requests", {
+    status: 429,
+    headers: { "Content-Type": "text/plain" },
+  });
+}
 
 const recommendationResult = createRecommendationResult({
   source: "fallback_missing_api_key",
@@ -121,8 +143,10 @@ function mockFetch(
   recommendationResponses: ApiResponseQueue = [recommendationResult],
   options: {
     keybotDelayMs?: number;
+    keybotRateLimited?: boolean;
     keybotResponse?: KeybotApiResponse["data"];
     keybotShouldFail?: boolean;
+    visionRateLimited?: boolean;
   } = {},
 ) {
   const responses = [...recommendationResponses];
@@ -171,6 +195,10 @@ function mockFetch(
           );
         }
 
+        if (options.keybotRateLimited) {
+          return rateLimitedResponse();
+        }
+
         if (options.keybotShouldFail) {
           return new Response(
             JSON.stringify({
@@ -202,6 +230,10 @@ function mockFetch(
             },
           }),
         );
+      }
+
+      if (url === "/api/ai/vision-intent" && options.visionRateLimited) {
+        return rateLimitedResponse();
       }
 
       return jsonResponse({
@@ -739,6 +771,50 @@ describe("RecommendationDemo", () => {
       within(panel).getByText(/could not reach Meg just now/i),
     ).toBeInTheDocument();
     expect(within(panel).getByText(/Route unavailable/i)).toBeInTheDocument();
+  });
+
+  it("shows a friendly slow-down message when Keybot is rate limited", async () => {
+    mockFetch([recommendationResult], { keybotRateLimited: true });
+    render(<RecommendationDemo mode="configurator" />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Open Meg assistant/i,
+      }),
+    );
+
+    const panel = getLastKeybotPanel();
+
+    fireEvent.change(within(panel).getByLabelText("Meg question"), {
+      target: { value: "Can you explain this build?" },
+    });
+    fireEvent.click(
+      within(panel).getByRole("button", {
+        name: /Send Meg question/i,
+      }),
+    );
+
+    expect(
+      await within(panel).findByText(RATE_LIMIT_MESSAGE),
+    ).toBeInTheDocument();
+    expect(
+      within(panel).queryByText(/could not reach Meg/i),
+    ).not.toBeInTheDocument();
+    expect(
+      within(panel).queryByText(/Route unavailable/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the slow-down message when image reading is rate limited", async () => {
+    mockFetch([recommendationResult], { visionRateLimited: true });
+    render(<RecommendationDemo mode="configurator" />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Add an inspiration photo/i }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Use test image/i }));
+
+    expect(await screen.findByText(RATE_LIMIT_MESSAGE)).toBeInTheDocument();
   });
 
   it.skip("passes selected recommendation context to Keybot", async () => {

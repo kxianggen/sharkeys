@@ -60,6 +60,7 @@ import type {
   ExtractedKeyboardIntent,
 } from "@/lib/ai";
 import type { RecommendationsApiResponse } from "@/lib/recommendations/schemas";
+import { isRateLimited, RATE_LIMIT_MESSAGE } from "@/lib/api/rate-limit";
 import type { KeybotApiResponse } from "@/lib/keybot/schemas";
 
 type RecommendationResult = RecommendationsApiResponse["data"];
@@ -1108,6 +1109,12 @@ export function RecommendationDemo({
           message: message.trim() || undefined,
         }),
       });
+
+      if (isRateLimited(response)) {
+        setVisionNote(RATE_LIMIT_MESSAGE);
+        return;
+      }
+
       const body = (await response.json()) as
         | AiIntentApiResponse
         | ApiErrorResponse;
@@ -3008,6 +3015,20 @@ function KeybotPanel({
           }),
         }),
       });
+
+      if (isRateLimited(response)) {
+        // No source or route-failure flag, so the bubble carries no badge.
+        setMessages((current) => [
+          ...current,
+          {
+            id: createKeybotMessageId("assistant"),
+            role: "assistant",
+            content: RATE_LIMIT_MESSAGE,
+          },
+        ]);
+        return;
+      }
+
       const body = (await response.json()) as
         | KeybotApiResponse
         | ApiErrorResponse;
