@@ -19,6 +19,40 @@ describe("AI intent API route", () => {
     expect(parsed.error.code).toBe("invalid_request");
   });
 
+  it("rejects a message longer than 2000 characters", async () => {
+    const response = await intentPOST(
+      new Request("http://localhost/api/ai/intent", {
+        method: "POST",
+        body: JSON.stringify({ message: "a".repeat(2001) }),
+      }),
+    );
+    const body = await response.json();
+    const parsed = apiErrorResponseSchema.parse(body);
+
+    expect(response.status).toBe(400);
+    expect(parsed.error.code).toBe("invalid_request");
+  });
+
+  it("accepts a message of exactly 2000 characters", async () => {
+    const previousApiKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      const response = await intentPOST(
+        new Request("http://localhost/api/ai/intent", {
+          method: "POST",
+          body: JSON.stringify({ message: "a".repeat(2000) }),
+        }),
+      );
+
+      expect(response.status).toBe(200);
+    } finally {
+      if (previousApiKey !== undefined) {
+        process.env.OPENAI_API_KEY = previousApiKey;
+      }
+    }
+  });
+
   it("returns fallback intent and candidates when no API key is configured", async () => {
     const previousApiKey = process.env.OPENAI_API_KEY;
     delete process.env.OPENAI_API_KEY;

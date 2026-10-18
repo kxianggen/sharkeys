@@ -117,6 +117,33 @@ describe("Keybot API route", () => {
     expect(parsed.error.code).toBe("invalid_request");
   });
 
+  it("rejects a message longer than 2000 characters", async () => {
+    const response = await keybotPOST(
+      new Request("http://localhost/api/keybot", {
+        method: "POST",
+        body: JSON.stringify({ message: "a".repeat(2001) }),
+      }),
+    );
+    const body = await response.json();
+    const parsed = apiErrorResponseSchema.parse(body);
+
+    expect(response.status).toBe(400);
+    expect(parsed.error.code).toBe("invalid_request");
+  });
+
+  it("accepts a message of exactly 2000 characters", async () => {
+    await withFallbackEnv(async () => {
+      const response = await keybotPOST(
+        new Request("http://localhost/api/keybot", {
+          method: "POST",
+          body: JSON.stringify({ message: "a".repeat(2000) }),
+        }),
+      );
+
+      expect(response.status).toBe(200);
+    });
+  });
+
   it("uses the recommendation engine for build questions without an OpenAI API key", async () => {
     await withFallbackEnv(async () => {
       const response = await keybotPOST(

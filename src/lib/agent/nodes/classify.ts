@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { readOptionalOpenAIConfig } from "@/lib/env";
 import { classifyKeybotMessage } from "@/lib/keybot/service";
+import { OPENAI_MAX_RETRIES, OPENAI_TIMEOUT_MS } from "@/lib/openai";
 import type { KeybotAgentStateType } from "../state";
 
 // The routing categories the agent understands — identical to the legacy
@@ -86,6 +87,10 @@ export async function classifyNode(
       model: config.OPENAI_MODEL,
       apiKey: config.OPENAI_API_KEY,
       temperature: 0,
+      // Same bound as the shared OpenAI client. ChatOpenAI retries itself
+      // (default 6), so maxRetries must be set here too.
+      timeout: OPENAI_TIMEOUT_MS,
+      maxRetries: OPENAI_MAX_RETRIES,
     });
 
     const result = await model
