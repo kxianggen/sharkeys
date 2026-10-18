@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "benchmark": "bench-keybot-ttft",
+    "startedAt": "2026-10-18T07:57:53.100Z",
+    "finishedAt": "2026-10-18T07:59:47.230Z",
+    "nodeVersion": "v25.9.0",
+    "platform": "darwin/arm64",
+    "host": "jayson.local",
+    "model": "gpt-4.1-mini",
+    "runs": 20,
+    "prompts": [
+      "What is a gasket mount?",
+      "Why does plate material change the sound?",
+      "Is a 65% layout good for gaming?",
+      "What does lubing stabilizers actually do?"
+    ],
+    "measures": "Per run, the same compose request via responses.parse (non-streaming total = time to first text today) and responses.stream (first delta, first visible answer text, total). OpenAI timings start at the compose call; factsMs is reported separately.",
+    "doesNotShow": "That the product meets CP1 §3.2.4. The product does not stream; this shows whether streaming would bring first answer text under 2,000 ms on this machine.",
+    "environmentCaveat": "Latency is dominated by network round-trip and provider queueing. These figures characterise THIS machine and network only."
+  },
+  "errorCount": 0,
+  "errors": [],
+  "results": [
+    {
+      "metric": "factsMs",
+      "stats": {
+        "n": 20,
+        "meanMs": 1078.0305874,
+        "medianMs": 1191.090125,
+        "p95Ms": 1878.699083,
+        "minMs": 370.285208,
+        "maxMs": 2117.401084
+      }
+    },
+    {
+      "metric": "parseTotalMs",
+      "stats": {
+        "n": 20,
+        "meanMs": 2562.62460215,
+        "medianMs": 2392.140834,
+        "p95Ms": 3735.7205,
+        "minMs": 1582.890375,
+        "maxMs": 4700.076833
+      }
+    },
+    {
+      "metric": "streamFirstDeltaMs",
+      "stats": {
+        "n": 20,
+        "meanMs": 1126.0113250999998,
+        "medianMs": 1025.466334,
+        "p95Ms": 1839.059917,
+        "minMs": 795.832875,
+        "maxMs": 1928.219833
+      }
+    },
+    {
+      "metric": "streamFirstAnswerTextMs",
+      "stats": {
+        "n": 20,
+        "meanMs": 1196.3162687499998,
+        "medianMs": 1125.409709,
+        "p95Ms": 1860.419083,
+        "minMs": 796.036625,
+        "maxMs": 1942.792583
+      }
+    },
+    {
+      "metric": "streamTotalMs",
+      "stats": {
+        "n": 20,
+        "meanMs": 1923.1687085,
+        "medianMs": 1743.681042,
+        "p95Ms": 2478.705792,
+        "minMs": 1538.429708,
+        "maxMs": 2895.183208
+      }
+    }
+  ]
+}
