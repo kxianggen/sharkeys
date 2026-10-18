@@ -46,6 +46,8 @@ I'm a new graduate; my weak spot is writing code, not reading it.
 1. Live demo on Vercel (Hobby), first with no AI keys.
 2. README: live link, screenshot, results table, limitations.
 3. Mark `evidence/` as the raw FYP measurement trail; README is the main document.
-4. Before AI goes public: per-IP rate limit on the AI routes, OpenAI request timeouts, max input length.
+4. Done. Rate limit lives in the Vercel Firewall (set in the Vercel dashboard, not in this repo):
+   20 AI requests per visitor per 10 minutes on /api/keybot and /api/ai/, returns 429.
+   OpenAI timeouts (src/lib/openai/client.ts) and max input length (zod schemas) are in the code.
 5. Stream Keybot replies; measure time to first token before and after (FYP baseline: median 2,410 ms
    total reply, no streaming; requirement: first text under 2,000 ms).
