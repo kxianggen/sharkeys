@@ -181,14 +181,7 @@ export async function buildGroundedKeybotResponse(
   classification: KeybotClassification,
   options: GenerateKeybotResponseOptions = {},
 ): Promise<KeybotResponse> {
-  const catalogComponents = needsCatalogComponents(request, classification)
-    ? options.catalogComponents ?? (await getCatalogComponents())
-    : [];
-  const facts = await buildKeybotFacts(
-    request,
-    catalogComponents,
-    classification,
-  );
+  const facts = await prepareKeybotFacts(request, classification, options);
   const config = readOptionalOpenAIConfig();
   const apiKey = options.apiKey ?? config.OPENAI_API_KEY;
 
@@ -201,46 +194,9 @@ export async function buildGroundedKeybotResponse(
 
   try {
     const client = options.client ?? createOpenAIClient(apiKey);
-
-    // When the post has an attached photo, compose the reply with the vision
-    // model (reusing the inspiration-photo `input_image` pipeline) and layer on
-    // the honesty guardrails so Meg answers from what it sees, hedged.
-    const hasImage =
-      typeof options.postImageDataUrl === "string" &&
-      options.postImageDataUrl.length > 0;
-    const systemContent = composeKeybotSystemPrompt(hasImage);
-    const promptPayload = JSON.stringify(buildOpenAIPromptPayload(facts));
-    const userContent = hasImage
-      ? [
-          { type: "input_text" as const, text: promptPayload },
-          {
-            type: "input_image" as const,
-            image_url: options.postImageDataUrl as string,
-            detail: "auto" as const,
-          },
-        ]
-      : promptPayload;
-
-    const response = await client.responses.parse({
-      model: hasImage
-        ? options.model ?? defaultVisionModel
-        : options.model ?? config.OPENAI_MODEL,
-      max_output_tokens:
-        options.maxOutputTokens ?? config.OPENAI_MAX_OUTPUT_TOKENS,
-      input: [
-        {
-          role: "system",
-          content: systemContent,
-        },
-        {
-          role: "user",
-          content: userContent,
-        },
-      ],
-      text: {
-        format: zodTextFormat(keybotOpenAIOutputSchema, "keybot_answer"),
-      },
-    });
+    const response = await client.responses.parse(
+      buildKeybotComposeRequest(facts, options),
+    );
     const parsed = response.output_parsed;
 
     if (!parsed) {
@@ -276,6 +232,71 @@ export async function buildGroundedKeybotResponse(
       error: formatOpenAIError(error),
     });
   }
+}
+
+// Resolves the catalog (only when the classification needs it) and assembles
+// the deterministic facts Meg's reply is grounded in. Exported so the
+// time-to-first-token bench builds exactly the facts the live path uses.
+export async function prepareKeybotFacts(
+  request: KeybotRequest,
+  classification: KeybotClassification,
+  options: GenerateKeybotResponseOptions = {},
+): Promise<KeybotFacts> {
+  const catalogComponents = needsCatalogComponents(request, classification)
+    ? options.catalogComponents ?? (await getCatalogComponents())
+    : [];
+
+  return buildKeybotFacts(request, catalogComponents, classification);
+}
+
+// The OpenAI compose request for a grounded reply. Shared by the live
+// `responses.parse` call and the time-to-first-token bench
+// (scripts/bench-keybot-ttft.ts), so both send an identical prompt.
+export function buildKeybotComposeRequest(
+  facts: KeybotFacts,
+  options: GenerateKeybotResponseOptions = {},
+) {
+  const config = readOptionalOpenAIConfig();
+
+  // When the post has an attached photo, compose the reply with the vision
+  // model (reusing the inspiration-photo `input_image` pipeline) and layer on
+  // the honesty guardrails so Meg answers from what it sees, hedged.
+  const hasImage =
+    typeof options.postImageDataUrl === "string" &&
+    options.postImageDataUrl.length > 0;
+  const systemContent = composeKeybotSystemPrompt(hasImage);
+  const promptPayload = JSON.stringify(buildOpenAIPromptPayload(facts));
+  const userContent = hasImage
+    ? [
+        { type: "input_text" as const, text: promptPayload },
+        {
+          type: "input_image" as const,
+          image_url: options.postImageDataUrl as string,
+          detail: "auto" as const,
+        },
+      ]
+    : promptPayload;
+
+  return {
+    model: hasImage
+      ? options.model ?? defaultVisionModel
+      : options.model ?? config.OPENAI_MODEL,
+    max_output_tokens:
+      options.maxOutputTokens ?? config.OPENAI_MAX_OUTPUT_TOKENS,
+    input: [
+      {
+        role: "system" as const,
+        content: systemContent,
+      },
+      {
+        role: "user" as const,
+        content: userContent,
+      },
+    ],
+    text: {
+      format: zodTextFormat(keybotOpenAIOutputSchema, "keybot_answer"),
+    },
+  };
 }
 
 async function buildKeybotFacts(
