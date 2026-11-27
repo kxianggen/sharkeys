@@ -10,7 +10,9 @@ async function expectSharedNav(page: import("@playwright/test").Page) {
   await expect(nav).toBeVisible();
   await expect(nav.getByRole("link", { name: "Sharkeys" })).toBeVisible();
   await expect(nav.getByRole("link", { name: "Configurator" })).toBeVisible();
-  await expect(nav.getByRole("link", { name: "Log in" })).toBeVisible();
+  // The nav's "Log in" link became the account flyout trigger (avatar), as
+  // nav-consistency.spec.ts already asserts.
+  await expect(nav.getByRole("button", { name: "Account" })).toBeVisible();
 }
 
 test("configurator empty state renders visual placeholder + rail", async ({
