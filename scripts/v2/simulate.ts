@@ -52,7 +52,6 @@ import {
 import { checkInventedParts, type PossibleFlag } from "./lib/invented-parts";
 import {
   judgeTranscript,
-  renderTranscript,
   RUBRIC_VERSION,
   type JudgeVerdict,
   type TranscriptTurn,
@@ -257,12 +256,12 @@ async function runSession(
     screenNote = `APP REPLY:\n${reply.text}\n\nBUILDS ON SCREEN:\n${screen}`;
   }
 
-  const transcript = renderTranscript(turns, endedWith);
   let verdict: JudgeVerdict | null = null;
   let judgeUsage = zeroUsage();
   if (endedWith !== "error") {
     try {
-      const judged = await judgeTranscript({ client, persona, transcript });
+      // The judge never sees the persona's accept / give-up (rubric-v2).
+      const judged = await judgeTranscript({ client, persona, turns });
       verdict = judged.verdict;
       judgeUsage = judged.usage;
     } catch (e) {
