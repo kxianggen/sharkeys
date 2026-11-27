@@ -22,6 +22,7 @@ import { useCatalog } from "@/components/configurator/use-catalog";
 import { useHasMounted } from "@/components/configurator/use-has-mounted";
 import { useManualCheck } from "@/components/configurator/use-manual-check";
 import { usePhotoIntent } from "@/components/configurator/use-photo-intent";
+import { useRefine } from "@/components/configurator/use-refine";
 import { useSaveBuild } from "@/components/configurator/use-save-build";
 import { track } from "@/lib/analytics";
 import type { RecommendationsApiResponse } from "@/lib/recommendations/schemas";
@@ -138,6 +139,34 @@ export function useConfigurator({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialKitId, initialPrompt, catalog]);
 
+  // A new result replaces the old one: first build selected, free choices
+  // and validation reset, manual panel loaded with the top build.
+  function showResult(nextResult: RecommendationResult) {
+    setResult(nextResult);
+    const firstRecommendation = nextResult.recommendations[0];
+    setSelectedRecommendationId(firstRecommendation?.id ?? null);
+    manual.setManualValidation(null);
+    setSavedBuildMessage(null);
+    setChosenParts({});
+    setAssemblyValidation(null);
+
+    if (firstRecommendation) {
+      manual.setManualSelection(firstRecommendation.componentIds);
+    } else {
+      manual.setManualSelection({});
+      manual.setManualValidation(null);
+      manual.setManualError(null);
+    }
+  }
+
+  const refine = useRefine({
+    catalog,
+    isSubmitting,
+    onError: setError,
+    result,
+    showResult,
+  });
+
   async function runRecommendationRequest(
     nextMessage = message,
     anchorKitId?: string,
@@ -169,9 +198,7 @@ export function useConfigurator({
         );
       }
 
-      setResult(body.data);
-      const firstRecommendation = body.data.recommendations[0];
-      if (firstRecommendation) {
+      if (body.data.recommendations[0]) {
         track("build_shown", {
           buildCount: body.data.recommendations.length,
           validCount: body.data.recommendations.filter(
@@ -180,19 +207,8 @@ export function useConfigurator({
           layout: body.data.intent?.layout ?? undefined,
         });
       }
-      setSelectedRecommendationId(firstRecommendation?.id ?? null);
-      manual.setManualValidation(null);
-      setSavedBuildMessage(null);
-      setChosenParts({});
-      setAssemblyValidation(null);
-
-      if (firstRecommendation) {
-        manual.setManualSelection(firstRecommendation.componentIds);
-      } else {
-        manual.setManualSelection({});
-        manual.setManualValidation(null);
-        manual.setManualError(null);
-      }
+      showResult(body.data);
+      refine.clearRefineNote();
 
       window.setTimeout(() => {
         if (typeof resultsRef.current?.scrollIntoView === "function") {
@@ -332,6 +348,8 @@ export function useConfigurator({
     handleQuickPrompt,
     handleSubmit,
     hasMounted,
+    refine: refine.controls,
+    refineVersion: refine.refineVersion,
     isSubmitDisabled,
     isSubmitting,
     message,

@@ -19,6 +19,10 @@ import {
   getKitDisplayName,
   getMetadataString,
 } from "@/components/configurator/build-helpers";
+import {
+  RefineChips,
+  type RefineControls,
+} from "@/components/configurator/refine-chips";
 import type { RecommendationBuild } from "@/components/configurator/types";
 import { getComponentSwatch } from "@/components/part-thumbnail";
 import { SwatchDots } from "@/components/swatch-dots";
@@ -34,11 +38,13 @@ export function RecommendationCarousel({
   onSaveRecommendation,
   onSelect,
   recommendations,
+  refine,
   selectedId,
 }: {
   onSaveRecommendation: (recommendation: RecommendationBuild) => void;
   onSelect: (recommendation: RecommendationBuild) => void;
   recommendations: RecommendationBuild[];
+  refine?: RefineControls;
   selectedId: string | null;
 }) {
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -191,6 +197,8 @@ export function RecommendationCarousel({
           </button>
         </div>
       </article>
+
+      {refine ? <RefineChips build={recommendation} controls={refine} /> : null}
     </section>
   );
 }

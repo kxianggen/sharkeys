@@ -137,9 +137,11 @@ export function ConfiguratorView({
               <>
                 {result && result.recommendations.length > 0 ? (
                   <RecommendationCarousel
+                    key={state.refineVersion}
                     onSaveRecommendation={state.saveRecommendationBuild}
                     onSelect={state.adoptRecommendation}
                     recommendations={result.recommendations}
+                    refine={state.refine}
                     selectedId={selectedRecommendation?.id ?? null}
                   />
                 ) : null}
