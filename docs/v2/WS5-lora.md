@@ -52,7 +52,7 @@ Can a small open model, fine-tuned with LoRA, do Sharkeys' intent extraction (tu
 
 ## Needs approval
 
-Any paid GPU (for example Colab Pro); the teacher-labelling cost if it's over USD 3.
+Any paid GPU (for example Colab Pro); the teacher labelling. Labelling 600–1,000 messages with gpt-4.1 will probably need an OpenAI top-up, so estimate the cost and ask first. A cheaper fallback is to label with gpt-4.1-mini and spot-check more.
 
 ## Learn card
 

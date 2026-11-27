@@ -61,7 +61,12 @@ Every v2 claim needs a "before" number. The existing 58 test cases were written 
 - **Invented parts are checked by code**, against the catalogue, not by the judge.
 - **Calibrate the judge:** Jayson grades 15 transcripts himself, and the session reports how often the judge agrees with him. Below 80%, tighten the rubric and re-check.
 - **Repeat runs:** run each persona 3 times, because AI answers vary. Report the average and the spread.
-- **Cost guard:** use gpt-4.1-mini for both persona and judge. Print the estimated cost before running, and stop if one full run would cost more than USD 3.
+- **Cost guard (about USD 2 of credit in total, shared with the live site):**
+  - Use gpt-4.1-mini for both persona and judge.
+  - Run a pilot first (5 personas × 1 run) to measure the real cost per session.
+  - Then propose the full run size so that it costs under USD 0.50.
+  - Print the estimated cost before every run, and stop and ask if it's over USD 0.50.
+  - Fewer runs is fine (for example 15 personas × 2) if the budget needs it; say so in the report.
 
 ### 4. Baseline scorecard
 
@@ -104,7 +109,7 @@ Every v2 claim needs a "before" number. The existing 58 test cases were written 
 
 ## Needs approval
 
-The PostHog key on Vercel; any run costing more than USD 3; turning on Claude PR review.
+The PostHog key on Vercel; any run costing more than USD 0.50; turning on Claude PR review (it uses Anthropic API credit, so leave it off for now).
 
 ## Learn card
 

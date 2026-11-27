@@ -19,7 +19,12 @@ Make Sharkeys noticeably better for users, prove it with before/after numbers, a
 1. Work from the GitHub repo's master branch (the October wrap-up version, 84a29a8 or later). The copy in OneDrive/Sunway/FYP is the August submission copy. Do not build on it.
 2. Create a branch `v2` from master. Each workstream branches from `v2` (`v2/ws0-foundation`, `v2/ws1-chatbot`, ...). Approved work merges into `v2`; `v2` merges into master only at the end.
 3. Copy this folder of briefs into the repo at `docs/v2/`, so every Claude Code session can read them.
-4. Check the OpenAI project "sharkeys" has a spending cap. Suggested: USD 10 for the whole of v2. Sessions must ask before going over it.
+4. **Budget: about USD 2 of OpenAI credit for now (as of 27 Nov); Jayson tops up when needed.** The live site uses the same credit. Every session must:
+   - estimate the cost before any paid run
+   - keep each run under USD 0.50
+   - stop and ask once the remaining credit would drop below USD 0.50
+   - use gpt-4.1-mini unless the brief says otherwise
+   - prefer the offline (no-API) eval when it's enough
 5. To run sessions in parallel, give each one its own git worktree (a separate checkout of the same repo), so two sessions never edit the same files at once.
 
 ## How to start a workstream
@@ -94,7 +99,7 @@ The targets are proposals; WS0 may revise them once the baseline exists.
 
 ## Sessions must stop and ask you before
 
-- **Spending:** raising the OpenAI cap, any paid tool, Colab Pro.
+- **Spending:** any run estimated at over USD 0.50, anything that would leave under USD 0.50 of credit, any paid tool, Colab Pro.
 - **Live site:** deploys, Vercel environment variables, or schema changes on the live Supabase project (do them locally or on a Supabase branch first).
 - **Data:** deleting or overwriting catalogue rows, or adding a new vendor to the importer.
 - **Merges** into `v2` or master.
