@@ -1,0 +1,37 @@
+# Daily Supabase keep-alive (v2 WS0).
+# Free Supabase projects pause after a week without activity. This calls the
+# live site's /api/health route, which reads the catalogue from Supabase and
+# returns 503 if it had to fall back to the local seed (paused/unreachable DB).
+#
+# Setup (one time, by Jayson): Settings → Secrets and variables → Actions →
+# Variables → New repository variable: LIVE_SITE_URL = https://<your-site>.vercel.app
+# It is a variable, not a secret: the URL is public anyway.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: "17 1 * * *" # daily, 01:17 UTC (09:17 MYT)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping /api/health
+        env:
+          LIVE_SITE_URL: ${{ vars.LIVE_SITE_URL }}
+        run: |
+          if [ -z "$LIVE_SITE_URL" ]; then echo "LIVE_SITE_URL repository variable is not set."; exit 1; fi
+          # Retry once: the first request after a quiet spell can be a cold start.
+          for attempt in 1 2; do
+            status=$(curl -sS -o body.json -w "%{http_code}" --max-time 30 "$LIVE_SITE_URL/api/health" || echo "000")
+            echo "Attempt $attempt: HTTP $status"; cat body.json 2>/dev/null; echo
+            if [ "$status" = "200" ]; then exit 0; fi
+            sleep 20
+          done
+          echo "Health check failed: the database may be paused or unreachable."
+          exit 1

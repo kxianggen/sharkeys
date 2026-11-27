@@ -17,7 +17,7 @@ Make Sharkeys noticeably better for users, prove it with before/after numbers, a
 ## One-time setup (about 20 minutes, before WS0)
 
 1. Work from the GitHub repo's master branch (the October wrap-up version, 84a29a8 or later). The copy in OneDrive/Sunway/FYP is the August submission copy. Do not build on it.
-2. Create a branch `v2` from master. Each workstream branches from `v2` (`v2/ws0-foundation`, `v2/ws1-chatbot`, ...). Approved work merges into `v2`; `v2` merges into master only at the end.
+2. Create a branch `v2` from master. Each workstream branches from `v2` (`v2-ws0-foundation`, `v2-ws1-chatbot`, ...). Approved work merges into `v2`; `v2` merges into master only at the end.
 3. Copy this folder of briefs into the repo at `docs/v2/`, so every Claude Code session can read them.
 4. **Budget: about USD 2 of OpenAI credit for now (as of 27 Nov); Jayson tops up when needed.** The live site uses the same credit. Every session must:
    - estimate the cost before any paid run

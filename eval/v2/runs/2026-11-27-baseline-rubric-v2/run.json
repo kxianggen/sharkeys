@@ -1,0 +1,33 @@
+{
+  "label": "baseline-rubric-v2",
+  "date": "2026-11-27",
+  "gitSha": "4a9146a",
+  "personas": [
+    "p01-budget-student",
+    "p02-quiet-office",
+    "p03-gamer",
+    "p04-sound-enthusiast",
+    "p05-vague-beginner",
+    "p06-gift-buyer",
+    "p07-colour-focused",
+    "p08-wireless-mac",
+    "p09-small-desk",
+    "p10-code-mixer",
+    "p11-out-of-catalogue",
+    "p12-mind-changer",
+    "p13-haggler",
+    "p14-photo-reference",
+    "p15-expert-compat"
+  ],
+  "runs": 1,
+  "maxTurns": 8,
+  "rubricVersion": "rubric-v2",
+  "simVersion": "sim-v3",
+  "simModel": "gpt-4.1-mini",
+  "appCostPerTurnAssumed": 0.002,
+  "estimatedSpendUSD": 0.2281,
+  "rejudgedFrom": "2026-11-27-baseline",
+  "rejudgedOn": "2026-11-27",
+  "note": "Transcripts, app calls and code checks copied unchanged from the source run; only the judge was re-run. Persona and app costs are the source run's.",
+  "rejudgeSpendUSD": 0.0271
+}
