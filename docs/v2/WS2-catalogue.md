@@ -96,3 +96,40 @@ The vendor list; any write to the live database; merging new parts.
 - First price-check run: how many parts were checked and how many changed
 - Recommendation speed at the new catalogue size
 - Open questions for HQ
+
+### Filled in by the WS2 session (branch `v2-ws2-catalogue`, 2026-11-28)
+
+**What changed, in plain words**
+- **Frozen snapshot.** `src/data/components.ts` (the original 60 parts) is untouched and pinned by a test (count + content hash). Tests and the CI eval run on it (`SHARKEYS_CATALOG=frozen` in `vitest.config.ts` and `scripts/v2/ci-eval.ts`). `src/data/catalog.ts` builds the full catalogue = frozen 60 + approved imports (`src/data/imported/approved-parts.json`) + approved price checks (`src/data/imported/price-checks.json`).
+- **Importer** (`scripts/catalog/`): polite fetcher (`lib/fetch.ts`: robots.txt, honest bot name, ≥5 s per site, back-off, cache, Shopee blocked); plain-code Shopify mapper (`lib/deterministic.ts`: price, brand, layout, pins, force…); AI only for reading-type fields (`lib/extract-ai.ts`, gpt-4.1-mini, every value must quote the page, code checks the quote; disagreements become "unknown"); checks (`lib/checks.ts`: schema, duplicates incl. same brand + model code, price bands, rule-engine "fits at least one valid build"); review queue (`review.ts` → `review.md` + `decisions.json`) and `apply-approved.ts`.
+- **Agreed rules:** beginner-friendly rule for switches/keycaps/stabilisers (matches all hand-typed entries); "profile implies MX stem" for keycaps; a page offering several options for a field → unknown; switch price per switch; listed MYR price excl. shipping.
+- **Blind pass + auto-approval (HQ rule):** a second, in-session reading blind to the importer (`blind-view.ts`, answers in `blind/mecha-001.json` with page quotes) and `blind-check.ts`. A part is auto-approved only if every field agrees, every quote is on the page and the rule engine finds a valid build. Auto-approved parts carry `reviewedBy: "auto (HQ rule: …)"`.
+- **Weekly price check:** `price-check.ts` + `.github/workflows/price-check.yml` (Mondays 09:00 MYT, no secrets, opens a PR editing only `price-checks.json`). Gone pages are marked `availability: "unavailable"`, never deleted.
+- **Local database:** `supabase/config.jsonc` (local stack), `seed-local.ts` and `seed-embeddings.ts --local` refuse any non-localhost URL; `check-health-local.ts` calls the real `/api/health` handler.
+- Vendor safeguards: Mecha + MKB.MY approved by Jayson without asking (non-commercial; ToS §12 forbids scraping — risk accepted, logged in `vendors.ts`); no vendor photos stored; full vendor text (`candidates.json`) kept out of the public repo.
+
+**Parts added, accuracy, review time**
+- Catalogue: **60 → 106** (+46: 29 switches, 11 keycap sets, 2 kits = 2 cases/PCBs/plates), all from Mecha, all auto-approved under the HQ rule (42 products). 58 blind-read products and ~150 unread candidates wait for Jayson in `review.md`. Target was ~120; stopped after the agreed ~60-product batch.
+- Field accuracy (verified by an independent in-session pass — same assistant that wrote the rules, blind to importer values, every value quoted; not a human check): **88.5% on 20 held-out parts (headline)**, coverage 97.0%. Golden 20: 76.2% before fixes, 90.1% after (optimistic: fixes were shaped by those 20).
+- Known limitation: kit fields where the page offers variants (plate material, stabiliser type, beginner-friendly on hot-swap kits) are the weakest; now "unknown" by rule and sent to Jayson.
+- Review time: manual baseline **90 s** for one switch (Monx Gravity, 7 fields, one rough sample; kits not timed). Jayson's per-part review time not measured yet (no human review done). The importer's value is **scale and freshness**, not per-part speed: 254 candidates from 3 requests, re-checked weekly.
+- OpenAI spend: **USD 0.115** extraction (2 logged runs) + ≈ USD 0.0001 embeddings.
+
+**First price-check run (2026-11-27, before imports)**
+- 17 parts had a source page; 10 requests. 4 unchanged, **0 changed**, **5 gone** (MKB: 4 stabilisers + MMD Princess V3 → marked unavailable), 8 not checked (KeebsProject not approved). Report: `scripts/catalog/price-reports/2026-11-27.md`.
+
+**Recommendation speed** (`scripts/catalog/bench-scale.ts`, same machine/session/workload, deterministic mode)
+- 60 parts (585,200 combinations): median **200 ms**, p95 504 ms.
+- 106 parts (12,972,960 combinations): median **743 ms**, p95 834 ms. All 18 returned builds valid in both.
+- ~1.8× parts → ~3.7× slower. Request (outside WS2 area): per-category candidate prefilter in `src/lib/recommendations/`.
+
+**Checks:** `npm run verify` passes (330 tests; 13 pre-existing lint warnings). CI eval (frozen): 54/2/2, no new failures. Full catalogue eval: 53/3/2 — `rr-002` picks `switch_keychron_k_pro_banana_tactile_switch` (no sound profile on its page) for a "creamy" request. Left unknown per HQ; for WS1's ranking fix. `/api/health` against local Supabase: 200, count 106 = catalogue.
+
+**Open questions for HQ**
+1. WS1: unknown sound profiles still win `rr-002` on the full catalogue; 8 approved switches need sound (`blind/mecha-001-needs-sound.md`).
+2. Request: per-category prefilter in recommendations (speed above).
+3. WS1 cache: after `seed-local`/price apply, the catalogue cache needs a clear/refresh hook.
+4. Push imports to the live Supabase? Not done (needs Jayson). `npm run supabase:seed-catalog` now seeds the full catalogue.
+5. `docs/` is tracked in git, against CLAUDE.md; this report is left uncommitted for that reason.
+6. The Monday Action only runs once on master and needs "Allow GitHub Actions to create PRs".
+7. Jayson: spot-check 10 auto-approved parts (`blind/mecha-001-spot-check.md`); approve or drop the GMK67 V2 / GMK104 possible duplicates.
