@@ -9,7 +9,29 @@ import { getSessionUser } from "@/lib/auth";
 import { getCatalogComponents } from "@/lib/components";
 import { summarizeGalleryBuild } from "@/lib/gallery/build-summary";
 import { buildCommentThreads, getPostWithComments } from "@/lib/gallery/service";
+import { encodeBuildCode } from "@/lib/recommendations/build-code";
 import { requiredComponentCategories } from "@/lib/types";
+
+function buildCloneHref(
+  componentIds: Partial<Record<(typeof requiredComponentCategories)[number], string>>,
+) {
+  const { case: caseId, pcb, plate, switch: switchId, keycap, stabilizer } = componentIds;
+
+  if (!caseId || !pcb || !plate || !switchId || !keycap || !stabilizer) return null;
+
+  try {
+    return `/configurator?build=${encodeBuildCode({
+      case: caseId,
+      pcb,
+      plate,
+      switch: switchId,
+      keycap,
+      stabilizer,
+    })}`;
+  } catch {
+    return null; // an id the link format cannot carry
+  }
+}
 
 function formatPostedAt(createdAt: string) {
   const date = new Date(createdAt);
@@ -43,6 +65,9 @@ export default async function PostDetailPage({
     (category) => post.componentIds[category],
   );
   const hasBuild = selectedCategories.length > 0;
+  // WS4 clone: only a complete six-part build can be opened in the
+  // configurator (where it is re-checked against today's catalogue).
+  const cloneHref = buildCloneHref(post.componentIds);
   const showVisual = Boolean(post.imageUrl) || hasBuild;
 
   return (
@@ -118,6 +143,15 @@ export default async function PostDetailPage({
             </p>
           ) : null}
         </details>
+        ) : null}
+
+        {cloneHref ? (
+          <Link
+            className="mt-4 inline-flex h-10 items-center justify-center rounded-pill bg-accent px-5 text-sm font-bold text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30"
+            href={cloneHref}
+          >
+            Use this build
+          </Link>
         ) : null}
 
         {/* Discussion */}

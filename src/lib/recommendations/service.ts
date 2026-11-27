@@ -149,12 +149,15 @@ export async function generateRecommendationsFromIntent(
 ): Promise<RecommendationResult> {
   const catalogComponents =
     options.catalogComponents ?? (await getCatalogComponents());
+  const preparation = prepareIntentMatches(request.intent, catalogComponents);
 
   return createRecommendationResult(
     { intent: request.intent, source: request.source },
     {
       catalogComponents,
-      preparation: prepareIntentMatches(request.intent, catalogComponents),
+      preparation: request.kitId
+        ? anchorPreparationToKit(preparation, request.kitId, catalogComponents)
+        : preparation,
       maxRecommendations: options.maxRecommendations,
       ranking: { preferHigherSpend: request.chip === "premium" },
     },

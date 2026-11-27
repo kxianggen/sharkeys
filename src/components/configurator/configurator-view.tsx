@@ -11,6 +11,7 @@ import {
 } from "@/components/configurator/build-helpers";
 import { BuildSteps } from "@/components/configurator/build-steps";
 import { BuildVisualPanel } from "@/components/configurator/build-visual-panel";
+import { CloneNotice } from "@/components/configurator/clone-notice";
 import { CompareView } from "@/components/configurator/compare-view";
 import { configuratorSections } from "@/components/configurator/constants";
 import { useCompare } from "@/components/configurator/use-compare";
@@ -27,15 +28,18 @@ import { MainNav } from "@/components/main-nav";
 // The /configurator page: preview on the left, the request input, result
 // cards, build steps and save bar on the right, Meg floating on top.
 export function ConfiguratorView({
+  initialBuildCode,
   initialKitId,
   initialPrompt,
   isAuthenticated,
 }: {
+  initialBuildCode: string | null;
   initialKitId: string | null;
   initialPrompt: string | null;
   isAuthenticated: boolean;
 }) {
   const { resultsRef, ...state } = useConfigurator({
+    initialBuildCode,
     initialKitId,
     initialPrompt,
     isAuthenticated,
@@ -128,6 +132,14 @@ export function ConfiguratorView({
             setIsImagePanelOpen={setIsImagePanelOpen}
             setKeybotOpenSignal={setKeybotOpenSignal}
             state={state}
+          />
+
+          <CloneNotice
+            assemblyValidation={assemblyValidation}
+            buildPrice={buildPrice}
+            clone={state.clone}
+            isBuildComplete={isBuildComplete}
+            isValidating={isAssemblyValidating}
           />
 
           <section

@@ -92,6 +92,9 @@ export const refineRecommendationsRequestSchema = z
     // Which chip produced the intent. Only "premium" changes ranking (it
     // favours builds that use more of the raised ceiling).
     chip: z.enum(refineChips).optional(),
+    // Clone ("Use this build"): keep assembly on the shared build's kit.
+    // Same anchor as the message path's kitId; validation is unchanged.
+    kitId: z.string().trim().min(1).max(120).optional(),
   })
   .strict();
 

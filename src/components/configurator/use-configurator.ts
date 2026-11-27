@@ -22,6 +22,7 @@ import { useCatalog } from "@/components/configurator/use-catalog";
 import { useHasMounted } from "@/components/configurator/use-has-mounted";
 import { useManualCheck } from "@/components/configurator/use-manual-check";
 import { usePhotoIntent } from "@/components/configurator/use-photo-intent";
+import { useClone } from "@/components/configurator/use-clone";
 import { useRefine } from "@/components/configurator/use-refine";
 import { useSaveBuild } from "@/components/configurator/use-save-build";
 import { track } from "@/lib/analytics";
@@ -30,10 +31,12 @@ import type { RecommendationsApiResponse } from "@/lib/recommendations/schemas";
 // All configurator state and actions. The view components only render what
 // this returns; nothing here changes what the rule engine decides.
 export function useConfigurator({
+  initialBuildCode = null,
   initialKitId,
   initialPrompt,
   isAuthenticated,
 }: {
+  initialBuildCode?: string | null;
   initialKitId: string | null;
   initialPrompt: string | null;
   isAuthenticated: boolean;
@@ -88,7 +91,11 @@ export function useConfigurator({
   useEffect(() => {
     const trimmedInitialPrompt = initialPrompt?.trim();
 
-    if (!trimmedInitialPrompt || initialPromptSubmittedRef.current) {
+    if (
+      initialBuildCode ||
+      !trimmedInitialPrompt ||
+      initialPromptSubmittedRef.current
+    ) {
       return;
     }
 
@@ -108,6 +115,7 @@ export function useConfigurator({
     const trimmedInitialKitId = initialKitId?.trim();
 
     if (
+      initialBuildCode ||
       !trimmedInitialKitId ||
       initialPrompt?.trim() ||
       initialKitSubmittedRef.current ||
@@ -166,6 +174,13 @@ export function useConfigurator({
     result,
     showResult,
   });
+  const cloneState = useClone({
+    catalog,
+    catalogById,
+    code: initialBuildCode,
+    setChosenParts,
+    showResult,
+  });
 
   async function runRecommendationRequest(
     nextMessage = message,
@@ -209,6 +224,7 @@ export function useConfigurator({
       }
       showResult(body.data);
       refine.clearRefineNote();
+      cloneState.dismissClone();
 
       window.setTimeout(() => {
         if (typeof resultsRef.current?.scrollIntoView === "function") {
@@ -348,6 +364,7 @@ export function useConfigurator({
     handleQuickPrompt,
     handleSubmit,
     hasMounted,
+    clone: cloneState.clone,
     refine: refine.controls,
     refineVersion: refine.refineVersion,
     isSubmitDisabled,

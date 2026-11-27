@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
@@ -7,6 +8,7 @@ import { categoryLabels } from "@/components/configurator/constants";
 import { KitVisual } from "@/components/configurator/build-visual";
 import { ShareButton } from "@/components/configurator/share-button";
 import { MainNav } from "@/components/main-nav";
+import { encodeBuildCode } from "@/lib/recommendations/build-code";
 import { loadSharedBuild, sharedBuildFits } from "@/lib/recommendations/shared-build";
 
 type Props = { params: Promise<{ code: string }> };
@@ -123,6 +125,12 @@ export default async function SharedBuildPage({ params }: Props) {
           </ul>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
+            <Link
+              className="inline-flex h-10 items-center justify-center rounded-pill bg-accent px-5 text-sm font-bold text-white transition hover:bg-accent-hover focus:outline-none focus:ring-4 focus:ring-accent/30"
+              href={`/configurator?build=${encodeBuildCode(build.componentIds)}`}
+            >
+              Use this build
+            </Link>
             <ShareButton
               componentIds={build.componentIds}
               label="Copy link"

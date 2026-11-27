@@ -14,6 +14,9 @@ import { LandingView } from "@/components/configurator/landing-view";
 type RecommendationDemoMode = "configurator" | "landing";
 
 type RecommendationDemoProps = {
+  // Build code from ?build= (clone a shared or gallery build). Takes
+  // precedence over ?prompt and ?kit.
+  initialBuildCode?: string | null;
   initialKitId?: string | null;
   initialPrompt?: string | null;
   // Server-known session presence: gates saving to the account. Logged-out
@@ -23,6 +26,7 @@ type RecommendationDemoProps = {
 };
 
 export function RecommendationDemo({
+  initialBuildCode = null,
   initialKitId = null,
   initialPrompt = null,
   isAuthenticated = false,
@@ -31,6 +35,7 @@ export function RecommendationDemo({
   if (mode === "configurator") {
     return (
       <ConfiguratorView
+        initialBuildCode={initialBuildCode}
         initialKitId={initialKitId}
         initialPrompt={initialPrompt}
         isAuthenticated={isAuthenticated}
