@@ -128,7 +128,7 @@ The PostHog key on Vercel; any run costing more than USD 0.50; turning on Claude
 
 ## Report back (session fills this in)
 
-_Draft 27 Nov 2026, branch `v2-ws0-foundation` (local, not pushed). Items still waiting on Jayson are marked **PENDING**._
+_27 Nov 2026, branch `v2-ws0-foundation` (local, not pushed). Items still waiting on an approval are marked **PENDING**._
 
 ### What changed, in plain words
 
@@ -185,6 +185,7 @@ Routing is the production default (regex). The LLM router behind `KEYBOT_LLM_CLA
 |---|---|
 | task success (judge) | 46.7% (7/15) |
 | task success (judge AND code check of hard requirements) | 46.7% (7/15) |
+| task success (confirmed grades: HQ-graded, Jayson-confirmed) | 46.7% (7/15), but not the same 7 sessions: judge agreement is 12/15 |
 | turns to an accepted build (successful sessions) | mean 3.0, median 3 |
 | confusion (1 clear … 5 unusable) | 1.93 |
 | **invented parts: unknown component IDs** | **0** |
@@ -197,17 +198,36 @@ Routing is the production default (regex). The LLM router behind `KEYBOT_LLM_CLA
 
 - **A (real-customer lines): skipped** by Jayson's decision. Personas are labelled "AI-drafted, reviewed by Jayson". Don't use the HQ plan's wording "grounded in my 150+ customer builds".
 - **B (label review): done.** 30-row sample, **0 of 30 changed**, appendix of 10 label-vs-engine disagreements accepted. TEST frozen after the review.
-- **C (judge calibration): PENDING.** 15 run-3 transcripts are exported blind to `eval/v2/calibration/`; Jayson fills `grades.json`, then `judge-agreement.ts score`. **Judge agreement: PENDING.**
+- **C (judge calibration): done.**
+  - The 15 run-3 transcripts were **graded by HQ (Claude) from the full transcripts and confirmed by Jayson** (all 15, including the borderline p02 and p10). They were not human-graded from scratch.
+  - So this measures agreement between two AI graders, one of them checked by a human. It is not the judge against independent human judgement.
+  - Grades: `eval/v2/calibration/grades.json`. Score: `eval/v2/calibration/agreement.md`.
+
+| measure | agreement |
+|---|---|
+| **success yes/no** (bar 80%) | **80.0% (12/15)**: meets the bar, with no margin |
+| confusion within ±1 | 53.3% (8/15); the judge rated confusion lower than HQ in 11 of 15 |
+| turns to success, exact (both said success) | 40.0% (2/5) |
+
+**Judge vs persona acceptance.** Personas sometimes accept builds that don't meet their own goal. The judge must grade the builds on screen against the "satisfied when" rule, never the persona's acceptance.
+- Personas accepted a build in 9 sessions. **5 of those 9 builds did not meet the rule** (p02, p03, p07, p14, p15, per the confirmed grades).
+- The judge called **2 of those 5 a success anyway** (p03, p14).
+- The third disagreement, p10, goes the other way: the persona gave up while the build on screen met the rule, and the judge said fail.
+- So **all 3 judge disagreements follow the persona's ending** (accept → success, give up → fail) instead of the screen.
+- The cause is in rubric-v1, which defines success as "a fitting build AND the customer accepted it". The code check of hard requirements didn't rescue these cases: judge AND code check also agrees 12/15.
+- Proposed fix (rubric-v2, not applied, see open question 3): grade success only from the builds on screen against the rule; strip "accepts build N" and "gave up" from the transcript the judge sees; give anchored examples for confusion. Re-judging run-3 costs about USD 0.02 (judge only, no app calls) and would go into a new results file.
 
 ### Cost of one full simulation run (15 × 1)
 
-About **USD 0.24**: persona + judge USD 0.062 (measured from tokens) plus the app's own ~84 calls at ~USD 0.002 each (measured roughly from the balance drop).
+About **USD 0.25**: persona + judge USD 0.062 (measured from tokens) plus the app's own 84 calls at about USD 0.0022 each (derived from the balance drop below).
 
 ### (d) Total WS0 spend and balance
 
-- Start of WS0: about USD 1.73. Mid-run-3 reading: USD 1.34.
-- Measured persona + judge across all runs: USD 0.146. The app made 200 calls across the runs, plus 48 for the LLM intent column.
-- **Estimated total: about USD 0.60–0.70**, which would leave about **USD 1.05**. **Final balance: PENDING** (Jayson to read it).
+- **Total WS0 spend: USD 0.70** (USD 1.73 at the start, **USD 1.03 now**). This was read from the OpenAI usage page, so it includes any live-site traffic in the same period.
+- Breakdown:
+  - persona + judge (measured from tokens): USD 0.146 across the smoke test, run-1, run-2 and run-3;
+  - the app's own OpenAI calls: about USD 0.55, from 200 calls in the simulations plus 48 for the LLM intent column, so about USD 0.0022 per call.
+- Every single run stayed under the USD 0.50 cap, and the balance never went below USD 0.50.
 
 ### Surprises and things that look broken (for other workstreams)
 
@@ -217,7 +237,7 @@ About **USD 0.24**: persona + judge USD 0.062 (measured from tokens) plus the ap
 4. **Meg claims actions she can't take** (WS1 honesty, WS4 UX): "I swapped out one build… on screen", when chat can't change the builds panel. Users ask Meg for changes and nothing happens on screen. WS4's refine chips or "apply Meg's suggestion" would close this.
 5. **Grounding miss** (WS1): Meg said the catalogue has no purple keycaps; the Gradient set (blue/purple) exists.
 6. **Slow tail** (WS1): p95 16.4 s against p50 3.5 s. That fits one 7-second timeout plus a retry in `src/lib/openai/client.ts`.
-7. **The judge is lenient on honesty**: it rated every session "honest" and never used "not applicable", including one where Meg was wrong about stock. Candidate for rubric-v2 after Checkpoint C. Success is already double-checked by code.
+7. **The judge follows the persona, and is lenient**: all 3 success disagreements follow the persona's accept/give-up (see (c)). It rated confusion lower than HQ in 11/15 sessions, and rated every session "honest", never using "not applicable", including sessions where Meg was wrong about stock or prices. The confirmed grades also list more Meg errors than the judge caught: wrong compatibility answers (p15: "screw-in stabs fit the GMK67 PCB"), vision reading a 65% photo as 75% (p14), and false price claims ("nothing under RM450", p09).
 8. "Full keyboard" (meaning a full set) is read as full-size layout, and the cheapest full-size build is about RM420.
 9. Use case is the weakest intent field for both extractors (63.6%).
 10. PostHog's 4 remaining events need one `track(...)` line each when WS3/WS4 build share, clone, sound and refine.
@@ -227,8 +247,8 @@ About **USD 0.24**: persona + judge USD 0.062 (measured from tokens) plus the ap
 ### Open questions for HQ
 
 1. **Fix the row-order bug before WS1 measures?** If it's fixed during WS1, WS1's before/after numbers on budget personas will include the fix. Suggest: fix first (with an order-independence test), re-run the baseline as run-4 (about USD 0.24), and give WS1 that as its "before".
-2. Repeat runs (3 per persona) wait for a top-up: about USD 0.50 for two more runs of 15.
-3. Rubric-v2 for honesty after Checkpoint C?
+2. Repeat runs (3 per persona) wait for a top-up: about USD 0.50 for two more runs of 15. With USD 1.03 left, they fit, but would leave about USD 0.53, close to the USD 0.50 floor.
+3. **Rubric-v2?** Success graded only from the builds on screen (acceptance and give-up hidden from the judge), anchored confusion examples, and stricter honesty. Re-judge run-3 (about USD 0.02) into a new results file and re-score agreement. Until then, read "task success" as judge AND HQ-confirmed: 7/15 on both, but not the same 7 sessions.
 4. Approvals still needed: push and open the PR (so the CI checks run), the `LIVE_SITE_URL` repository variable, the PostHog key on Vercel, and a deploy (for `/api/health`, the keep-alive and the analytics).
 
 ### Done-when status
@@ -237,7 +257,7 @@ About **USD 0.24**: persona + judge USD 0.062 (measured from tokens) plus the ap
 |---|---|
 | Personas and messy set committed, Jayson's review done | done (A skipped, B done) |
 | Simulation runs end to end with one command | done |
-| Judge agrees with Jayson ≥ 80% | **PENDING** (Checkpoint C) |
-| Baseline scorecard committed | written; commit waiting for OK |
+| Judge agrees with the grades ≥ 80% | done: **80.0%** (HQ-graded, Jayson-confirmed); rubric-v2 proposed |
+| Baseline scorecard committed | done (`d8fba83`, run-3) |
 | PostHog events in the dashboard | **PENDING** (key + deploy approval) |
 | PRs show the checks; keep-alive ran once | **PENDING** (push + deploy approval) |
