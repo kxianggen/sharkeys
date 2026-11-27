@@ -5,16 +5,26 @@
  *   chat   → POST /api/keybot with UI context  (Meg's chat panel)
  *   photo  → POST /api/ai/vision-intent, then the prompt it fills in goes to
  *            /api/recommendations              (the image drop)
+ *   refine → POST /api/recommendations/refine  (the chips under a build;
+ *            uses the UI's own applyRefineChip, so it cannot drift)
  *
- * The context and the photo prompt mirror buildKeybotRequestContext and
- * intentToPrompt in src/components/recommendation-demo.tsx. If the UI changes
- * those, update this file too (WS4 owns the component).
+ * The context and the photo prompt mirror buildKeybotRequestContext
+ * (src/components/configurator/keybot/keybot-helpers.ts) and intentToPrompt
+ * (src/components/configurator/build-helpers.ts). If the UI changes those,
+ * update this file too (WS4 owns the configurator components).
  */
 import { readFileSync } from "node:fs";
 import { extname } from "node:path";
 
 import type { ExtractedKeyboardIntent } from "@/lib/ai";
 import type { KeybotResponse } from "@/lib/keybot/schemas";
+import {
+  applyRefineChip,
+  describeBuildChange,
+  refineChipLabels,
+  type RefineChip,
+} from "@/lib/recommendations/refine";
+import type { ComponentColour } from "@/lib/types";
 import type {
   RecommendationResult,
   ValidatedRecommendationBuild,
@@ -29,7 +39,11 @@ export type AppState = {
 };
 
 export type AppCallRecord = {
-  endpoint: "/api/recommendations" | "/api/keybot" | "/api/ai/vision-intent";
+  endpoint:
+    | "/api/recommendations"
+    | "/api/recommendations/refine"
+    | "/api/keybot"
+    | "/api/ai/vision-intent";
   ms: number;
   status: number;
   source?: string;
@@ -146,6 +160,63 @@ export async function sendSearch(
     returnedIds: buildIds(data),
     buildsChanged: true,
   };
+}
+
+/**
+ * A refine chip click (v2 WS4), exactly as the UI does it: the chip edits the
+ * structured intent of the current result (applyRefineChip, shared with the
+ * UI), and /api/recommendations/refine re-runs the engine. No AI call. A chip
+ * that cannot change the selected build is greyed out in the UI, so it makes
+ * no call here either.
+ */
+export async function sendRefine(
+  baseUrl: string,
+  state: AppState,
+  chip: RefineChip,
+  keycapColours?: readonly ComponentColour[],
+): Promise<AppReply> {
+  const base = state.result?.recommendations[state.selectedIndex];
+
+  if (!state.result || !base) {
+    return {
+      text: "(There are no builds on screen yet, so there are no buttons to click.)",
+      calls: [],
+      returnedIds: [],
+      buildsChanged: false,
+    };
+  }
+
+  const intent = applyRefineChip(state.result.intent, chip, base, keycapColours);
+
+  if (!intent) {
+    return {
+      text: `(The ${refineChipLabels[chip]} button is greyed out: this build already covers it.)`,
+      calls: [],
+      returnedIds: [],
+      buildsChanged: false,
+    };
+  }
+
+  const { data, record, errorMessage } = await postJson<RecommendationResult>(
+    baseUrl,
+    "/api/recommendations/refine",
+    { intent, source: state.result.source, chip },
+  );
+  if (!data) {
+    return { text: `[error: ${errorMessage}]`, calls: [record], returnedIds: [], buildsChanged: false };
+  }
+
+  const top = data.recommendations[0] ?? null;
+  const text = `${refineChipLabels[chip]}: ${describeBuildChange(base, top)}`;
+
+  // Same as the UI: no matching build keeps the current result on screen.
+  if (!top) {
+    return { text, calls: [record], returnedIds: [], buildsChanged: false };
+  }
+
+  state.result = data;
+  state.selectedIndex = 0;
+  return { text, calls: [record], returnedIds: buildIds(data), buildsChanged: true };
 }
 
 export async function sendChat(
