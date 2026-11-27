@@ -7,7 +7,11 @@ Run names are run-1/2/3 so they never clash with the project's "v2". Each run fo
 | smoke | `2026-11-27-smoke` | 1 × 1 (3 turns) | simulator-1 | rubric-v1 | pipeline check only |
 | run-1 | `2026-11-27-pilot` | 5 × 1 | simulator-1 | rubric-v1 | pilot, used to measure cost |
 | run-2 | `2026-11-27-baseline-simv2` | 15 × 1 | simulator-2 (recorded as `sim-v2`) | rubric-v1 | superseded, kept for the record |
-| **run-3** | `2026-11-27-baseline` | 15 × 1 | simulator-3 (recorded as `sim-v3`) | rubric-v1 | **committed baseline** → `eval/v2/results/2026-11-27-v2-ws0-foundation.md` |
+| run-3 | `2026-11-27-baseline` | 15 × 1 | simulator-3 (recorded as `sim-v3`) | rubric-v1 | the baseline run (transcripts live here) → history results file `2026-11-27-v2-ws0-foundation.md` |
+| run-3 re-judged | `2026-11-27-baseline-rubric-v2` | same sessions | simulator-3 | rubric-v2 | history: 66.7% agreement, below the bar |
+| **run-3 re-judged** | `2026-11-27-baseline-rubric-v3` | same sessions | simulator-3 | **rubric-v3** | **canonical baseline** → `2026-11-27-v2-ws0-foundation-2.md` |
+
+The re-judged folders hold only `sessions.jsonl` and `run.json`. The transcripts, app calls and code checks are copied unchanged from run-3; only the judge was re-run (`scripts/v2/rejudge.ts`).
 
 The `run.json` files of run-2 and run-3 say `sim-v2` / `sim-v3`: they were written before the labels were renamed to simulator-2 / simulator-3. Their `gitSha` (4a9146a) is the last commit at run time; the simulator-2/3 changes were still uncommitted then and were committed right after.
 
