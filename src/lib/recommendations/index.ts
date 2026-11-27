@@ -1,6 +1,7 @@
 export {
   buildValidatedRecommendations,
   createRecommendationResult,
+  generateRecommendationsFromIntent,
   generateRecommendationsFromMessage,
   scoreRecommendation,
 } from "./service";
@@ -8,6 +9,8 @@ export {
   recommendationResultSchema,
   recommendationsApiResponseSchema,
   recommendationsRequestSchema,
+  refineRecommendationsRequestSchema,
+  type RefineRecommendationsRequest,
   validatedRecommendationBuildSchema,
   type RecommendationComponentIds,
   type RecommendationComponents,

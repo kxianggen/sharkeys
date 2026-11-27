@@ -19,6 +19,8 @@ import {
   userIntentRequestSchema,
 } from "@/lib/ai/intent-schema";
 
+import { refineChips } from "./refine";
+
 const recommendationComponentIdsSchema = z
   .object({
     case: z.string().min(1),
@@ -79,6 +81,26 @@ export const recommendationsRequestSchema = userIntentRequestSchema
     kitId: z.string().trim().min(1).max(120).optional(),
   })
   .strict();
+
+// Refine chips (v2 WS4): the client sends an already-structured intent, edited
+// deterministically by a chip, plus the source of the intent it started from.
+// No free text, so there is nothing for an AI model to interpret.
+export const refineRecommendationsRequestSchema = z
+  .object({
+    intent: extractedKeyboardIntentSchema,
+    source: intentExtractionSourceSchema,
+    // Which chip produced the intent. Only "premium" changes ranking (it
+    // favours builds that use more of the raised ceiling).
+    chip: z.enum(refineChips).optional(),
+    // Clone ("Use this build"): keep assembly on the shared build's kit.
+    // Same anchor as the message path's kitId; validation is unchanged.
+    kitId: z.string().trim().min(1).max(120).optional(),
+  })
+  .strict();
+
+export type RefineRecommendationsRequest = z.infer<
+  typeof refineRecommendationsRequestSchema
+>;
 
 export const recommendationsApiResponseSchema = z.object({
   success: z.literal(true),

@@ -13,10 +13,13 @@ export default async function ConfiguratorPage({
   const params = searchParams ? await searchParams : {};
   const initialPrompt = getParamValue(params.prompt);
   const initialKitId = getParamValue(params.kit);
+  // ?build=<code>: "Use this build" from a shared link or gallery post.
+  const initialBuildCode = getParamValue(params.build);
   const user = await getSessionUser();
 
   return (
     <RecommendationDemo
+      initialBuildCode={initialBuildCode}
       initialKitId={initialKitId}
       initialPrompt={initialPrompt}
       isAuthenticated={Boolean(user)}

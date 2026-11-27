@@ -37,6 +37,7 @@ import {
   type RecommendationComponents,
   type RecommendationResult,
   type RecommendationsRequest,
+  type RefineRecommendationsRequest,
   type ValidatedRecommendationBuild,
 } from "./schemas";
 
@@ -50,6 +51,17 @@ type GenerateRecommendationsOptions = {
 };
 
 type OpenAIRecommendationClient = Pick<OpenAI, "responses">;
+
+// Ranking switches set only by the refine route. Every default keeps the
+// original ranking, so the message path ranks exactly as before.
+type RankingOptions = {
+  // "More premium": favour builds that use more of the raised ceiling.
+  preferHigherSpend?: boolean;
+  // "Cheaper": strictly the priciest build under the ceiling first, i.e. the
+  // next step down. A score nudge cannot guarantee that (close prices round
+  // to the same points), so price decides and the score only breaks ties.
+  nextStepDown?: boolean;
+};
 
 type AssemblyResult = {
   recommendations: ValidatedRecommendationBuild[];
@@ -128,6 +140,38 @@ export async function generateRecommendationsFromMessage(
   });
 }
 
+/**
+ * Refine path (v2 WS4 chips): re-runs recommendations from an intent that a
+ * chip has already edited. Deliberately makes NO OpenAI call of any kind:
+ * no intent extraction (the intent is given), no semantic switch search (the
+ * sync matcher is used), and no explanation rewrite. Assembly and the rule
+ * engine are the same as the message path, so every returned build is still
+ * validated.
+ */
+export async function generateRecommendationsFromIntent(
+  request: RefineRecommendationsRequest,
+  options: Pick<GenerateRecommendationsOptions, "catalogComponents" | "maxRecommendations"> = {},
+): Promise<RecommendationResult> {
+  const catalogComponents =
+    options.catalogComponents ?? (await getCatalogComponents());
+  const preparation = prepareIntentMatches(request.intent, catalogComponents);
+
+  return createRecommendationResult(
+    { intent: request.intent, source: request.source },
+    {
+      catalogComponents,
+      preparation: request.kitId
+        ? anchorPreparationToKit(preparation, request.kitId, catalogComponents)
+        : preparation,
+      maxRecommendations: options.maxRecommendations,
+      ranking: {
+        preferHigherSpend: request.chip === "premium",
+        nextStepDown: request.chip === "cheaper",
+      },
+    },
+  );
+}
+
 // Categories that structurally belong to a kit (metadata.kitLock). Switches
 // and keycaps stay intent-driven — the anchor only pins the kit itself.
 const kitAnchoredCategories: readonly ComponentCategory[] = [
@@ -204,6 +248,7 @@ export function createRecommendationResult(
     catalogComponents?: readonly KeyboardComponent[];
     preparation?: IntentPreparation;
     maxRecommendations?: number;
+    ranking?: RankingOptions;
   } = {},
 ): RecommendationResult {
   const catalogComponents = options.catalogComponents;
@@ -215,6 +260,7 @@ export function createRecommendationResult(
     candidateComponentIds: preparation.candidateComponentIds,
     catalogComponents,
     maxRecommendations: options.maxRecommendations,
+    ranking: options.ranking,
   });
   const clarificationPrompt = buildClarificationPrompt(extraction.intent, assembly);
 
@@ -236,11 +282,13 @@ export function buildValidatedRecommendations({
   candidateComponentIds,
   catalogComponents,
   maxRecommendations = defaultMaxRecommendations,
+  ranking = {},
 }: {
   intent: ExtractedKeyboardIntent;
   candidateComponentIds: ComponentCandidateIdsByCategory;
   catalogComponents?: readonly KeyboardComponent[];
   maxRecommendations?: number;
+  ranking?: RankingOptions;
 }): AssemblyResult {
   const candidateSets = getCandidateSets(candidateComponentIds);
   const missingCandidateCategories = requiredComponentCategories.filter(
@@ -330,7 +378,7 @@ export function buildValidatedRecommendations({
   return {
     recommendations: diversifyByCase(
       recommendations.sort((left, right) =>
-        compareRecommendations(left, right, intent),
+        compareRecommendations(left, right, intent, ranking),
       ),
       maxRecommendations,
     ),
@@ -521,9 +569,21 @@ function compareRecommendations(
   left: ValidatedRecommendationBuild,
   right: ValidatedRecommendationBuild,
   intent: ExtractedKeyboardIntent,
+  ranking: RankingOptions = {},
 ) {
+  if (ranking.nextStepDown) {
+    const priceDifference =
+      (right.estimatedPrice ?? Number.NEGATIVE_INFINITY) -
+      (left.estimatedPrice ?? Number.NEGATIVE_INFINITY);
+
+    if (priceDifference !== 0) {
+      return priceDifference;
+    }
+  }
+
   const scoreDifference =
-    scoreRecommendation(right, intent) - scoreRecommendation(left, intent);
+    scoreRecommendation(right, intent, ranking) -
+    scoreRecommendation(left, intent, ranking);
 
   if (scoreDifference !== 0) {
     return scoreDifference;
@@ -608,6 +668,7 @@ function scoreComponentColour(
 export function scoreRecommendation(
   recommendation: ValidatedRecommendationBuild,
   intent: ExtractedKeyboardIntent,
+  ranking: RankingOptions = {},
 ) {
   const { components } = recommendation;
   let score = 100;
@@ -642,7 +703,9 @@ export function scoreRecommendation(
   score += scoreConstraintFit(recommendation, intent);
   score += scoreUseCaseFit(recommendation, intent);
   score += scoreBeginnerFit(recommendation, intent);
-  score += scoreBudgetFit(recommendation, intent);
+  score += ranking.preferHigherSpend
+    ? scorePremiumSpend(recommendation, intent)
+    : scoreBudgetFit(recommendation, intent);
   score += scoreConnectionFit(recommendation, intent);
   score += scoreCatalogConfidence(recommendation);
 
@@ -952,6 +1015,40 @@ function scoreBudgetFit(
   const efficiency = remainingBudget / Math.max(catalogBudget.amount, 1);
 
   return 20 + Math.round(Math.min(efficiency, 0.5) * 20);
+}
+
+/**
+ * "More premium" refine chip only (ranking.preferHigherSpend). The normal
+ * budget score rewards unspent budget, so a raised ceiling still returns the
+ * cheapest build. Here, among builds under the ceiling, the one that uses
+ * more of it scores higher (+20 to +50). Over-budget builds are already
+ * rejected before ranking, and compatibility is untouched: this only orders
+ * builds the rule engine has passed.
+ */
+function scorePremiumSpend(
+  recommendation: ValidatedRecommendationBuild,
+  intent: ExtractedKeyboardIntent,
+) {
+  const catalogBudget = normalizeBudgetForCatalogPricing(intent.budget);
+
+  if (!catalogBudget) {
+    return 0;
+  }
+
+  if (
+    recommendation.estimatedPrice === null ||
+    recommendation.estimatedPriceCurrency !== catalogBudget.currency
+  ) {
+    return -25;
+  }
+
+  const spentShare = recommendation.estimatedPrice / Math.max(catalogBudget.amount, 1);
+
+  if (spentShare > 1) {
+    return -60;
+  }
+
+  return 20 + Math.round(spentShare * 30);
 }
 
 function scoreConnectionFit(

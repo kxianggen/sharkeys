@@ -35,6 +35,7 @@ import { execSync } from "node:child_process";
 import OpenAI from "openai";
 
 import { keyboardComponents } from "@/data";
+import { getKeycapColours } from "@/lib/recommendations/refine";
 
 import { loadEnvFile } from "../load-env-file";
 import {
@@ -44,6 +45,7 @@ import {
   emptyAppState,
   sendChat,
   sendPhoto,
+  sendRefine,
   sendSearch,
   type AppCallRecord,
   type AppReply,
@@ -161,6 +163,8 @@ async function checkServer() {
 }
 
 const catalogue = keyboardComponents.map((c) => ({ id: c.id, name: c.name, brand: c.brand }));
+// "Different colour" only offers colours some keycap actually has (as in the UI).
+const keycapColours = getKeycapColours(keyboardComponents);
 
 async function runSession(
   client: OpenAI,
@@ -218,6 +222,11 @@ async function runSession(
     try {
       if (action.action === "photo" && persona.photo) {
         reply = await sendPhoto(BASE_URL, state, persona.photo, action.message);
+      } else if (action.action === "refine") {
+        // v2 WS4 chip click: no typing, no AI call on the app side.
+        reply = action.chip
+          ? await sendRefine(BASE_URL, state, action.chip, keycapColours)
+          : { text: "(No button was clicked.)", calls: [], returnedIds: [], buildsChanged: false };
       } else if (action.action === "chat") {
         // Meg's panel also works before any search, exactly like the UI.
         reply = await sendChat(BASE_URL, state, action.message);
@@ -246,7 +255,8 @@ async function runSession(
     turns.push({
       turn,
       action: action.action,
-      userMessage: action.message,
+      userMessage:
+        action.action === "refine" ? `clicks ${action.chip ?? "nothing"}` : action.message,
       appReply: reply.text,
       screen,
       calls: reply.calls,
