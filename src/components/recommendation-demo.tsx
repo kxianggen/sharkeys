@@ -61,6 +61,7 @@ import type {
 } from "@/lib/ai";
 import type { RecommendationsApiResponse } from "@/lib/recommendations/schemas";
 import { isRateLimited, RATE_LIMIT_MESSAGE } from "@/lib/api/rate-limit";
+import { track } from "@/lib/analytics";
 import type { KeybotApiResponse } from "@/lib/keybot/schemas";
 
 type RecommendationResult = RecommendationsApiResponse["data"];
@@ -1002,6 +1003,7 @@ export function RecommendationDemo({
     setError(null);
     setManualError(null);
     setIsSubmitting(true);
+    track("request_sent", { entry: anchorKitId ? "kit" : "search" });
 
     try {
       const response = await fetch("/api/recommendations", {
@@ -1027,6 +1029,15 @@ export function RecommendationDemo({
 
       setResult(body.data);
       const firstRecommendation = body.data.recommendations[0];
+      if (firstRecommendation) {
+        track("build_shown", {
+          buildCount: body.data.recommendations.length,
+          validCount: body.data.recommendations.filter(
+            (recommendation) => recommendation.validation.isValid,
+          ).length,
+          layout: body.data.intent?.layout ?? undefined,
+        });
+      }
       setSelectedRecommendationId(firstRecommendation?.id ?? null);
       setActiveCategory("case");
       setManualValidation(null);
@@ -1226,6 +1237,9 @@ export function RecommendationDemo({
     setIsSavingBuild(true);
     try {
       const saveResult = await saveBuildAction(input);
+      if (saveResult.ok) {
+        track("build_saved", { source: input.source, signedIn: true });
+      }
       setSavedBuildMessage(
         saveResult.ok ? `${input.title} saved to your builds.` : saveResult.error,
       );
@@ -2998,6 +3012,7 @@ function KeybotPanel({
     setInput("");
     setError(null);
     setIsSending(true);
+    track("request_sent", { entry: "chat" });
 
     try {
       const response = await fetch("/api/keybot", {
