@@ -128,7 +128,7 @@ The PostHog key on Vercel; any run costing more than USD 0.50; turning on Claude
 
 ## Report back (session fills this in)
 
-_27 Nov 2026, PR [kxianggen/sharkeys#5](https://github.com/kxianggen/sharkeys/pull/5) (`v2-ws0-foundation` → `v2`). HQ verdict: APPROVED, with the changes below applied. Items waiting for the v2 wrap-up are marked **LATER**._
+_27 Nov 2026. PR [kxianggen/sharkeys#5](https://github.com/kxianggen/sharkeys/pull/5) (`v2-ws0-foundation` → `v2`) is merged; the freeze follow-up is on `v2-ws0-freeze`. HQ verdict: APPROVED, with the changes below applied. Items waiting for the v2 wrap-up are marked **LATER**._
 
 ### What changed, in plain words
 
@@ -166,12 +166,12 @@ Run-3's transcripts were judged three times; only the judge changed, never the t
 | rubric-v2 (HQ-approved) | success only from the builds on screen; accept/give-up hidden from the judge; anchored confusion examples; stricter honesty, checked against a catalogue list | **66.7% (10/15): below the bar** | 53.3% |
 | **rubric-v3** | v2 plus general fixes for v2's misses: compatibility fields in the judge's catalogue list (it had wrongly said screw-in stabs fit the GMK67 PCB); the judge is told what the uploaded photo shows; explicit budget tolerance (≤5% over for "about"/flexible); only the "satisfied when" rule counts, not extra wishes from chat; a later false claim cancels an earlier honest answer | **80.0% (12/15)** | **80.0%** |
 
-- **Why rubric-v3 and not v2 is canonical.** HQ approved v2 as the canonical rubric, but v2 fell below the 80% bar. The brief says to tighten and re-check, so I made v3. HQ can overrule this before merging.
+- **Why rubric-v3 and not v2 is canonical.** HQ approved v2 as the canonical rubric, but v2 fell below the 80% bar. The brief says to tighten and re-check, so I made v3. **HQ accepted rubric-v3 as canonical and froze it, with simulator-3, for the rest of v2** (see "HQ decisions").
 - **Caveat.** Both v2 and v3 were adjusted after seeing the same 15 graded transcripts they are scored on. That makes the agreement number optimistic; the next unseen runs are the real test. The v3 fixes are general (missing facts, explicit tolerances), with nothing written for a specific persona.
 - **Remaining v3 disagreements** (3):
   - p03: the judge says success. It misses that Meg later claimed hall-effect fits under RM800.
   - p10: borderline. The judge says fail; the confirmed grade says success.
-  - p15: the judge says success but also marks the session dishonest with confusion 4, so it contradicts itself. A small code guard ("honesty-type rule + dishonest ⇒ not a success") would fix this. Not applied, so as not to tune further on the same 15.
+  - p15: the judge says success but also marks the session dishonest with confusion 4, so it contradicts itself. **Known judge weakness, not fixed (HQ decision).** Read success and honesty together.
 
 ### (b) The canonical baseline
 
@@ -265,6 +265,7 @@ HQ turned these into WS1's work list: `docs/v2/ws0-baseline-findings.md`.
 4. The row-order bug stays in the baseline; WS1 fixes it.
 5. **LATER:** after Jayson's top-up, run 2 more baseline runs on this branch's code (simulator-3, rubric-v3) before WS1 merges. Expected cost about USD 0.50.
 6. **LATER, at the v2 wrap-up:** `LIVE_SITE_URL`, the PostHog key on Vercel, and the deploy.
+7. **Frozen (follow-up decision):** rubric-v3 is canonical, and simulator-3 + rubric-v3 are frozen for the rest of v2. Every later run (repeat baselines, WS1 "after", WS4 "after") uses them. `tests/v2/frozen-eval.test.ts` fails CI if the judge, simulator, invented-parts check or personas change. The catalogue is not frozen, so the judge's catalogue facts follow WS2's catalogue. The p15 self-contradiction stays as a known judge weakness.
 
 ### Done-when status
 

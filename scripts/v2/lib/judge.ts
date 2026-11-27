@@ -6,6 +6,11 @@
  * and its success verdict is reported next to the code check of the persona's
  * hardRequirements, so a lenient judge can't hide a wrong build.
  *
+ * FROZEN (HQ, 27 Nov 2026): rubric-v3 is the canonical rubric for the rest of
+ * v2; tests/v2/frozen-eval.test.ts fails if this file changes. Known weakness,
+ * not fixed by HQ decision: the judge can call a session a success while also
+ * rating it dishonest (p15 in run-3).
+ *
  * Change the rubric only together with RUBRIC_VERSION, then re-check agreement
  * against the confirmed grades (scripts/v2/judge-agreement.ts).
  *
