@@ -52,7 +52,6 @@ import {
 import { checkInventedParts, type PossibleFlag } from "./lib/invented-parts";
 import {
   judgeTranscript,
-  renderTranscript,
   RUBRIC_VERSION,
   type JudgeVerdict,
   type TranscriptTurn,
@@ -83,6 +82,18 @@ const { values: args } = parseArgs({
   },
 });
 
+// Bump when the simulator's view of the app changes, so runs stay comparable.
+// Named simulator-1/2/3 so they never clash with the project's "v2".
+// (The first runs on 27 Nov recorded these as "sim-v2"/"sim-v3"; see
+// eval/v2/runs/README.md for the mapping.)
+//  simulator-1: smoke test and pilot.
+//  simulator-2: search reply mirrors the UI (build cards only, or the
+//    empty-state text), Meg's part chips are shown, accept needs an
+//    on-screen build. The persona is deliberately NOT told that chat can't
+//    change the builds panel: a real user isn't told either.
+//  simulator-3: the screen lists all six parts of each build, like the card.
+const SIM_VERSION = "simulator-3";
+
 const MAX_TURNS = Number(args["max-turns"]);
 const RUNS = Number(args.runs);
 const BASE_URL = args["base-url"]!.replace(/\/$/, "");
@@ -90,9 +101,11 @@ const APP_COST_PER_TURN = Number(args["app-cost-per-turn"]);
 const MAX_COST = Number(args["max-cost"]);
 
 // Per-session token estimate for persona + judge, worst case (all 8 turns).
-// Replace with measured numbers after the pilot (see summary.json).
-const EST_PERSONA_TOKENS_PER_TURN = { inputTokens: 2_400, cachedInputTokens: 0, outputTokens: 110 };
-const EST_JUDGE_TOKENS = { inputTokens: 5_000, cachedInputTokens: 0, outputTokens: 300 };
+// Measured in the 27 Nov pilot (5 sessions): persona ~1,580 in / 42 out per
+// turn, judge ~2,300 in / 110 out per session. Rounded up ~50% for headroom
+// (the sim-v2 screen text is longer).
+const EST_PERSONA_TOKENS_PER_TURN = { inputTokens: 2_400, cachedInputTokens: 0, outputTokens: 70 };
+const EST_JUDGE_TOKENS = { inputTokens: 3_500, cachedInputTokens: 0, outputTokens: 170 };
 
 export type SessionRecord = {
   personaId: string;
@@ -224,7 +237,10 @@ async function runSession(
       userText: userTexts.join("\n"),
     });
     check.unknownIds.forEach((id) => unknownIds.add(id));
-    check.possible.forEach((f) => possible.push({ ...f, turn }));
+    // One flag per term per session: a term repeated across turns is one review item.
+    for (const f of check.possible) {
+      if (!possible.some((p) => p.term === f.term)) possible.push({ ...f, turn });
+    }
 
     const screen = describeScreen(state);
     turns.push({
@@ -240,12 +256,12 @@ async function runSession(
     screenNote = `APP REPLY:\n${reply.text}\n\nBUILDS ON SCREEN:\n${screen}`;
   }
 
-  const transcript = renderTranscript(turns, endedWith);
   let verdict: JudgeVerdict | null = null;
   let judgeUsage = zeroUsage();
   if (endedWith !== "error") {
     try {
-      const judged = await judgeTranscript({ client, persona, transcript });
+      // The judge never sees the persona's accept / give-up (rubric-v2).
+      const judged = await judgeTranscript({ client, persona, turns });
       verdict = judged.verdict;
       judgeUsage = judged.usage;
     } catch (e) {
@@ -364,6 +380,7 @@ async function main() {
         runs: RUNS,
         maxTurns: MAX_TURNS,
         rubricVersion: RUBRIC_VERSION,
+        simVersion: SIM_VERSION,
         simModel: SIM_MODEL,
         appCostPerTurnAssumed: APP_COST_PER_TURN,
         estimatedSpendUSD: Number(spent.toFixed(4)),
