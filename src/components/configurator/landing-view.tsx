@@ -25,6 +25,12 @@ import { MainNav } from "@/components/main-nav";
 // Meg's props stable between renders.
 const noManualSelection: ManualSelection = {};
 
+// Kept as its own string literal: Tailwind finds classes by scanning source
+// text, and "sm:text-display" glued to a following `${` is not recognised, so
+// the class silently went missing from the CSS (caught by the visual test on
+// a fresh dev server).
+const headlineClassName = "max-w-4xl text-primary text-h1 sm:text-display";
+
 // The home page: hero with the prompt box (which hands off to /configurator),
 // the decorative demo panel, the landing sections, footer and Meg.
 export function LandingView() {
@@ -112,9 +118,7 @@ export function LandingView() {
               className="flex w-full flex-col items-center will-change-transform"
               ref={heroCopyRef}
             >
-              <h1
-                className={`max-w-4xl text-primary text-h1 sm:text-display${heroFade()}`}
-              >
+              <h1 className={`${headlineClassName}${heroFade()}`}>
                 Build your dream keyboard in words.
               </h1>
               <p
