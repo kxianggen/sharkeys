@@ -33,8 +33,8 @@ export const NON_CATALOGUE_BRANDS = [
   "keychron", "razer", "logitech", "corsair", "steelseries", "hyperx", "hhkb",
   "topre", "realforce", "ducky", "leopold", "varmilo", "glorious", "gmmk",
   "nuphy", "epomaker", "royal kludge", "aula", "feker", "monsgeek", "durock",
-  "jwk", "novelkeys", "zeal", "zealios", "drop", "kbdfans", "tofu", "qk65",
-  "mode", "rama", "mchose", "madlions", "drunkdeer", "apple magic keyboard",
+  "jwk", "novelkeys", "zeal", "zealios", "kbdfans", "tofu65", "qk65",
+  "mode sonnet", "mode envoy", "rama works", "mchose", "madlions", "drunkdeer", "apple magic keyboard",
   "holy panda", "banana split", "alpaca", "tangerine", "ktt", "hmx", "jwick",
   "kinesis", "moonlander", "zsa", "ergodox", "krytox", "tribosys",
 ] as const;
