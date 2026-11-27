@@ -983,20 +983,6 @@ describe("RecommendationDemo", () => {
     ).toBeDisabled();
   });
 
-  it.skip("shows validated recommendation details and vendor-link behavior", async () => {
-    mockFetch();
-    render(<RecommendationDemo mode="configurator" />);
-
-    submitConfiguratorPrompt("Creamy 65% under RM500");
-
-    expect(await screen.findByText(/Start from a build/)).toBeInTheDocument();
-    fireEvent.click(screen.getByText("Technical details"));
-
-    expect(screen.getByText(/Estimated total/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Lucky65 V3/i).length).toBeGreaterThan(0);
-    expect(screen.getByText("Open vendor page")).toBeInTheDocument();
-  });
-
 
 
   it.skip("shows compatible validation status for manual selection", async () => {
