@@ -1,0 +1,59 @@
+# Weekly price check (v2 WS2).
+# Every Monday 09:00 Malaysia time it re-fetches each catalogue part's vendor
+# page (slowly, honouring robots.txt), compares prices and, if anything changed
+# or a page disappeared, opens a "price changes" PR that edits only
+# src/data/imported/price-checks.json. Merging that PR is Jayson's approval.
+#
+# Needs no secrets and never touches a database. Scheduled workflows run from
+# the default branch, so the Monday schedule starts once this file is on master;
+# until then it can be started by hand (Actions → Weekly price check → Run).
+# The repo setting "Allow GitHub Actions to create and approve pull requests"
+# must be on for the PR step.
+name: Weekly price check
+
+on:
+  schedule:
+    - cron: "0 1 * * 1" # Monday 01:00 UTC = 09:00 MYT
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: price-check
+  cancel-in-progress: false
+
+jobs:
+  price-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - id: check
+        run: npx tsx --tsconfig tsconfig.json scripts/catalog/price-check.ts
+
+      - name: Open the price-changes PR
+        if: steps.check.outputs.changed != '0'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          base: v2
+          branch: bot/price-check
+          delete-branch: true
+          add-paths: |
+            src/data/imported/price-checks.json
+            scripts/catalog/price-reports/
+          commit-message: "chore(prices): weekly price check"
+          title: "Price changes: weekly check"
+          body-path: ${{ steps.check.outputs.report }}
+          labels: price-check

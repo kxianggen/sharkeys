@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "benchmark": "catalog bench-scale",
+    "at": "2026-11-27T11:41:05.789Z",
+    "node": "v22.19.0",
+    "platform": "win32/x64",
+    "workload": "scripts/bench-recommendations.ts prompts, 20 warm-up + 200 timed calls, deterministic mode, no network"
+  },
+  "results": [
+    {
+      "catalogMode": "frozen",
+      "parts": 60,
+      "partsByCategory": {
+        "case": 7,
+        "pcb": 8,
+        "plate": 19,
+        "stabilizer": 11,
+        "switch": 10,
+        "keycap": 5
+      },
+      "rawCombinations": 585200,
+      "latencyMs": {
+        "n": 200,
+        "median": 200.0443,
+        "p95": 504.3227,
+        "max": 570.5984,
+        "mean": 237.18761849999993
+      },
+      "buildsReturnedPerPrompt": [
+        0,
+        3,
+        3,
+        0,
+        3,
+        3,
+        3,
+        3
+      ],
+      "buildsChecked": 18,
+      "allBuildsValid": true
+    },
+    {
+      "catalogMode": "full",
+      "parts": 106,
+      "partsByCategory": {
+        "case": 9,
+        "pcb": 10,
+        "plate": 21,
+        "stabilizer": 11,
+        "switch": 39,
+        "keycap": 16
+      },
+      "rawCombinations": 12972960,
+      "latencyMs": {
+        "n": 200,
+        "median": 742.6012,
+        "p95": 834.4949,
+        "max": 929.6054,
+        "mean": 534.6238775000002
+      },
+      "buildsReturnedPerPrompt": [
+        0,
+        3,
+        3,
+        0,
+        3,
+        3,
+        3,
+        3
+      ],
+      "buildsChecked": 18,
+      "allBuildsValid": true
+    }
+  ]
+}

@@ -1,0 +1,2504 @@
+{
+  "mecha:red-on-black-frosted-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry Profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 149,
+      "q": "Default Title: 149.00"
+    }
+  },
+  "mecha:kailh-deep-sea-silent-linear-lubricated-switches": {
+    "brand": {
+      "v": "Kailh",
+      "q": "Kailh Deep Sea Silent Linear Lubricated Switches"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "light, smooth, and silent linear switch"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "Plate mounted design (3 pins)"
+    },
+    "actuationForceG": {
+      "v": 45,
+      "q": "Actuation: 45g"
+    },
+    "price": {
+      "v": 3.5,
+      "q": "Default Title: 3.50"
+    },
+    "soundProfile": {
+      "v": "silent",
+      "q": "sound_Silent"
+    }
+  },
+  "mecha:akko-mod006-diy-barebones-kit": {
+    "brand": {
+      "v": "AKKO",
+      "q": "AKKO MOD006 Aluminum DIY Barebones Kit"
+    },
+    "layouts": {
+      "v": [
+        "75"
+      ],
+      "q": "Layout_75%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Gasket Mount: silion/poron gaskets"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "hot-swappable sockets"
+    },
+    "stabilizerTypeSupport": {
+      "v": [
+        "screw_in"
+      ],
+      "q": "compatible with more screw-in stabilizers"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Connectivity_Tri Mode"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "hot-swappable sockets"
+    },
+    "price": {
+      "v": 300,
+      "q": "Space Grey: 300.00"
+    }
+  },
+  "mecha:tx-2023-almost-perfect-pcb-clip-on-stabilizers": {
+    "brand": {
+      "v": "TX Keyboards",
+      "q": "Vendor field: TX Keyboards"
+    },
+    "stabilizerType": {
+      "v": "pcb_mount",
+      "q": "Clip-on PCB Mounted Stabilizers"
+    },
+    "stabilizerSizes": {
+      "v": [
+        "2u",
+        "6.25u",
+        "7u"
+      ],
+      "q": "both 6.25u and 7u spacebar wires"
+    },
+    "price": {
+      "v": 10,
+      "q": "Normal 1.6mm / Black: 10.00"
+    }
+  },
+  "mecha:green-and-white-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry Profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 149,
+      "q": "Default Title: 149.00"
+    }
+  },
+  "mecha:kailh-deep-sea-silent-pro-box-whale-linear-switch": {
+    "brand": {
+      "v": "Kailh",
+      "q": "Kailh Deep Sea Silent Pro Box Whale Tactile Switch"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Box Whale Tactile Switch"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-Pin"
+    },
+    "actuationForceG": {
+      "v": 40,
+      "q": "40±10 gf"
+    },
+    "price": {
+      "v": 2.5,
+      "q": "Default Title: 2.50"
+    },
+    "soundProfile": {
+      "v": "silent",
+      "q": "sound_Silent"
+    }
+  },
+  "mecha:weikav-max-102-98-barebones-keyboard-kit": {
+    "brand": {
+      "v": "Weikav",
+      "q": "Brand: Weikav"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "PCB-Gasket Structure"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Hotswap Sockets: Yes"
+    },
+    "connection": {
+      "v": "both",
+      "q": "three connection modes: Type-C wired, 2.4 GHz wireless, and Bluetooth"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Hotswap Sockets: Yes"
+    },
+    "plateMaterial": {
+      "v": "fr4",
+      "q": "Plate: FR4"
+    },
+    "price": {
+      "v": 420,
+      "q": "Black: 420.00"
+    }
+  },
+  "mecha:everglide-v3-transparent-gold-plated-screw-in-stabilizers": {
+    "brand": {
+      "v": "Durock",
+      "q": "Durock V3 Screw-in Stabilizers"
+    },
+    "stabilizerType": {
+      "v": "screw_in",
+      "q": "Screw-in stabs"
+    },
+    "stabilizerSizes": {
+      "v": [
+        "2u",
+        "6.25u",
+        "7u"
+      ],
+      "q": "Contains: 5x 2U, 1x 6.25U, 1x 7U"
+    },
+    "price": {
+      "v": 30,
+      "q": "Default Title: 30.00"
+    }
+  },
+  "mecha:two-tone-grey-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry Profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 149,
+      "q": "Default Title: 149.00"
+    }
+  },
+  "mecha:durock-shrimp-silent-tactile-switches": {
+    "brand": {
+      "v": "Durock",
+      "q": "Durock Shrimp Silent Tactile Switches"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "silent tactile switches"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "PCB-mounted design (5 pins)"
+    },
+    "price": {
+      "v": 3.9,
+      "q": "Default Title: 3.90"
+    },
+    "soundProfile": {
+      "v": "silent",
+      "q": "Durock Shrimp Silent Tactile"
+    }
+  },
+  "mecha:weikav-stars80-tkl-barebones-keyboard-kit": {
+    "brand": {
+      "v": "Weikav",
+      "q": "Weikav Stars80 V3 Aluminum TKL"
+    },
+    "layouts": {
+      "v": [
+        "tkl"
+      ],
+      "q": "Layout: TKL (80%)"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Plate Mount: PCB-Gasket"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Hotswap Sockets: Yes"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Connectivity: Bluetooth 5.0, 2.4G wireless, Type-C USB wired connection"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Hotswap Sockets: Yes"
+    },
+    "plateMaterial": {
+      "v": "fr4",
+      "q": "Plate: FR4"
+    },
+    "price": {
+      "v": 330,
+      "q": "Silver: 330.00"
+    }
+  },
+  "mecha:tx-stablizer-set": {
+    "brand": {
+      "v": "TX Keyboards",
+      "q": "Vendor field: TX Keyboards"
+    },
+    "stabilizerType": {
+      "v": "pcb_mount",
+      "q": "Stabilizer Style_PCB Mount"
+    },
+    "stabilizerSizes": {
+      "v": [
+        "2u",
+        "6.25u",
+        "7u"
+      ],
+      "q": "WK (6.25U), WKL (7U), 3 2U"
+    }
+  },
+  "mecha:burgundy-gold-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry Profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 149,
+      "q": "Default Title: 149.00"
+    }
+  },
+  "mecha:sw-x-haimu-mp-tactile-switches": {
+    "brand": {
+      "v": "Swagkeys",
+      "q": "Vendor field: Swagkeys"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type : Tactile"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "PCB Mount (5-pin)"
+    },
+    "price": {
+      "v": 1.9,
+      "q": "Default Title: 1.90"
+    }
+  },
+  "mecha:qk65-mk3-65-custom-keyboard-kit": {
+    "brand": {
+      "v": "qwertykeys",
+      "q": "Vendor field: qwertykeys"
+    },
+    "layouts": {
+      "v": [
+        "65"
+      ],
+      "q": "Layout_65%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "PCB Gasket Mounting"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Tri-mode ANSI Flex-cut Hotswap PCB"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Support USB-C, Bluetooth, and 2.4GHz connections"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Tri-mode ANSI Flex-cut Hotswap PCB"
+    },
+    "price": {
+      "v": 900,
+      "q": "Console (Spray-coated Grey): 900.00"
+    }
+  },
+  "mecha:parametric-pearlescent-metallic-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry Profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 199,
+      "q": "Default Title: 199.00"
+    }
+  },
+  "mecha:hmx-hanami-dango-v2-lubricated-linear-switches": {
+    "brand": {
+      "v": "HMX",
+      "q": "HMX Hanami Dango V2"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Lubricated Linear Switches"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "PCB-mounted design (5 pins)"
+    },
+    "actuationForceG": {
+      "v": 46,
+      "q": "Actuation: 46g"
+    },
+    "price": {
+      "v": 2,
+      "q": "Default Title: 2.00"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "sound_Thocky"
+    }
+  },
+  "mecha:pre-order-extras-neo75-wireless-75-keyboard-kit": {
+    "brand": {
+      "v": "qwertykeys",
+      "q": "Vendor field: qwertykeys"
+    },
+    "layouts": {
+      "v": [
+        "75"
+      ],
+      "q": "Layout_75%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount",
+        "top_mount"
+      ],
+      "q": "Poron Gasket, modern Silicone Gasket and traditional Top Mount methods"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Connectivity_Tri Mode"
+    },
+    "stabilizerType": {
+      "v": "pcb_mount",
+      "q": "1 set of PCB clip-in NeoStab"
+    }
+  },
+  "mecha:sakura-blossom-forsted-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry Profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 149,
+      "q": "Default Title: 149.00"
+    }
+  },
+  "mecha:akko-pom-brown-tactile-switch": {
+    "brand": {
+      "v": "AKKO",
+      "q": "AKKO POM Brown Tactile Switch"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Tactile"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-pins switch"
+    },
+    "actuationForceG": {
+      "v": 40,
+      "q": "Operating Force: 40gf"
+    },
+    "price": {
+      "v": 1.2,
+      "q": "Default Title: 1.20"
+    }
+  },
+  "mecha:sakura-blossom-pearlescent-metallic-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry Profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 199,
+      "q": "Default Title: 199.00"
+    }
+  },
+  "mecha:akko-cs-crystal-wine-red-linear-switch-1": {
+    "brand": {
+      "v": "AKKO",
+      "q": "AKKO CS Crystal Wine Red"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Linear"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-pins switch"
+    },
+    "actuationForceG": {
+      "v": 45,
+      "q": "Operating Force: 45gf"
+    },
+    "price": {
+      "v": 1.2,
+      "q": "Default Title: 1.20"
+    }
+  },
+  "mecha:extras-neo80-cu-tkl-kit": {
+    "brand": {
+      "v": "qwertykeys",
+      "q": "Vendor field: qwertykeys"
+    },
+    "layouts": {
+      "v": [
+        "tkl"
+      ],
+      "q": "Layout_80%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount",
+        "top_mount"
+      ],
+      "q": "Poron Gasket Mount + Silicone Gasket Mount + Top Mount"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Connectivity_Tri Mode"
+    },
+    "price": {
+      "v": 1300,
+      "q": "Alu Plate: 1300.00"
+    }
+  },
+  "mecha:frosted-purple-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry Profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 149,
+      "q": "Default Title: 149.00"
+    }
+  },
+  "mecha:akko-cs-jelly-black-linear-switches": {
+    "brand": {
+      "v": "AKKO",
+      "q": "AKKO CS Jelly Black"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Jelly Black Linear Switches"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "Plate mounted design (3 pins)"
+    },
+    "actuationForceG": {
+      "v": 50,
+      "q": "Operating: 50g"
+    },
+    "price": {
+      "v": 2,
+      "q": "Lubed: 2.00"
+    }
+  },
+  "mecha:extras-neo65-core-plus-keyboard-kit": {
+    "brand": {
+      "v": "qwertykeys",
+      "q": "Vendor field: qwertykeys"
+    },
+    "layouts": {
+      "v": [
+        "65"
+      ],
+      "q": "Neo65 Core Plus Keyboard Kit"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount",
+        "o_ring_mount"
+      ],
+      "q": "Support both PCB gasket mount and gummy O-ring mount"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Connectivity_Tri Mode"
+    },
+    "stabilizerType": {
+      "v": "pcb_mount",
+      "q": "1 set of PCB clip-in NeoStab"
+    }
+  },
+  "mecha:frosted-pink-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 149,
+      "q": "Default Title: 149.00"
+    }
+  },
+  "mecha:gopolar-x-gateron-azure-dragon-v2-tactile-switches": {
+    "brand": {
+      "v": "Gateron",
+      "q": "Vendor field: Gateron"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Azure Dragon V2 Tactile Switches"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "5-pin PCB mount"
+    },
+    "actuationForceG": {
+      "v": 63,
+      "q": "63g activation force"
+    },
+    "price": {
+      "v": 2.5,
+      "q": "Default Title: 2.50"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Medium Clack"
+    }
+  },
+  "mecha:hjs-alu75v2-75-wireless-aluminum-barebones-kit": {
+    "brand": {
+      "v": "HJS",
+      "q": "Vendor field: HJS"
+    },
+    "layouts": {
+      "v": [
+        "75"
+      ],
+      "q": "Layout_75%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Mounting: Gasket"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Connectivity: Tri-mode"
+    },
+    "price": {
+      "v": 209,
+      "q": "Pink (FR4 Plate): 209.00"
+    }
+  },
+  "mecha:frosted-grey-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 149,
+      "q": "Default Title: 149.00"
+    }
+  },
+  "mecha:jwick-t1-lubricated-tactile-switches": {
+    "brand": {
+      "v": "JWK",
+      "q": "Vendor field: JWK"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "JWICK T1 Tactile"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "PCB mounted design (5 pins)"
+    },
+    "actuationForceG": {
+      "v": 55,
+      "q": "Actuation: 55g"
+    },
+    "price": {
+      "v": 1.2,
+      "q": "Default Title: 1.20"
+    }
+  },
+  "mecha:extras-qk-alice-duo": {
+    "brand": {
+      "v": "qwertykeys",
+      "q": "Vendor field: qwertykeys"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Support both USB-C and 2.4GHz connections"
+    },
+    "plateMaterial": {
+      "v": "fr4",
+      "q": "Wrist Rest / 1.6mm / FR4"
+    },
+    "price": {
+      "v": 1499,
+      "q": "FR4: 1499.00"
+    }
+  },
+  "mecha:frosted-blue-cherry-profile-keycaps": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Cherry profile"
+    },
+    "layouts": {
+      "v": [
+        "60",
+        "75",
+        "tkl",
+        "full"
+      ],
+      "q": "ANSI 100/80/75/60 supported"
+    },
+    "price": {
+      "v": 149,
+      "q": "Default Title: 149.00"
+    }
+  },
+  "mecha:gateron-g-pro-2-0-red-linear-switches": {
+    "brand": {
+      "v": "Gateron",
+      "q": "Gateron G Pro 2.0 Red"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Red Linear Switches"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "PCB mounted design (3 pins)"
+    },
+    "actuationForceG": {
+      "v": 45,
+      "q": "Operating: 45 ±15 gf"
+    },
+    "price": {
+      "v": 1,
+      "q": "Default Title: 1.00"
+    }
+  },
+  "mecha:extras-neo60-cu-custom-mechanical-keyboard-kit": {
+    "brand": {
+      "v": "qwertykeys",
+      "q": "Vendor field: qwertykeys"
+    },
+    "layouts": {
+      "v": [
+        "60"
+      ],
+      "q": "Tags: 60%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount",
+        "top_mount"
+      ],
+      "q": "supports both PCB gasket mount (carried over from the Neo65) and isolated top mount"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Tri-mode Hotswap PCB"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Connectivity_Tri Mode"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Tri-mode Hotswap PCB"
+    },
+    "price": {
+      "v": 699,
+      "q": "Tri-mode Hotswap: 699.00"
+    }
+  },
+  "mecha:merdeka-sale-jkdk-child-kits": {
+    "brand": {
+      "v": "JKDK",
+      "q": "Vendor field: JKDK"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Profile: Cherry"
+    },
+    "price": {
+      "v": 30,
+      "q": "Dark Matter - Numpad: 30.00"
+    }
+  },
+  "mecha:copy-of-gateron-g-pro-2-0-yellow-linear-switches": {
+    "brand": {
+      "v": "Gateron",
+      "q": "Gateron G Pro 2.0 Yellow"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Yellow Linear Switches"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "PCB mounted design (3 pins)"
+    },
+    "actuationForceG": {
+      "v": 50,
+      "q": "Operating: 50 ±15 gf"
+    },
+    "price": {
+      "v": 1.5,
+      "q": "Default Title: 1.50"
+    }
+  },
+  "mecha:zuoya-gmk67-65-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Zuoya",
+      "q": "Vendor field: Zuoya"
+    },
+    "beginnerFriendly": {
+      "v": true,
+      "q": "the GMK67 V2 makes it simple"
+    },
+    "layouts": {
+      "v": [
+        "65"
+      ],
+      "q": "Layout_65%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Mounting: Gasket Mounted"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Kailh Hotswap Sockets"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Tri-mode: Wired, Wireless 2.4 and Bluetooth 5.0"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "PCB: Hotswap"
+    },
+    "stabilizerType": {
+      "v": "plate_mount",
+      "q": "Stabilisers: Plate-mounted"
+    },
+    "plateMaterial": {
+      "v": "polycarbonate",
+      "q": "Default plate: Polycarbonate"
+    },
+    "price": {
+      "v": 249,
+      "q": "Black: 249.00"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "Tuned for Thock"
+    }
+  },
+  "mecha:pink-mist-cherry-profile-keycap-set": {
+    "brand": {
+      "v": "Mecha",
+      "q": "Vendor field: Mecha"
+    },
+    "keycapProfile": {
+      "v": "cherry",
+      "q": "Profile: Cherry"
+    },
+    "price": {
+      "v": 149,
+      "q": "Default Title: 149.00"
+    }
+  },
+  "mecha:akko-cs-wine-red-linear-switch": {
+    "brand": {
+      "v": "AKKO",
+      "q": "AKKO CS Wine Red"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Linear"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-pins switch"
+    },
+    "price": {
+      "v": 1.2,
+      "q": "Lubed: 1.20"
+    }
+  },
+  "mecha:gateron-g-pro-2-0-brown-tactile-switches": {
+    "brand": {
+      "v": "Gateron",
+      "q": "Gateron G Pro 2.0 Brown"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Brown Tactile Switches"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "PCB mounted design (3 pins)"
+    },
+    "actuationForceG": {
+      "v": 55,
+      "q": "Operating: 55 ±15 gf"
+    },
+    "price": {
+      "v": 1.5,
+      "q": "Default Title: 1.50"
+    }
+  },
+  "mecha:bsun-x-monx-my-silent-linear-switch": {
+    "brand": {
+      "v": "BSUN",
+      "q": "Manufacturer: BSUN"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Silent Linear"
+    },
+    "actuationForceG": {
+      "v": 43,
+      "q": "Spring Actuation: 43g"
+    },
+    "price": {
+      "v": 1.5,
+      "q": "Default Title: 1.50"
+    },
+    "soundProfile": {
+      "v": "silent",
+      "q": "sound_Silent"
+    }
+  },
+  "mecha:keygeek-y3-linear-switch": {
+    "brand": {
+      "v": "Keygeek",
+      "q": "Keygeek Y3 Linear Switch"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Linear 5-pin MX"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Linear 5-pin MX"
+    },
+    "price": {
+      "v": 1.3,
+      "q": "Default Title: 1.30"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "sound_Thocky"
+    }
+  },
+  "mecha:keychron-k-pro-silent-red-linear-switch": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Keychron K Pro Silent Red"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Silent Red Linear Switch"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-Pin"
+    },
+    "price": {
+      "v": 1.2,
+      "q": "Default Title: 1.20"
+    },
+    "soundProfile": {
+      "v": "silent",
+      "q": "sound_Silent"
+    }
+  },
+  "mecha:keychron-k-pro-banana-tactile-switch": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Keychron K Pro Banana"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Banana Tactile Switch"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-Pin"
+    },
+    "price": {
+      "v": 1,
+      "q": "Default Title: 1.00"
+    }
+  },
+  "mecha:keychron-k-pro-silver-linear-switch": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Keychron K Pro Silver"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Silver Linear Switch"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-Pin"
+    },
+    "price": {
+      "v": 0.5,
+      "q": "Default Title: 0.50"
+    }
+  },
+  "mecha:keychron-k-pro-yellow-linear-switch": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Keychron K Pro Yellow"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Yellow Linear Switch"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-Pin"
+    },
+    "price": {
+      "v": 0.5,
+      "q": "Default Title: 0.50"
+    }
+  },
+  "mecha:keychron-k-pro-brown-tactile-switch": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Keychron K Pro Brown"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Brown Tactile Switch"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-Pin"
+    },
+    "price": {
+      "v": 0.5,
+      "q": "Default Title: 0.50"
+    }
+  },
+  "mecha:keychron-k-pro-red-linear-switch": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Keychron K Pro Red"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Red Linear Switch"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-Pin"
+    },
+    "price": {
+      "v": 0.5,
+      "q": "Default Title: 0.50"
+    }
+  },
+  "mecha:keygeek-y2-linear-switch": {
+    "brand": {
+      "v": "Keygeek",
+      "q": "Keygeek Y2 Linear Switch"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Linear 5-pin MX"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Linear 5-pin MX"
+    },
+    "price": {
+      "v": 1.3,
+      "q": "Default Title: 1.30"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "sound_Thocky"
+    }
+  },
+  "mecha:mmd-princess-v5-ultra-thock-tactile-switch": {
+    "brand": {
+      "v": "MMD",
+      "q": "MMD Princess V5"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Switch Type: Tactile"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Pins: 5-pin"
+    },
+    "actuationForceG": {
+      "v": 42,
+      "q": "Operating Force: 42gf"
+    },
+    "price": {
+      "v": 1,
+      "q": "Default Title: 1.00"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "sound_Thocky"
+    }
+  },
+  "mecha:hmx-snowfall-tactile-switch": {
+    "brand": {
+      "v": "HMX",
+      "q": "HMX Snowfall Tactile Switch"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Snowfall Tactile Switch"
+    },
+    "price": {
+      "v": 1.5,
+      "q": "Default Title: 1.50"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Clacky"
+    }
+  },
+  "mecha:ws-yellow-linear-switch": {
+    "brand": {
+      "v": "Wuque Studios",
+      "q": "Vendor field: Wuque Studios"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Switch Type: Linear"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Mounting Pins: 5-pin"
+    },
+    "price": {
+      "v": 0.5,
+      "q": "Default Title: 0.50"
+    }
+  },
+  "mecha:mmd-princess-v4-linear-switch": {
+    "brand": {
+      "v": "MMD",
+      "q": "MMD Princess V4 Linear Switch"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Princess V4 Linear Switch"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "PCB-mounted design (5 pins)"
+    },
+    "actuationForceG": {
+      "v": 45,
+      "q": "Actuation Force: 45g"
+    },
+    "price": {
+      "v": 1,
+      "q": "Default Title: 1.00"
+    }
+  },
+  "mecha:gateron-low-profile-2-0-ks-33-rgb-switches": {
+    "brand": {
+      "v": "Gateron",
+      "q": "Gateron Low Profile 2.0 KS-33"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "Pins：3-Pin"
+    }
+  },
+  "mecha:ws-heavy-tactile": {
+    "brand": {
+      "v": "Wuque Studios",
+      "q": "Vendor field: Wuque Studios"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Strong Tactile"
+    },
+    "price": {
+      "v": 1.2,
+      "q": "Default Title: 1.20"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Clacky"
+    }
+  },
+  "mecha:bsun-strawberry-cheesecake-r2-tactile-switch": {
+    "brand": {
+      "v": "BSUN",
+      "q": "Manufacturer: BSUN"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Cheesecake R2 Tactile Switch"
+    },
+    "price": {
+      "v": 1.5,
+      "q": "Default Title: 1.50"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "sound_Thocky"
+    }
+  },
+  "mecha:cherry-mx2a-gunw-unlubed-brown": {
+    "brand": {
+      "v": "Cherry MX",
+      "q": "Vendor field: Cherry MX"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Switch Type: MX Mechanical Switch"
+    },
+    "price": {
+      "v": 1.4,
+      "q": "Default Title: 1.40"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Clacky"
+    }
+  },
+  "mecha:cherry-mx2a-1c6w-unlubed-black": {
+    "brand": {
+      "v": "Cherry MX",
+      "q": "Vendor field: Cherry MX"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Switch Type: MX Mechanical Switch"
+    },
+    "price": {
+      "v": 3,
+      "q": "Break-In 3 Million Off Centered Actuation): 3.00"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Clacky"
+    }
+  },
+  "mecha:jetliner-linear-switch-50g": {
+    "brand": {
+      "v": "TDX Studios",
+      "q": "Vendor field: TDX Studios"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Switch Type: Linear"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Pin Type: 5-pin"
+    },
+    "actuationForceG": {
+      "v": 55,
+      "q": "22mm 55gf actuation"
+    },
+    "price": {
+      "v": 1,
+      "q": "Default Title: 1.00"
+    }
+  },
+  "mecha:gateron-blue-ks-9-clicky-switches": {
+    "brand": {
+      "v": "Gateron",
+      "q": "Gateron Blue KS-9"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Clicky Switch"
+    },
+    "pinCount": {
+      "v": 3,
+      "q": "3-Pin"
+    },
+    "actuationForceG": {
+      "v": 60,
+      "q": "Operating Force: 60g"
+    },
+    "price": {
+      "v": 1,
+      "q": "Default Title: 1.00"
+    }
+  },
+  "mecha:owlab-ti-he-switch": {
+    "brand": {
+      "v": "Owlab",
+      "q": "Owlab Ti HE Switch"
+    },
+    "switchTechnology": {
+      "v": "hall_effect",
+      "q": "Switch Type_Hall Effect"
+    },
+    "price": {
+      "v": 2,
+      "q": "50g: 2.00"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Clacky"
+    }
+  },
+  "mecha:outemu-silent-peach-v3": {
+    "brand": {
+      "v": "Outemu",
+      "q": "Outemu Silent Peach V3"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Silent Linear Switch"
+    },
+    "price": {
+      "v": 1.3,
+      "q": "Default Title: 1.30"
+    },
+    "soundProfile": {
+      "v": "silent",
+      "q": "sound_Silent"
+    }
+  },
+  "mecha:mmd-princess-v4-tactile": {
+    "brand": {
+      "v": "MMD",
+      "q": "Manufacturer: MMD"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Switch Type: Tactiles"
+    },
+    "actuationForceG": {
+      "v": 53,
+      "q": "Actuation Force: 53g"
+    },
+    "price": {
+      "v": 1,
+      "q": "Default Title: 1.00"
+    }
+  },
+  "mecha:gateron-magnetic-jade-pro-switch": {
+    "brand": {
+      "v": "Gateron",
+      "q": "Gateron Magnetic Jade Pro"
+    },
+    "switchTechnology": {
+      "v": "hall_effect",
+      "q": "Switch Type_Hall Effect"
+    },
+    "price": {
+      "v": 3.5,
+      "q": "Default Title: 3.50"
+    }
+  },
+  "mecha:hmx-azure-switch": {
+    "brand": {
+      "v": "HMX",
+      "q": "HMX Azure Linear Switch"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Linear"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Mount type: PCB (5-pin)"
+    },
+    "price": {
+      "v": 1.4,
+      "q": "Default Title: 1.40"
+    },
+    "soundProfile": {
+      "v": "creamy",
+      "q": "sound_Creamy"
+    }
+  },
+  "mecha:mmd-princess-v2-linear-switch": {
+    "brand": {
+      "v": "MMD",
+      "q": "MMD Princess V2"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Princess V2 Linear Switch"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "PCB-mounted design (5 pins)"
+    },
+    "actuationForceG": {
+      "v": 45,
+      "q": "Actuation: 45g"
+    },
+    "price": {
+      "v": 1,
+      "q": "Default Title: 1.00"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "sound_Thocky"
+    }
+  },
+  "mecha:kailh-bcp-linear-switch": {
+    "brand": {
+      "v": "Kailh",
+      "q": "Kailh BCP Linear Switch"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Switch Type - Linear"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Mounting pins - 5pins"
+    },
+    "actuationForceG": {
+      "v": 52,
+      "q": "Operating Force - 52g"
+    },
+    "price": {
+      "v": 1,
+      "q": "Default Title: 1.00"
+    }
+  },
+  "mecha:hmx-x-yg-macchiato-linear-switch": {
+    "brand": {
+      "v": "HMX",
+      "q": "Manufactured by HMX"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Switch Type - Linear"
+    },
+    "price": {
+      "v": 1.9,
+      "q": "Default Title: 1.90"
+    },
+    "soundProfile": {
+      "v": "creamy",
+      "q": "sound_Creamy"
+    }
+  },
+  "mecha:geon-lucifer-he-switch": {
+    "brand": {
+      "v": "GEONWORKS",
+      "q": "Vendor field: GEONWORKS"
+    },
+    "switchTechnology": {
+      "v": "hall_effect",
+      "q": "LUCIFER HE SWITCH"
+    },
+    "pinCount": {
+      "v": 2,
+      "q": "Mounting pins - 2pins"
+    },
+    "price": {
+      "v": 0.9,
+      "q": "Default Title: 0.90"
+    }
+  },
+  "mecha:geon-raw-zero-linear-switch": {
+    "brand": {
+      "v": "GEONWORKS",
+      "q": "Manufactured by GEONWORKS"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Switch Type - Linear"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Mounting pins - 5Pins"
+    },
+    "price": {
+      "v": 2.2,
+      "q": "Default Title: 2.20"
+    }
+  },
+  "mecha:geon-raw-he-switch": {
+    "brand": {
+      "v": "GEONWORKS",
+      "q": "Manufactured by GEONWORKS"
+    },
+    "switchTechnology": {
+      "v": "hall_effect",
+      "q": "Switch Type_Hall Effect"
+    },
+    "pinCount": {
+      "v": 2,
+      "q": "Mounting pins - 2pins"
+    },
+    "price": {
+      "v": 2,
+      "q": "Default Title: 2.00"
+    }
+  },
+  "mecha:geonworks-raptor-he-gaming-switch": {
+    "brand": {
+      "v": "GEONWORKS",
+      "q": "Vendor field: GEONWORKS"
+    },
+    "switchTechnology": {
+      "v": "hall_effect",
+      "q": "Switch Type - Linear, Hall Effect"
+    },
+    "actuationForceG": {
+      "v": 42,
+      "q": "Operating Force - 42.0g"
+    },
+    "price": {
+      "v": 1.6,
+      "q": "Default Title: 1.60"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Clacky"
+    }
+  },
+  "mecha:bsun-strawberry-cheesecake-tactile-switch": {
+    "brand": {
+      "v": "BSUN",
+      "q": "BSUN Strawberry Cheesecake"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Tactile"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "5-pin tactile switch"
+    },
+    "price": {
+      "v": 1.6,
+      "q": "Default Title: 1.60"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Clacky"
+    }
+  },
+  "mecha:hmx-gravel-linear-switch": {
+    "brand": {
+      "v": "HMX",
+      "q": "HMX Gravel Linear Switch"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Linear"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Mount type: PCB (5-pin)"
+    },
+    "price": {
+      "v": 1.6,
+      "q": "Default Title: 1.60"
+    },
+    "soundProfile": {
+      "v": "creamy",
+      "q": "sound_Creamy"
+    }
+  },
+  "mecha:lcet-joker-tactile-switch": {
+    "brand": {
+      "v": "LCET",
+      "q": "Vendor field: LCET"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Tactile"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Pins：5-Pin"
+    },
+    "actuationForceG": {
+      "v": 60,
+      "q": "Operating Force：60+5gf"
+    },
+    "price": {
+      "v": 0.9,
+      "q": "Default Title: 0.90"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "sound_Thocky"
+    }
+  },
+  "mecha:ever-free-grayish-tactile-switch": {
+    "brand": {
+      "v": "EverFree",
+      "q": "EverFree Grayish Tactile Switch"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Heavy Tactile"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Pins：5-Pin"
+    },
+    "actuationForceG": {
+      "v": 59,
+      "q": "Operating Force：59+10gf"
+    },
+    "price": {
+      "v": 1.2,
+      "q": "Default Title: 1.20"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Clacky"
+    }
+  },
+  "mecha:cherry-mx2a-purple-tactile-switch": {
+    "brand": {
+      "v": "Cherry MX",
+      "q": "Vendor field: Cherry MX"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "MX Structure"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "5-Pin, PCB Mount"
+    },
+    "actuationForceG": {
+      "v": 45,
+      "q": "Operating Force: 45g"
+    },
+    "price": {
+      "v": 2,
+      "q": "Default Title: 2.00"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Clacky"
+    }
+  },
+  "mecha:gateron-smoothie-linear-switch": {
+    "brand": {
+      "v": "Gateron",
+      "q": "Manufacturer: Gateron"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Switch Type: MX Mechanical Switch"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "5-pin, PCB mount"
+    },
+    "actuationForceG": {
+      "v": 40,
+      "q": "Actuation force: 40±10gf"
+    },
+    "price": {
+      "v": 1.3,
+      "q": "Default Title: 1.30"
+    },
+    "soundProfile": {
+      "v": "clacky",
+      "q": "sound_Medium Clack"
+    }
+  },
+  "mecha:invyr-holy-panda-tactile-switches": {
+    "brand": {
+      "v": "Invyr",
+      "q": "Vendor field: Invyr"
+    },
+    "switchTechnology": {
+      "v": "mechanical",
+      "q": "Type: Tactile"
+    },
+    "pinCount": {
+      "v": 5,
+      "q": "Mount type: PCB (5-pin)"
+    },
+    "price": {
+      "v": 1.5,
+      "q": "Default Title: 1.50"
+    }
+  },
+  "mecha:zuoya-gmk26-wireless-custom-numpad": {
+    "brand": {
+      "v": "Zuoya",
+      "q": "Vendor field: Zuoya"
+    },
+    "beginnerFriendly": {
+      "v": true,
+      "q": "the GMK26 makes it simple"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Mounting: Gasket Mounted"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Kailh Hotswap Sockets"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Tri-mode: Wired, Wireless 2.4 and Bluetooth 5.0"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "PCB: Hotswap"
+    },
+    "stabilizerType": {
+      "v": "plate_mount",
+      "q": "Stabilisers: Plate-mounted"
+    },
+    "plateMaterial": {
+      "v": "polycarbonate",
+      "q": "Default plate: Polycarbonate"
+    },
+    "price": {
+      "v": 149,
+      "q": "Black: 149.00"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "Tuned for Thock"
+    }
+  },
+  "mecha:kbdfans-tiger-lite-gaming-mx-hall-effect-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "KBDfans",
+      "q": "Vendor field: KBDfans"
+    },
+    "layouts": {
+      "v": [
+        "tkl"
+      ],
+      "q": "Layout_80%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Silicone Gasket Structure"
+    },
+    "plateMaterial": {
+      "v": "fr4",
+      "q": "FR4 Plate (Venom HE compatible)"
+    },
+    "price": {
+      "v": 429,
+      "q": "Black / Mechanical (Nova87): 429.00"
+    }
+  },
+  "mecha:keychron-q2-max-qmk-via-wireless-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Vendor field: Keychron"
+    },
+    "layouts": {
+      "v": [
+        "65"
+      ],
+      "q": "Tags: 65%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Double-Gasket Design"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Hot-Swappable"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Hot-Swappable"
+    }
+  },
+  "mecha:zuoya-gmk87-80-tkl-custom-mechanical-keyboard-copy": {
+    "brand": {
+      "v": "Zuoya",
+      "q": "Vendor field: Zuoya"
+    },
+    "beginnerFriendly": {
+      "v": true,
+      "q": "the GMK87 makes it simple"
+    },
+    "layouts": {
+      "v": [
+        "tkl"
+      ],
+      "q": "Zuoya GMK87 80%/TKL"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Mounting: Gasket Mounted"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Kailh Hotswap Sockets"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Tri-mode: Wired, Wireless 2.4 and Bluetooth 5.0"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "PCB: Hotswap"
+    },
+    "stabilizerType": {
+      "v": "plate_mount",
+      "q": "Stabilisers: Plate-mounted"
+    },
+    "plateMaterial": {
+      "v": "polycarbonate",
+      "q": "Default plate: Polycarbonate"
+    },
+    "price": {
+      "v": 219,
+      "q": "Black: 219.00"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "Tuned for Thock"
+    }
+  },
+  "mecha:zuoya-gmk81-75-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Zuoya",
+      "q": "Vendor field: Zuoya"
+    },
+    "beginnerFriendly": {
+      "v": true,
+      "q": "the GMK81 makes it simple"
+    },
+    "layouts": {
+      "v": [
+        "75"
+      ],
+      "q": "Layout_75%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Mounting: Gasket Mounted"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Kailh Hotswap Sockets"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Tri-mode: Wired, Wireless 2.4 and Bluetooth 5.0"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "PCB: Hotswap"
+    },
+    "stabilizerType": {
+      "v": "plate_mount",
+      "q": "Stabilisers: Plate-mounted"
+    },
+    "plateMaterial": {
+      "v": "polycarbonate",
+      "q": "Default plate: Polycarbonate"
+    },
+    "price": {
+      "v": 219,
+      "q": "Black: 219.00"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "Tuned for Thock"
+    }
+  },
+  "mecha:zuoya-gmk104-100-full-size-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Zuoya",
+      "q": "Vendor field: Zuoya"
+    },
+    "beginnerFriendly": {
+      "v": true,
+      "q": "the GMK104 makes it simple"
+    },
+    "layouts": {
+      "v": [
+        "full"
+      ],
+      "q": "100%/Full Size"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Mounting: Gasket Mounted"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Kailh Hotswap Sockets"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Tri-mode: Wired, Wireless 2.4 and Bluetooth 5.0"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "PCB: Hotswap"
+    },
+    "stabilizerType": {
+      "v": "plate_mount",
+      "q": "Stabilisers: Plate-mounted"
+    },
+    "plateMaterial": {
+      "v": "polycarbonate",
+      "q": "Default plate: Polycarbonate"
+    },
+    "price": {
+      "v": 219,
+      "q": "Black: 219.00"
+    },
+    "soundProfile": {
+      "v": "thocky",
+      "q": "Tuned for Thock"
+    }
+  },
+  "mecha:hiexa-v65": {
+    "brand": {
+      "v": "HIEXAKEYS",
+      "q": "Vendor field: HIEXAKEYS"
+    },
+    "layouts": {
+      "v": [
+        "65"
+      ],
+      "q": "Hiexa V65 65% Mechanical Keyboard"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount",
+        "top_mount"
+      ],
+      "q": "It can support PCB gasket, plate gasket, and top mount"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Tri-Mode Hotswap PCB"
+    },
+    "stabilizerTypeSupport": {
+      "v": [
+        "pcb_mount"
+      ],
+      "q": "Support PCB stabilizers"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Supports Wired, Bluetooth 5.0, and 2.4G mode"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Tri-Mode Hotswap PCB"
+    },
+    "plateMaterial": {
+      "v": "pom",
+      "q": "No Flex-Cut POM Plate"
+    },
+    "price": {
+      "v": 549,
+      "q": "Midnight Purple: 549.00"
+    }
+  },
+  "mecha:pre-order-qk80mk2-barebones-kit-no-pcb-plate-copy": {
+    "brand": {
+      "v": "qwertykeys",
+      "q": "Vendor field: qwertykeys"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Tri-Mode Hotswap PCB"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Support wired, Bluetooth, and 2.4GHz connectivity"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Tri-mode Non-flex cut Hotswap PCB"
+    }
+  },
+  "mecha:zoom65-v3-special-edition": {
+    "brand": {
+      "v": "Meletrix",
+      "q": "Vendor field: Meletrix"
+    },
+    "layouts": {
+      "v": [
+        "65"
+      ],
+      "q": "Layout_65%"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Tri-mode Flex Cut ANSI Hotswap RGB PCB"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Tri-mode Flex Cut ANSI Hotswap"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Tri-mode Flex Cut ANSI Hotswap RGB PCB"
+    }
+  },
+  "mecha:lemokey-p1-qmk-via-custom-gaming-keyboard": {
+    "brand": {
+      "v": "Lemokey",
+      "q": "Vendor field: Lemokey"
+    },
+    "layouts": {
+      "v": [
+        "75"
+      ],
+      "q": "Layout_75%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "GASKET MOUNT DESIGN"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "HOT-SWAPPABLE"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "HOT-SWAPPABLE"
+    }
+  },
+  "mecha:keychron-q0-max-custom-number-pad": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Vendor field: Keychron"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Double-Gasket Design"
+    }
+  },
+  "mecha:keychron-q6-max-qmk-via-wireless-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Vendor field: Keychron"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Double-Gasket Design"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Hot-Swappable"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Hot-Swappable"
+    }
+  },
+  "mecha:keychron-q3-max-qmk-via-wireless-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Vendor field: Keychron"
+    },
+    "layouts": {
+      "v": [
+        "tkl"
+      ],
+      "q": "Layout_80%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Double Gasket Design"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Hot-Swappable"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Hot-Swappable"
+    }
+  },
+  "mecha:keychron-v3-max-qmk-via-wireless-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Vendor field: Keychron"
+    },
+    "layouts": {
+      "v": [
+        "tkl"
+      ],
+      "q": "Layout_80%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Gasket Mount Design"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Hot-swappable"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Hot-swappable"
+    },
+    "stabilizerTypeSupport": {
+      "v": [
+        "screw_in"
+      ],
+      "q": "Screw-In PCB Stabilizers"
+    },
+    "stabilizerType": {
+      "v": "screw_in",
+      "q": "Screw-In PCB Stabilizers"
+    }
+  },
+  "mecha:keychron-v10-max-qmk-via-wireless-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Vendor field: Keychron"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Gasket Mount Design"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Hot-swappable"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Hot-swappable"
+    },
+    "stabilizerTypeSupport": {
+      "v": [
+        "screw_in"
+      ],
+      "q": "Screw-In PCB Stabilizers"
+    },
+    "stabilizerType": {
+      "v": "screw_in",
+      "q": "Screw-In PCB Stabilizers"
+    },
+    "price": {
+      "v": 359,
+      "q": "Carbon Black / Barebones: 359.00"
+    }
+  },
+  "mecha:keychron-v1-max-qmk-via-wireless-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Vendor field: Keychron"
+    },
+    "layouts": {
+      "v": [
+        "75"
+      ],
+      "q": "Layout_75%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Gasket Mount Design"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Hot-swappable"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Hot-swappable"
+    },
+    "stabilizerTypeSupport": {
+      "v": [
+        "screw_in"
+      ],
+      "q": "Screw-In PCB Stabilizers"
+    },
+    "stabilizerType": {
+      "v": "screw_in",
+      "q": "Screw-In PCB Stabilizers"
+    }
+  },
+  "mecha:createkeebs-luminkey-80-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Createkeebs",
+      "q": "Vendor field: Createkeebs"
+    },
+    "layouts": {
+      "v": [
+        "tkl"
+      ],
+      "q": "Layout: 80% TKL ANSI/ISO"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Mounting: Gasket Mount"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "PCB: 1.6mm Hot-swap"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Connectivity: Wireless/2.4G/Wired"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "PCB: 1.6mm Hot-swap"
+    },
+    "plateMaterial": {
+      "v": "polycarbonate",
+      "q": "Plate: 1.5mm PC Plate"
+    }
+  },
+  "mecha:keychron-q3-pro-qmk-via-wireless-custom-mechanical-keyboard": {
+    "brand": {
+      "v": "Keychron",
+      "q": "Vendor field: Keychron"
+    },
+    "layouts": {
+      "v": [
+        "tkl"
+      ],
+      "q": "Tags: 80%"
+    },
+    "mountSupport": {
+      "v": [
+        "gasket_mount"
+      ],
+      "q": "Double-Gasket Design"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "Hot-Swappable"
+    },
+    "connection": {
+      "v": "both",
+      "q": "Wireless and Wired"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "Hot-Swappable"
+    }
+  },
+  "mecha:copy-of-pre-order-angry-miao-am-compact-touch-am-65-less": {
+    "brand": {
+      "v": "Angry Miao",
+      "q": "Vendor field: Angry Miao"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "hot-swap split backspace PCB"
+    },
+    "connection": {
+      "v": "both",
+      "q": "USB Type-C (supports C to C) and Bluetooth 5.1 connectivity"
+    },
+    "hotswap": {
+      "v": true,
+      "q": "hot-swap split backspace PCB"
+    },
+    "plateMaterial": {
+      "v": "pom",
+      "q": "POM plate compatible with split backspace"
+    },
+    "price": {
+      "v": 999,
+      "q": "Night Drive / Engraved: 999.00"
+    }
+  },
+  "mecha:zeta-keyboards-hera-r2-60-barebones-mechanical-keyboard": {
+    "brand": {
+      "v": "Zeta Keyboards",
+      "q": "Vendor field: Zeta Keyboards"
+    },
+    "beginnerFriendly": {
+      "v": false,
+      "q": "solder-only PCB"
+    },
+    "layouts": {
+      "v": [
+        "60"
+      ],
+      "q": "Layout_60%"
+    },
+    "switchTechnologySupport": {
+      "v": [
+        "mechanical"
+      ],
+      "q": "MX-style switches"
+    },
+    "stabilizerTypeSupport": {
+      "v": [
+        "pcb_mount"
+      ],
+      "q": "Stabilizer Mount: PCB Mounted Clip-in"
+    },
+    "connection": {
+      "v": "wired",
+      "q": "Connectivity_Wired Only"
+    },
+    "hotswap": {
+      "v": false,
+      "q": "solder-only PCB"
+    },
+    "plateMaterial": {
+      "v": "fr4",
+      "q": "1x FR4 Half-Plate"
+    },
+    "price": {
+      "v": 679,
+      "q": "B-Stock / Black: 679.00"
+    }
+  }
+}

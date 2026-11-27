@@ -1,4 +1,6 @@
-import { keyboardComponents } from "@/data/components";
+// v2 WS2: seeds the active catalogue (frozen 61 + approved imports, or the
+// frozen 61 alone when SHARKEYS_CATALOG=frozen).
+import { keyboardComponents } from "@/data/catalog";
 import type { Database } from "@/lib/types/database";
 import type { Json } from "@/lib/types/database";
 import type { KeyboardComponent } from "@/lib/types";

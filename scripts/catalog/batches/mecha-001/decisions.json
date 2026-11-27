@@ -1,0 +1,1339 @@
+{
+  "batchId": "mecha-001",
+  "reviewStartedAt": "",
+  "reviewFinishedAt": "",
+  "parts": {
+    "mecha:group-buy-gmk-finer-things-r2": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:mecha-x-tut-lofi-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:monx-gravity-tactile-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:extras-84-tkl-by-nuxros": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:transparent-keycap-oem-profile": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gb-gmk-cyl-ramune": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:bsun-taichi-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:bsun-taichi-v1": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gb-gmk-british-racing-green-r2-simple-base": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:kailh-polia-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jwick-ice-jade-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:geonworks-raptor-mx-gaming-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:black-on-white-hiragana-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:red-on-black-frosted-cherry-profile-keycap-set": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:green-and-white-cherry-profile-keycap-set": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:two-tone-grey-cherry-profile-keycap-set": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:burgundy-gold-cherry-profile-keycap-set": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:cupid-moa-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:parametric-pearlescent-metallic-cherry-profile-keycap-set": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:sakura-blossom-forsted-cherry-profile-keycap-set": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:sakura-blossom-pearlescent-metallic-cherry-profile-keycap-set": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:frosted-purple-cherry-profile-keycap-set": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:frosted-pink-cherry-profile-keycap-set": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:frosted-grey-cherry-profile-keycap-set": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:frosted-blue-cherry-profile-keycaps": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 6 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:zuoya-gmk68": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:leobog-hi75c-pro-75-barebones-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:merdeka-sale-jkdk-child-kits": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:kailh-deep-sea-silent-linear-lubricated-switches": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:kailh-deep-sea-silent-pro-box-whale-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:durock-shrimp-silent-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:sw-x-haimu-mp-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:hmx-hanami-dango-v2-lubricated-linear-switches": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:akko-pom-brown-tactile-switch": {
+      "decision": "approve",
+      "fixes": {
+        "soundProfile": "creamy"
+      },
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true,
+      "soundSource": {
+        "source": "web reviews (HQ research)",
+        "confidence": "medium"
+      }
+    },
+    "mecha:akko-cs-crystal-wine-red-linear-switch-1": {
+      "decision": "approve",
+      "fixes": {
+        "soundProfile": "clacky"
+      },
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true,
+      "soundSource": {
+        "source": "web reviews (HQ research)",
+        "confidence": "medium-low"
+      }
+    },
+    "mecha:akko-cs-jelly-black-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gopolar-x-gateron-azure-dragon-v2-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jwick-t1-lubricated-tactile-switches": {
+      "decision": "approve",
+      "fixes": {
+        "soundProfile": "thocky"
+      },
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true,
+      "soundSource": {
+        "source": "web reviews (HQ research)",
+        "confidence": "medium-high"
+      }
+    },
+    "mecha:gateron-g-pro-2-0-red-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:copy-of-gateron-g-pro-2-0-yellow-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:akko-cs-wine-red-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-g-pro-2-0-brown-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:bsun-x-monx-my-silent-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:leobog-hi8se-aluminum-75-wireless-aluminum-barebones-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keygeek-y3-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:pink-mist-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:venom-60-he-gaming-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:coffee-cat-xda-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-k-pro-silent-red-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:keychron-k-pro-banana-tactile-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:keychron-k-pro-silver-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:keychron-k-pro-yellow-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:keychron-k-pro-brown-tactile-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:keychron-k-pro-red-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:akko-mod006-diy-barebones-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:weikav-max-102-98-barebones-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:weikav-stars80-tkl-barebones-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:sss-fourwrap-v2-stabilizers-screw-in-pcb-mount": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keygeek-y2-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:island-retreat-pbt-dye-sub-xda-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:pastel-weather-pbt-dye-sub-xda-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:retro-beige-abs-double-shot-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:red-industrial-retro-pbt-dye-sub-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:sea-salt-lemon-candy-cherry-profile-pbt-pc-double-shot-jelly-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:pixie-cherry-profile-pbt-dye-sub-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:kanagawa-shine-through-double-shot-pbt-cherry-profile-keycap-set-white": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:kanagawa-wave-shine-through-double-shot-pbt-cherry-profile-keycap-set-black": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:group-buy-gmk-cyl-mono": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:qk65-mk3-65-custom-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:pre-order-extras-neo98-wireless-98-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:pre-order-extras-neo75-wireless-75-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-retro-chocolate-cherry-profile-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:mmd-princess-v5-ultra-thock-tactile-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:hmx-snowfall-tactile-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:extras-neo80-cu-tkl-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:sakura-shine-through-cherry-profile-pbt-keycaps-side-printed": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:blue-gradient-shine-through-cherry-profile-pbt-keycaps-side-printed": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:green-gradient-shine-through-cherry-profile-pbt-keycaps-side-printed": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:white-shine-through-cherry-profile-pbt-keycaps-side-printed": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:pink-gradient-shine-through-cherry-profile-pbt-keycaps-side-printed": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gray-gradient-shine-through-cherry-profile-pbt-keycaps-side-printed": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:extras-neo65-core-plus-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:hjs-alu75v2-75-wireless-aluminum-barebones-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-supernova-cherry-profile-hi-gloss-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:ws-yellow-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:blue-mist-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:stealth-black-on-grey-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:mmd-princess-v4-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-low-profile-2-0-ks-33-rgb-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-pink-blue-on-white-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:ws-heavy-tactile": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:bsun-strawberry-cheesecake-r2-tactile-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:cherry-mx2a-gunw-unlubed-brown": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:cherry-mx2a-1c6w-unlubed-black": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:gmk-evil-dolch-the-split": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-grey-double-shot-osa-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-blue-white-double-shot-osa-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:extras-qk-alice-duo": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jetliner-linear-switch-50g": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-blue-ks-9-clicky-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:extras-neo60-cu-custom-mechanical-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-play-station-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:owlab-ti-he-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:topography-v2-side-printed-rgb-shine-through-cherry-profile-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-valentines-cherry-profile-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:cat-themed-mao-profile-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:black-on-white-hiragana-mda-profile-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:this-is-plastic-xda-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:chiikawa-themed-mao-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:weathering-black-on-white-cherry-profile-dye-sub-pbt-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:matcha-xda-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:9009-cherry-profile-pbt-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:akko-bun-wonderland-mog-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:capybara-mao-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:black-on-white-bow-pbt-doubleshot-cherry-profile-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:outemu-silent-peach-v3": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:shine-through-oem-profile-pc-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:mmd-princess-v4-tactile": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-closure-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-after-the-rain-r2-pbt-cherry-profile-keycap-set-copy": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-longjing-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-magic-mimi-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-holiday-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-swordsman-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:lelelabs-crystal-clear-abs-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:milkyway-alhambra-double-shot-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:zuoya-gmk67-65-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": "auto-approval withdrawn: duplicate: possibly the same product as existing \"case_gmk67_65_plastic\" (same brand and model code); duplicate: possibly the same product as existing \"pcb_gmk67_65_hotswap\" (same brand and model code); duplicate: possibly the same product as existing \"plate_gmk67_65_pc\" (same brand and model code); duplicate: possibly the same product as existing \"plate_gmk67_65_brass\" (same brand and model code); duplicate: possibly the same product as existing \"plate_gmk67_65_aluminum\" (same brand and model code); duplicate: possibly the same product as existing \"plate_gmk67_65_pom\" (same brand and model code)",
+      "auto": false
+    },
+    "mecha:zuoya-gmk26-wireless-custom-numpad": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-magnetic-jade-pro-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:akko-penguin-silent-tactile-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:hmx-azure-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:mmd-princess-v2-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:kbdfans-tiger-lite-gaming-mx-hall-effect-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gradient-shine-through-cherry-profile-pbt-keycaps-side-printed": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-q2-max-qmk-via-wireless-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-v6-max-qmk-via-wireless-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-regenerate-r2-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:zuoya-gmk87-80-tkl-custom-mechanical-keyboard-copy": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 13 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:zuoya-gmk81-75-custom-mechanical-keyboard": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 13 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:jkdk-x-km-cat-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-retro-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-drift-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-joker-pbt-cherry-profile-dye-sub-keycap": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:kailh-bcp-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gmk-blot": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:zuoya-gmk104-100-full-size-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": "auto-approval withdrawn: duplicate: possibly the same product as existing \"case_gmk104_full_abs\" (same brand and model code); duplicate: possibly the same product as existing \"pcb_gmk104_full_hotswap\" (same brand and model code); duplicate: possibly the same product as existing \"plate_gmk104_full_pc\" (same brand and model code)",
+      "auto": false
+    },
+    "mecha:hmx-x-yg-macchiato-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:geon-lucifer-he-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gb-keykobo-instant-double-shot-abs-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:eden-r2-60-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:hiexa-v65": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:pre-order-qk80mk2-barebones-kit-no-pcb-plate-copy": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-white-on-black-wob-pbt-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:typeplus-x-yikb-stabilizer-screw-in-pcb-mount": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gb-thumb-key-x-domikey-deicide-dye-sub-cherry-profile-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:zoom65-v3-special-edition": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:geon-raw-zero-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:geon-raw-he-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:geonworks-raptor-he-gaming-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keykobo-machinist-abs-keycaps-doubleshot-cherry-profile": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-t52-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-retro-purple-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-ramen-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-goodnight-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-zimo-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-wushuang-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-biker-girl-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-sfc1990-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:fbb-sfc1990-dark-pbt-cherry-profile-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:pbtfans-emma": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:bsun-strawberry-cheesecake-tactile-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:hmx-gravel-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:gb-gmk-abyssal-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:shenpo-matcha-sakura-dye-sub-pbt-cherry-profile-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:lcet-joker-tactile-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:ever-free-grayish-tactile-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:lemokey-p1-qmk-via-custom-gaming-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:photographer-dye-sublimation-pbt-cherry-keycaps-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:cherry-mx2a-purple-tactile-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:gmk-black-snail": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-side-printed-oem-profile-pbt-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-red-on-white-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-green-on-white-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-q0-max-custom-number-pad": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-smoothie-linear-switch": {
+      "decision": "approve",
+      "fixes": {},
+      "note": "auto-approved (HQ rule): independent in-session pass agreed on all 7 fields; page quotes verified; rule engine found a valid build",
+      "auto": true
+    },
+    "mecha:invyr-holy-panda-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:bsun-hillstone-tactile-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:prevail-nebula-v2-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keykobo-violet-alert-abs-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-q6-max-qmk-via-wireless-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-q3-max-qmk-via-wireless-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-v3-max-qmk-via-wireless-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-v10-max-qmk-via-wireless-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:swk-catmint-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-jupiter-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:eden-60-keyboard-kit": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-v1-max-qmk-via-wireless-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:createkeebs-luminkey-80-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-g-pro-3-0-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-ks-3-milky-yellow-pro-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-luciola-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:bsun-pine-tactile-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-studio-colors-hiragana-cherry-pbt-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-q3-pro-qmk-via-wireless-custom-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:copy-of-pre-order-angry-miao-am-compact-touch-am-65-less": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:kfa-pink-robin-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:tx-plate-mount-stabilizers": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:cherry-mx-black-clear-top-nixie-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-raw-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:cherry-mx-ergo-clear-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:geonworks-slider-switch-stems-100pcs": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:cherry-mx-black-hyperglide-linear-switches-1": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-baby-racoon-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:geon-x-haimu-raw-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:tx-2023-almost-perfect-pcb-clip-on-stabilizers": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jwick-ultimate-black-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jwick-pink-jade-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jwk-lotus-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jwk-sotc-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:k-techs-s1-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:k-techs-s2-v2-lubricated-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-baby-kangaroo-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:joininkeys-jade-rabbit-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:zeta-keyboards-hera-r2-60-barebones-mechanical-keyboard": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keygeek-raw-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:geon-x-haimu-white-tactile-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:geon-x-haimu-red-silent-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:geon-x-haimu-black-linear-switch": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:keychron-oem-dye-sub-pbt-keycap-set-ocean": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:emogogo-hybrid-black": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:moondrop-lunalight-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-dark-matter-pbt-cherry-profile-dye-sub-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-bamboo-forest-pbt-cherry-profile-dye-sub-keycap-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:dangkeebs-strawberry-milk-ice-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:everglide-v3-transparent-gold-plated-screw-in-stabilizers": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:tx-stablizer-set": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-g-pro-2-0-silver-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-white-on-black-hiragana-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-black-on-white-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-pink-dessert-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jkdk-hydrogen-pbt-cherry-profile-dye-sub-keycaps": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jtk-polycarbonate-keycap-storage-trays": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:drop-invyr-housing-holy-panda-tactile-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-ink-black-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-cap-gold-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:everglide-panda-plate-mounted-clip-in-stabilizers": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:glorious-gpbt-premium-keycaps-in-olive": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:glorious-gpbt-premium-keycaps-in-pastel": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:kailh-x-novelkeys-box-cream-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jwick-black-lubricated-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:tecsee-ice-candy-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:jwick-red-linear-lubricated-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:emogogo-cream-01-linear-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    },
+    "mecha:gateron-oil-king-linear-lubricated-switches": {
+      "decision": "pending",
+      "fixes": {},
+      "note": ""
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "_note": "Approved weekly price checks (scripts/catalog/price-check.ts). The Monday GitHub Action proposes changes to this file in a PR; merging the PR is the approval.",
+  "checks": {
+    "case_weikav_star80_tkl_aluminum": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "error",
+      "note": "vendor for www.keebsproject.com is not approved for fetching"
+    },
+    "keycap_unknown_gradient_cherry_shinethrough": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "ok",
+      "observedPrice": 139
+    },
+    "keycap_unknown_illusion_sky_blue_cherry_pbt": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "error",
+      "note": "vendor for www.keebsproject.com is not approved for fetching"
+    },
+    "keycap_unknown_pudding_oem_pbt": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "ok",
+      "observedPrice": 45
+    },
+    "keycap_unknown_retro_9009_cherry_pbt": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "error",
+      "note": "vendor for www.keebsproject.com is not approved for fetching"
+    },
+    "keycap_unknown_seasonic_xda_pbt": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "error",
+      "note": "vendor for www.keebsproject.com is not approved for fetching"
+    },
+    "pcb_weikav_star80_tkl_hotswap": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "error",
+      "note": "vendor for www.keebsproject.com is not approved for fetching"
+    },
+    "plate_weikav_star80_tkl_fr4": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "error",
+      "note": "vendor for www.keebsproject.com is not approved for fetching"
+    },
+    "stab_c3_equalz_v3_screw_in": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "gone",
+      "note": "source page is gone (404/410)"
+    },
+    "stab_flcmmk_fulin_v3_plate_mount": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "gone",
+      "note": "source page is gone (404/410)"
+    },
+    "stab_owlab_v3_screw_in": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "gone",
+      "note": "source page is gone (404/410)"
+    },
+    "stab_sp_star_plate_mount": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "gone",
+      "note": "source page is gone (404/410)"
+    },
+    "stab_tx_ap_clip_in_pcb_mount": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "ok",
+      "observedPrice": 43
+    },
+    "stab_weikav_star80_pcb_mount": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "error",
+      "note": "vendor for www.keebsproject.com is not approved for fetching"
+    },
+    "switch_akko_lavender_purple_v3_pro": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "ok",
+      "observedPrice": 1.05
+    },
+    "switch_akko_penguin_silent": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "error",
+      "note": "vendor for www.keebsproject.com is not approved for fetching"
+    },
+    "switch_mmd_princess_linear_v3": {
+      "lastCheckedAt": "2026-11-27T07:11:58.021Z",
+      "status": "gone",
+      "note": "source page is gone (404/410)"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "at": "2026-11-27T06:06:08.887Z",
+    "model": "gpt-4.1-mini",
+    "candidates": 10,
+    "inputTokens": 11221,
+    "outputTokens": 1453,
+    "usd": 0.006813200000000001
+  },
+  {
+    "at": "2026-11-27T07:11:21.147Z",
+    "model": "gpt-4.1-mini",
+    "candidates": 145,
+    "inputTokens": 185484,
+    "outputTokens": 21353,
+    "usd": 0.10835840000000001
+  }
+]

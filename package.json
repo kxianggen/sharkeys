@@ -17,7 +17,14 @@
     "eval": "tsx --tsconfig tsconfig.json scripts/run-eval.ts",
     "seed:embeddings": "tsx --tsconfig tsconfig.json scripts/seed-embeddings.ts",
     "supabase:seed-catalog": "tsx scripts/supabase/seed-catalog.ts",
-    "supabase:verify-catalog": "node scripts/supabase/verify-catalog.mjs"
+    "supabase:verify-catalog": "node scripts/supabase/verify-catalog.mjs",
+    "catalog:discover": "tsx --tsconfig tsconfig.json scripts/catalog/discover.ts",
+    "catalog:extract": "tsx --tsconfig tsconfig.json scripts/catalog/extract.ts",
+    "catalog:review": "tsx --tsconfig tsconfig.json scripts/catalog/review.ts",
+    "catalog:apply": "tsx --tsconfig tsconfig.json scripts/catalog/apply-approved.ts",
+    "catalog:golden": "tsx --tsconfig tsconfig.json scripts/catalog/golden.ts",
+    "catalog:seed-local": "tsx --tsconfig tsconfig.json scripts/catalog/seed-local.ts",
+    "catalog:price-check": "tsx --tsconfig tsconfig.json scripts/catalog/price-check.ts"
   },
   "dependencies": {
     "@langchain/core": "^1.1.48",
@@ -50,6 +57,7 @@
     "eslint-config-next": "16.2.6",
     "jsdom": "^29.1.1",
     "sharp": "^0.35.2",
+    "supabase": "^3.4.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.0",
     "typescript": "^5",

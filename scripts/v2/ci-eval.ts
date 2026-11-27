@@ -31,7 +31,14 @@ const known = new Set<string>(
 
 const outFile = join(mkdtempSync(join(tmpdir(), "sharkeys-eval-")), "eval.json");
 const run = spawnSync("npm", ["run", "eval"], {
-  env: { ...process.env, EVAL_JSON_OUT: outFile, EVAL_SEMANTIC: "false" },
+  env: {
+    ...process.env,
+    EVAL_JSON_OUT: outFile,
+    EVAL_SEMANTIC: "false",
+    // v2 WS2: the known-failures list was recorded on the frozen 61-part
+    // catalogue, so the gate runs there unless a caller asks for "full".
+    SHARKEYS_CATALOG: process.env.SHARKEYS_CATALOG ?? "frozen",
+  },
   stdio: "inherit",
   shell: true,
 });
