@@ -1,6 +1,6 @@
 # Scorecards
 
-One file per scorecard run, never edited. The canonical WS0 baseline is marked below; compare later runs against it with the **same rubric** (rubric-v3) and the same simulator (simulator-3).
+One file per scorecard run, never edited. The canonical WS0 baseline is marked below. **simulator-3 + rubric-v3 are frozen for the rest of v2 (HQ, 27 Nov):** every later run uses them, so its numbers compare with this baseline.
 
 | file | what | status |
 |---|---|---|

@@ -64,6 +64,7 @@ import {
   type Persona,
 } from "./lib/persona";
 import { addUsage, costUSD, zeroUsage, type TokenUsage } from "./lib/pricing";
+import { SIM_VERSION } from "./lib/versions"; // frozen: simulator-3 (HQ, 27 Nov)
 
 loadEnvFile();
 
@@ -82,17 +83,6 @@ const { values: args } = parseArgs({
   },
 });
 
-// Bump when the simulator's view of the app changes, so runs stay comparable.
-// Named simulator-1/2/3 so they never clash with the project's "v2".
-// (The first runs on 27 Nov recorded these as "sim-v2"/"sim-v3"; see
-// eval/v2/runs/README.md for the mapping.)
-//  simulator-1: smoke test and pilot.
-//  simulator-2: search reply mirrors the UI (build cards only, or the
-//    empty-state text), Meg's part chips are shown, accept needs an
-//    on-screen build. The persona is deliberately NOT told that chat can't
-//    change the builds panel: a real user isn't told either.
-//  simulator-3: the screen lists all six parts of each build, like the card.
-const SIM_VERSION = "simulator-3";
 
 const MAX_TURNS = Number(args["max-turns"]);
 const RUNS = Number(args.runs);
