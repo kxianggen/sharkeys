@@ -1,6 +1,6 @@
 # WS0 — Foundation: measure before changing anything
 
-## Paste this to start (Claude Code, repo root, branch `v2/ws0-foundation`)
+## Paste this to start (Claude Code, repo root, branch `v2-ws0-foundation`)
 
 > You're working on Sharkeys v2, workstream WS0. Read `docs/v2/00-plan.md` and `docs/v2/WS0-foundation.md`. Start in plan mode: show me your plan and wait for my approval. Stay inside this brief, and ask before doing anything on the plan's approval list. When you finish, fill in "Report back", then walk me through the Learn card in plain words, as if I'm a first-year CS student.
 

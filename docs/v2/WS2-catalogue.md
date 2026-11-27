@@ -1,6 +1,6 @@
 # WS2 — Bigger catalogue plus weekly price automation
 
-## Paste this to start (Claude Code, repo root, branch `v2/ws2-catalogue`)
+## Paste this to start (Claude Code, repo root, branch `v2-ws2-catalogue`)
 
 > You're working on Sharkeys v2, workstream WS2. Read `docs/v2/00-plan.md` and `docs/v2/WS2-catalogue.md`. Start in plan mode and wait for my approval. Never write to the live Supabase project without my OK; work locally or on a Supabase branch. When you finish, fill in "Report back", then walk me through the Learn card in plain words.
 

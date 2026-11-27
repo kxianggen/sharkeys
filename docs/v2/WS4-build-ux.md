@@ -1,6 +1,6 @@
 # WS4 — Build UX: split, refine, compare, share, clone
 
-## Paste this to start (Claude Code, repo root, branch `v2/ws4-build-ux`)
+## Paste this to start (Claude Code, repo root, branch `v2-ws4-build-ux`)
 
 > You're working on Sharkeys v2, workstream WS4. Read `docs/v2/00-plan.md` and `docs/v2/WS4-build-ux.md`. Start in plan mode and wait for my approval. Step 1 is a pure refactor: behaviour and screenshots must not change. When you finish, fill in "Report back", then walk me through the Learn card in plain words.
 

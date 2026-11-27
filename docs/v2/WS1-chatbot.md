@@ -1,6 +1,6 @@
 # WS1 — A chatbot that understands normal people (plus faster replies)
 
-## Paste this to start (Claude Code, repo root, branch `v2/ws1-chatbot`)
+## Paste this to start (Claude Code, repo root, branch `v2-ws1-chatbot`)
 
 > You're working on Sharkeys v2, workstream WS1. Read `docs/v2/00-plan.md`, `docs/v2/WS1-chatbot.md`, and the WS0 baseline in `eval/v2/results/`. Start in plan mode and wait for my approval. You may only use the DEV set for examples and tuning; never look at TEST messages while tuning. When you finish, fill in "Report back", then walk me through the Learn card in plain words.
 

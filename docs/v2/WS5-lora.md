@@ -1,6 +1,6 @@
 # WS5 — LoRA fine-tuning experiment (side track)
 
-## Paste this to start (Claude Code for the data and scoring scripts; Google Colab for training; branch `v2/ws5-lora`)
+## Paste this to start (Claude Code for the data and scoring scripts; Google Colab for training; branch `v2-ws5-lora`)
 
 > You're working on Sharkeys v2, workstream WS5. Read `docs/v2/00-plan.md` and `docs/v2/WS5-lora.md`. Start in plan mode and wait for my approval. The WS0 TEST set must never appear in the training data; prove it with an overlap check. Write the Colab notebook with plain-English comments on every cell. When you finish, fill in "Report back", then walk me through the Learn card in plain words.
 

@@ -1,6 +1,6 @@
 # WS3 — Hear it before you buy
 
-## Paste this to start (Claude Code, repo root, branch `v2/ws3-sound`, after WS4 step 1 is merged)
+## Paste this to start (Claude Code, repo root, branch `v2-ws3-sound`, after WS4 step 1 is merged)
 
 > You're working on Sharkeys v2, workstream WS3. Read `docs/v2/00-plan.md` and `docs/v2/WS3-sound.md`. Start in plan mode and wait for my approval. When you finish, fill in "Report back", then walk me through the Learn card in plain words.
 
