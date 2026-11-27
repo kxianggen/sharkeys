@@ -11,8 +11,13 @@ vi.mock("@/lib/openai", () => ({ createOpenAIClient }));
 
 import { POST } from "@/app/api/recommendations/refine/route";
 import { keyboardComponents } from "@/data";
-import { extractedKeyboardIntentSchema, type ExtractedKeyboardIntent } from "@/lib/ai";
 import {
+  extractedKeyboardIntentSchema,
+  extractKeyboardIntent,
+  type ExtractedKeyboardIntent,
+} from "@/lib/ai";
+import {
+  generateRecommendationsFromMessage,
   generateRecommendationsFromIntent,
   scoreRecommendation,
   type ValidatedRecommendationBuild,
@@ -70,12 +75,12 @@ describe("applyRefineChip", () => {
     expect(edited?.priorities).toContain("sound");
   });
 
-  it("cheaper caps the budget at 80% of the build price", async () => {
+  it("cheaper caps the budget at RM1 under the build price", async () => {
     const base = await baseBuild();
     const edited = applyRefineChip(makeIntent(), "cheaper", base);
 
     expect(edited?.budget).toEqual({
-      amount: Math.round((base.estimatedPrice ?? 0) * 0.8),
+      amount: Number(((base.estimatedPrice ?? 0) - 1).toFixed(2)),
       currency: "MYR",
       label: "budget",
     });
@@ -234,6 +239,51 @@ describe("generateRecommendationsFromIntent (refine path)", () => {
     expect(scoreRecommendation(base, intent)).toBe(
       scoreRecommendation(base, intent, {}),
     );
+  });
+});
+
+describe("Cheaper is the next step down (HQ fix)", () => {
+  const previousKey = process.env.OPENAI_API_KEY;
+
+  beforeEach(() => {
+    delete process.env.OPENAI_API_KEY; // keyword extraction, like the keyless demo
+  });
+
+  afterEach(() => {
+    if (previousKey !== undefined) process.env.OPENAI_API_KEY = previousKey;
+  });
+
+  it("from the RM313.80 GMK67 build: RM311.00, then RM304.00, then RM298.50", async () => {
+    // Valid GMK67 builds just under RM313.80 (brute-forced over the whole
+    // catalogue with the rule engine): 311.00, 304.00, 298.50, 290.80, ...
+    const message = "Beginner friendly 65% keyboard under RM500";
+    const search = await generateRecommendationsFromMessage(
+      { message },
+      {
+        extraction: await extractKeyboardIntent({ message }),
+        catalogComponents: keyboardComponents,
+      },
+    );
+    let build = search.recommendations.find(
+      (r) => r.components.case.metadata?.kitId === "gmk67",
+    );
+    expect(build?.estimatedPrice).toBe(313.8);
+
+    const steps: number[] = [];
+    let intent = search.intent;
+
+    for (let click = 0; click < 3; click += 1) {
+      intent = applyRefineChip(intent, "cheaper", build!)!;
+      const refined = await generateRecommendationsFromIntent(
+        { intent, source: search.source, chip: "cheaper" },
+        { catalogComponents: keyboardComponents },
+      );
+      build = refined.recommendations[0];
+      steps.push(build.estimatedPrice ?? Number.NaN);
+      expect(build.validation.isValid).toBe(true);
+    }
+
+    expect(steps).toEqual([311, 304, 298.5]);
   });
 });
 

@@ -41,9 +41,12 @@ export const refineChipLabels: Record<RefineChip, string> = {
   smaller: "Smaller",
 };
 
-// "Cheaper" caps the budget at 80% of the build's price; "More premium" lifts
-// the ceiling to 150%. Rounded to whole ringgit so the request stays readable.
-const CHEAPER_FACTOR = 0.8;
+// "Cheaper" is the next step down: the ceiling sits RM1 under the current
+// total, and the refine route orders by price, priciest first (a
+// fixed -20% step jumped past real cheaper builds, e.g. GMK67 RM313.80 →
+// RM251 skipped RM298.50). "More premium" lifts the ceiling to 150%,
+// rounded to whole ringgit.
+const CHEAPER_STEP_RM = 1;
 const PREMIUM_FACTOR = 1.5;
 
 // Smaller means fewer keys: each layout steps down to the next compact one.
@@ -107,12 +110,15 @@ export function applyRefineChip(
         return null;
       }
 
-      const factor = chip === "cheaper" ? CHEAPER_FACTOR : PREMIUM_FACTOR;
+      const amount =
+        chip === "cheaper"
+          ? Number((base.estimatedPrice - CHEAPER_STEP_RM).toFixed(2))
+          : Math.round(base.estimatedPrice * PREMIUM_FACTOR);
 
       return {
         ...edited,
         budget: {
-          amount: Math.round(base.estimatedPrice * factor),
+          amount,
           currency: "MYR",
           label: chip === "cheaper" ? "budget" : "premium",
         },

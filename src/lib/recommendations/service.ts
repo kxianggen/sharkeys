@@ -55,7 +55,12 @@ type OpenAIRecommendationClient = Pick<OpenAI, "responses">;
 // Ranking switches set only by the refine route. Every default keeps the
 // original ranking, so the message path ranks exactly as before.
 type RankingOptions = {
+  // "More premium": favour builds that use more of the raised ceiling.
   preferHigherSpend?: boolean;
+  // "Cheaper": strictly the priciest build under the ceiling first, i.e. the
+  // next step down. A score nudge cannot guarantee that (close prices round
+  // to the same points), so price decides and the score only breaks ties.
+  nextStepDown?: boolean;
 };
 
 type AssemblyResult = {
@@ -159,7 +164,10 @@ export async function generateRecommendationsFromIntent(
         ? anchorPreparationToKit(preparation, request.kitId, catalogComponents)
         : preparation,
       maxRecommendations: options.maxRecommendations,
-      ranking: { preferHigherSpend: request.chip === "premium" },
+      ranking: {
+        preferHigherSpend: request.chip === "premium",
+        nextStepDown: request.chip === "cheaper",
+      },
     },
   );
 }
@@ -563,6 +571,16 @@ function compareRecommendations(
   intent: ExtractedKeyboardIntent,
   ranking: RankingOptions = {},
 ) {
+  if (ranking.nextStepDown) {
+    const priceDifference =
+      (right.estimatedPrice ?? Number.NEGATIVE_INFINITY) -
+      (left.estimatedPrice ?? Number.NEGATIVE_INFINITY);
+
+    if (priceDifference !== 0) {
+      return priceDifference;
+    }
+  }
+
   const scoreDifference =
     scoreRecommendation(right, intent, ranking) -
     scoreRecommendation(left, intent, ranking);
