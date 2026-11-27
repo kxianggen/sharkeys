@@ -82,9 +82,14 @@ async function main() {
     }
 
     // Intent (search rows).
-    type FieldTally = Record<IntentField, { ok: number; n: number }>;
+    type FieldTally = Record<
+      IntentField,
+      { ok: number; n: number; statedOk: number; statedN: number; falseAdd: number; unstatedN: number }
+    >;
     const newTally = (): FieldTally =>
-      Object.fromEntries(FIELDS.map((f) => [f, { ok: 0, n: 0 }])) as FieldTally;
+      Object.fromEntries(
+        FIELDS.map((f) => [f, { ok: 0, n: 0, statedOk: 0, statedN: 0, falseAdd: 0, unstatedN: 0 }]),
+      ) as FieldTally;
 
     async function scoreIntent(useLlm: boolean) {
       const tally = newTally();
@@ -112,18 +117,39 @@ async function main() {
           };
           let allOk = true;
           for (const f of FIELDS) {
-            tally[f].n++;
-            if (JSON.stringify(actual[f]) === JSON.stringify(expected[f])) tally[f].ok++;
+            const t = tally[f];
+            const same = JSON.stringify(actual[f]) === JSON.stringify(expected[f]);
+            // "Stated" = the message says something about this field. Getting an
+            // unstated field right (both empty) is easy, so it is reported
+            // separately instead of inflating the headline.
+            const stated = expected[f] !== null && expected[f] !== "unknown";
+            const actualEmpty = actual[f] === null || actual[f] === "unknown";
+            t.n++;
+            if (same) t.ok++;
             else allOk = false;
+            if (stated) {
+              t.statedN++;
+              if (same) t.statedOk++;
+            } else {
+              t.unstatedN++;
+              if (!actualEmpty) t.falseAdd++;
+            }
           }
           if (allOk) rowsAllOk++;
         }
       } finally {
         delete process.env.OPENAI_API_KEY;
       }
-      const ok = FIELDS.reduce((s, f) => s + tally[f].ok, 0);
-      const n = FIELDS.reduce((s, f) => s + tally[f].n, 0);
-      return { tally, overall: ratio(ok, n), rowsAllOk };
+      const sum = (k: keyof FieldTally[IntentField]) => FIELDS.reduce((s, f) => s + tally[f][k], 0);
+      return {
+        tally,
+        overall: ratio(sum("ok"), sum("n")),
+        stated: ratio(sum("statedOk"), sum("statedN")),
+        statedN: sum("statedN"),
+        falseAdd: ratio(sum("falseAdd"), sum("unstatedN")),
+        unstatedN: sum("unstatedN"),
+        rowsAllOk,
+      };
     }
 
     const kw = await scoreIntent(false);
@@ -149,12 +175,14 @@ async function main() {
       "|---|---|---" + (llm ? "|---" : "") + "|",
       `| routing accuracy (follow-up rows) | ${followups.length} | ${pct(ratio(routeOk, followups.length))}` + (llm ? " | (not measured; WS1)" : "") + " |",
       `| falls back to vague_question (follow-up rows) | ${followups.length} | ${pct(ratio(vague, followups.length))}` + (llm ? " | (not measured; WS1)" : "") + " |",
-      `| intent field accuracy, all fields (search rows) | ${searches.length} | ${pct(kw.overall)}` + (llm ? ` | ${pct(llm.overall)}` : "") + " |",
+      `| **intent accuracy on stated fields** (headline; search rows) | ${kw.statedN} fields | **${pct(kw.stated)}**` + (llm ? ` | **${pct(llm.stated)}**` : "") + " |",
       ...FIELDS.map(
         (f) =>
-          `| &nbsp;&nbsp;${f}${f === "connection" ? " (proxy: priorities.wireless)" : ""} | ${kw.tally[f].n} | ${pct(ratio(kw.tally[f].ok, kw.tally[f].n))}` +
-          (llm ? ` | ${pct(ratio(llm.tally[f].ok, llm.tally[f].n))}` : "") + " |",
+          `| &nbsp;&nbsp;${f}${f === "connection" ? " (proxy: priorities.wireless)" : ""} | ${kw.tally[f].statedN} | ${pct(ratio(kw.tally[f].statedOk, kw.tally[f].statedN))}` +
+          (llm ? ` | ${pct(ratio(llm.tally[f].statedOk, llm.tally[f].statedN))}` : "") + " |",
       ),
+      `| intent: something added to an unstated field | ${kw.unstatedN} fields | ${pct(kw.falseAdd)}` + (llm ? ` | ${pct(llm.falseAdd)}` : "") + " |",
+      `| intent field accuracy, all fields incl. unstated | ${searches.length * FIELDS.length} fields | ${pct(kw.overall)}` + (llm ? ` | ${pct(llm.overall)}` : "") + " |",
       `| search rows with every field right | ${searches.length} | ${pct(ratio(kw.rowsAllOk, searches.length))}` + (llm ? ` | ${pct(ratio(llm.rowsAllOk, searches.length))}` : "") + " |",
       `| build returned when one should exist | ${shouldExist} | ${pct(ratio(found, shouldExist))}` + (llm ? " | — |" : " |"),
       `| build returned when none should exist | ${shouldNot} | ${pct(ratio(falseBuild, shouldNot))}` + (llm ? " | — |" : " |"),

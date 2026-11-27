@@ -4,7 +4,7 @@ Everything here is produced or read by the scripts in `scripts/v2/`. Don't hand-
 
 | file | what | who edits |
 |---|---|---|
-| `personas.json` | 15 simulated customers | Claude drafted; Jayson adds `realCustomerNotes` |
+| `personas.json` | 15 simulated customers: **AI-drafted, reviewed by Jayson** (no real-customer lines added) | Jayson |
 | `messy-set.jsonl` | ~120 labelled single messages (100 TEST, 20 DEV, incl. 10 traps) | labels: drafted by Claude, reviewed by Jayson |
 | `TEST.sha256` | hash of the TEST rows; a unit test fails if any TEST row changes | written once, at freeze |
 | `runs/<date>-<label>/` | simulated sessions: `sessions.jsonl`, readable `transcripts/`, `run.json` | `scripts/v2/simulate.ts` |
