@@ -21,6 +21,7 @@ import {
   getKitDisplayName,
   getMetadataString,
 } from "@/components/configurator/build-helpers";
+import { ShareButton } from "@/components/configurator/share-button";
 import type { CompareControls } from "@/components/configurator/use-compare";
 import {
   RefineChips,
@@ -237,6 +238,8 @@ export function RecommendationCarousel({
           {compare ? (
             <CompareToggle build={recommendation} controls={compare} />
           ) : null}
+          <ShareButton componentIds={recommendation.componentIds} title={kitName} />
+          {/* Share and Compare are new in WS4; the save icon keeps its spot. */}
         </div>
       </article>
 

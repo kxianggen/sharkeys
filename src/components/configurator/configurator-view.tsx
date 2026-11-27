@@ -213,6 +213,11 @@ export function ConfiguratorView({
             chosenParts={chosenParts}
             isBuildComplete={isBuildComplete}
             saveAssembledBuild={state.saveAssembledBuild}
+            shareIds={
+              assembledComponentIds && assemblyValidation?.isValid
+                ? assembledComponentIds
+                : null
+            }
           />
         </section>
       </div>

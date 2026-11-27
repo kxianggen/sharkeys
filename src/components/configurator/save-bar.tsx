@@ -3,7 +3,9 @@
 import { Heart } from "lucide-react";
 
 import { categoryLabels } from "@/components/configurator/constants";
+import { ShareButton } from "@/components/configurator/share-button";
 import type {
+  CompleteComponentIdSelection,
   ComponentCategory,
   ManualSelection,
   RecommendationBuild,
@@ -20,6 +22,7 @@ export function SaveBar({
   chosenParts,
   isBuildComplete,
   saveAssembledBuild,
+  shareIds,
 }: {
   activeBuild: RecommendationBuild | null;
   buildDisplayName: string | null;
@@ -29,6 +32,7 @@ export function SaveBar({
   chosenParts: ManualSelection;
   isBuildComplete: boolean;
   saveAssembledBuild: () => void;
+  shareIds: CompleteComponentIdSelection | null;
 }) {
   return (
     <>
@@ -56,6 +60,15 @@ export function SaveBar({
                     ) : null}
                   </div>
                   <div className="flex flex-none items-center gap-2">
+                    {/* Shown once the assembled build has passed the engine:
+                        sharing needs no login, unlike saving. */}
+                    {shareIds && buildDisplayName ? (
+                      <ShareButton
+                        className="h-10 rounded-full"
+                        componentIds={shareIds}
+                        title={buildDisplayName}
+                      />
+                    ) : null}
                     <button
                       aria-label="Save to favourites"
                       className="flex h-10 w-10 items-center justify-center rounded-full border-[0.5px] border-border text-secondary transition hover:border-border-strong hover:text-primary focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-45"
