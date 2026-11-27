@@ -128,9 +128,116 @@ The PostHog key on Vercel; any run costing more than USD 0.50; turning on Claude
 
 ## Report back (session fills this in)
 
-- What changed, in plain words, with the files
-- Numbers (paste the scorecard)
-- Judge agreement %
-- Cost of one full simulation run
-- Surprises, or things that look broken, for other workstreams
-- Open questions for HQ
+_Draft 27 Nov 2026, branch `v2-ws0-foundation` (local, not pushed). Items still waiting on Jayson are marked **PENDING**._
+
+### What changed, in plain words
+
+| area | what | files |
+|---|---|---|
+| Branch names | `v2/wsN` can't exist next to a branch called `v2`, so all briefs now say `v2-wsN-name` | `docs/v2/*.md` |
+| PR checks | On every PR into `v2` or master: typecheck, lint, tests, build and the offline eval, plus one summary comment. The eval has 2 known failures, so a small gate passes CI unless a **new** failure appears. | `.github/workflows/ci.yml`, `scripts/v2/ci-eval.ts`, `eval/known-failures.json`, `scripts/run-eval.ts` (adds an optional `EVAL_JSON_OUT`; default unchanged) |
+| Keep-alive | `/api/health` reads the catalogue from Supabase and returns 503 if it had to fall back (so a paused DB shows as a failure). A daily Action calls it on the live site. | `src/app/api/health/route.ts`, `.github/workflows/keepalive.yml`, test |
+| Analytics | A ~100-line PostHog sender instead of the SDK: no autocapture, no recording, no cookies, anonymous per-tab id, allowlisted props only (message text cannot be sent). Does nothing without `NEXT_PUBLIC_POSTHOG_KEY`. Wired: `landing_viewed`, `request_sent`, `build_shown`, `build_saved`. Typed, waiting for their features: `build_shared`, `build_cloned`, `sound_played`, `refine_clicked`. | `src/lib/analytics/index.ts`, `src/components/analytics-page-view.tsx`, `src/app/page.tsx`, 4 one-line calls in `src/components/recommendation-demo.tsx`, test |
+| Personas | 15 personas grounded in the 60-part catalogue. **AI-drafted, reviewed by Jayson; no real-customer lines** (Checkpoint A skipped). | `eval/v2/personas.json` |
+| Messy set | 120 labelled messages: 100 TEST (8 traps) frozen by hash, 20 DEV (2 traps); 56 search rows (scored on intent), 64 follow-ups with on-screen build context (scored on route). A freeze test and a leakage test run in CI. | `eval/v2/messy-set.jsonl`, `eval/v2/TEST.sha256`, `eval/v2/review-sample.md`, `tests/v2/` |
+| Simulator + judge | gpt-4.1-mini plays each persona against the real local app (search box, Meg's chat, photo upload, mirroring the UI) for up to 8 turns. A separate gpt-4.1-mini judge (rubric-v1, temperature 0) grades success, turns, confusion and honesty. **Code** checks invented part IDs (hard fail) and each persona's hard requirements (budget, layout, etc.). Cost guard: estimate first, stop above USD 0.50. | `scripts/v2/simulate.ts`, `scripts/v2/lib/*`, `scripts/v2/judge-agreement.ts` |
+| Scorecard | One command writes a dated results file, never overwritten. | `scripts/v2/scorecard.ts`, `eval/v2/results/` |
+
+### (a) Runs, and what changed between them
+
+Run names are run-1/2/3 and simulators simulator-1/2/3, so nothing clashes with the project's "v2". Full detail: `eval/v2/runs/README.md`.
+
+| run | what | simulator | status |
+|---|---|---|---|
+| smoke | 1 persona, 3 turns | simulator-1 | pipeline check |
+| run-1 | pilot, 5 personas × 1 | simulator-1 | measured cost |
+| run-2 | 15 × 1 | simulator-2 | superseded |
+| **run-3** | 15 × 1 | simulator-3 | **committed baseline** |
+
+- **simulator-1 → 2** (after reading the pilot transcripts): the persona was shown text the real UI doesn't show after a successful search; it didn't see Meg's part chips; it could "accept" with nothing on screen.
+- **simulator-2 → 3** (after reading run-2): the screen showed 3 of a build's 6 parts, while the real card shows all 6. One persona was visibly misled (couldn't see the plate).
+- The rubric stayed **rubric-v1** in every run.
+
+### (b) Committed baseline
+
+**Run-3 only** → `eval/v2/results/2026-11-27-v2-ws0-foundation.md` (section A = TEST split, offline plus the LLM intent column; section C = run-3). No numbers from run-1 or run-2 are in it. The header says `@ 4a9146a`, the last commit at run time; the simulator-3 code was committed straight after, in this PR.
+
+### Numbers (from the baseline file)
+
+**Messy TEST set** (100 rows: 48 search, 52 follow-up)
+
+| metric | keyword baseline (offline) | LLM extractor (gpt-4o-mini) |
+|---|---|---|
+| routing accuracy (follow-up rows) | **13.5%** | not measured (WS1) |
+| falls back to `vague_question` | **57.7%** | not measured (WS1) |
+| intent accuracy on stated fields (68 fields) | **86.8%** | **94.1%** |
+| use case (stated) | 63.6% | 63.6% |
+| something added to an unstated field | 1.4% | 2.7% |
+| search rows with every field right | 79.2% | 81.3% |
+| build returned when one should exist (offline, seed catalogue) | 97.1% | — |
+| build returned when **none** should exist | **61.5%** | — |
+
+Routing is the production default (regex). The LLM router behind `KEYBOT_LLM_CLASSIFY` exists but is off by default and was not measured (WS1 will).
+
+**Simulated users, run-3** (15 personas × **1 run, spread unknown**)
+
+| metric | value |
+|---|---|
+| task success (judge) | 46.7% (7/15) |
+| task success (judge AND code check of hard requirements) | 46.7% (7/15) |
+| turns to an accepted build (successful sessions) | mean 3.0, median 3 |
+| confusion (1 clear … 5 unusable) | 1.93 |
+| **invented parts: unknown component IDs** | **0** |
+| invented parts: possible text flags | 3 (all Keychron / HHKB / Topre, echoed from the user while saying "not stocked") |
+| honesty where something unavailable was asked | 100% as judged (see surprise 7) |
+| reply time per app call, p50 / p95 | 3.5 s / **16.4 s** |
+| cost per session | USD 0.0041 persona+judge (measured) + ~0.012 app (estimated) |
+
+### (c) Checkpoints
+
+- **A (real-customer lines): skipped** by Jayson's decision. Personas are labelled "AI-drafted, reviewed by Jayson". Don't use the HQ plan's wording "grounded in my 150+ customer builds".
+- **B (label review): done.** 30-row sample, **0 of 30 changed**, appendix of 10 label-vs-engine disagreements accepted. TEST frozen after the review.
+- **C (judge calibration): PENDING.** 15 run-3 transcripts are exported blind to `eval/v2/calibration/`; Jayson fills `grades.json`, then `judge-agreement.ts score`. **Judge agreement: PENDING.**
+
+### Cost of one full simulation run (15 × 1)
+
+About **USD 0.24**: persona + judge USD 0.062 (measured from tokens) plus the app's own ~84 calls at ~USD 0.002 each (measured roughly from the balance drop).
+
+### (d) Total WS0 spend and balance
+
+- Start of WS0: about USD 1.73. Mid-run-3 reading: USD 1.34.
+- Measured persona + judge across all runs: USD 0.146. The app made 200 calls across the runs, plus 48 for the LLM intent column.
+- **Estimated total: about USD 0.60–0.70**, which would leave about **USD 1.05**. **Final balance: PENDING** (Jayson to read it).
+
+### Surprises and things that look broken (for other workstreams)
+
+1. **Live bug: recommendations depend on catalogue row order.** (WS2 owns `src/lib/components/`; `src/lib/recommendations/` has no owner.) The same 60 Supabase rows in Supabase order give "no build under RM350, closest RM474"; put in seed order, they give RM281–331 builds. `fetchSupabaseCatalogComponents` orders by category only. This hides the cheapest builds on the live site, and is the main reason all 4 budget personas failed. The offline eval can't see it because it uses the seed order.
+2. **Routing on short follow-ups is weak** (WS1): 13.5% correct, 57.7% fall to `vague_question` ("still ex bro, got cheaper?", "can change the keycaps to white?").
+3. **No honest "no"** (WS1): for things the catalogue doesn't have (Keychron Q1, split, 40%, pink keycaps), the offline app returns ordinary builds (61.5% of such rows). "Wireless 75%" gets **wired** 75% builds, because the intent schema has no connection field.
+4. **Meg claims actions she can't take** (WS1 honesty, WS4 UX): "I swapped out one build… on screen", when chat can't change the builds panel. Users ask Meg for changes and nothing happens on screen. WS4's refine chips or "apply Meg's suggestion" would close this.
+5. **Grounding miss** (WS1): Meg said the catalogue has no purple keycaps; the Gradient set (blue/purple) exists.
+6. **Slow tail** (WS1): p95 16.4 s against p50 3.5 s. That fits one 7-second timeout plus a retry in `src/lib/openai/client.ts`.
+7. **The judge is lenient on honesty**: it rated every session "honest" and never used "not applicable", including one where Meg was wrong about stock. Candidate for rubric-v2 after Checkpoint C. Success is already double-checked by code.
+8. "Full keyboard" (meaning a full set) is read as full-size layout, and the cheapest full-size build is about RM420.
+9. Use case is the weakest intent field for both extractors (63.6%).
+10. PostHog's 4 remaining events need one `track(...)` line each when WS3/WS4 build share, clone, sound and refine.
+11. Heads-up for WS4: the analytics change adds 4 one-line `track` calls to `recommendation-demo.tsx`.
+12. `npm audit`: 24 vulnerabilities (1 critical). Out of scope, noted.
+
+### Open questions for HQ
+
+1. **Fix the row-order bug before WS1 measures?** If it's fixed during WS1, WS1's before/after numbers on budget personas will include the fix. Suggest: fix first (with an order-independence test), re-run the baseline as run-4 (about USD 0.24), and give WS1 that as its "before".
+2. Repeat runs (3 per persona) wait for a top-up: about USD 0.50 for two more runs of 15.
+3. Rubric-v2 for honesty after Checkpoint C?
+4. Approvals still needed: push and open the PR (so the CI checks run), the `LIVE_SITE_URL` repository variable, the PostHog key on Vercel, and a deploy (for `/api/health`, the keep-alive and the analytics).
+
+### Done-when status
+
+| item | status |
+|---|---|
+| Personas and messy set committed, Jayson's review done | done (A skipped, B done) |
+| Simulation runs end to end with one command | done |
+| Judge agrees with Jayson ≥ 80% | **PENDING** (Checkpoint C) |
+| Baseline scorecard committed | written; commit waiting for OK |
+| PostHog events in the dashboard | **PENDING** (key + deploy approval) |
+| PRs show the checks; keep-alive ran once | **PENDING** (push + deploy approval) |

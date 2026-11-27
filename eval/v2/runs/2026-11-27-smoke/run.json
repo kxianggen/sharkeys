@@ -1,0 +1,14 @@
+{
+  "label": "smoke",
+  "date": "2026-11-27",
+  "gitSha": "4a9146a",
+  "personas": [
+    "p01-budget-student"
+  ],
+  "runs": 1,
+  "maxTurns": 3,
+  "rubricVersion": "rubric-v1",
+  "simModel": "gpt-4.1-mini",
+  "appCostPerTurnAssumed": 0.003,
+  "estimatedSpendUSD": 0.0077
+}
