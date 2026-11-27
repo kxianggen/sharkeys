@@ -11,7 +11,9 @@ import {
 } from "@/components/configurator/build-helpers";
 import { BuildSteps } from "@/components/configurator/build-steps";
 import { BuildVisualPanel } from "@/components/configurator/build-visual-panel";
+import { CompareView } from "@/components/configurator/compare-view";
 import { configuratorSections } from "@/components/configurator/constants";
+import { useCompare } from "@/components/configurator/use-compare";
 import { FloatingKeybot } from "@/components/configurator/keybot/floating-keybot";
 import { ManualSelectionPanel } from "@/components/configurator/manual-selection-panel";
 import { EmptyRecommendationState } from "@/components/configurator/notices";
@@ -41,6 +43,7 @@ export function ConfiguratorView({
   const [isManualCheckOpen, setIsManualCheckOpen] = useState(false);
   const [isImagePanelOpen, setIsImagePanelOpen] = useState(false);
   const [keybotOpenSignal, setKeybotOpenSignal] = useState(0);
+  const compare = useCompare();
   const {
     assembledComponentIds,
     assembledParts,
@@ -137,6 +140,7 @@ export function ConfiguratorView({
               <>
                 {result && result.recommendations.length > 0 ? (
                   <RecommendationCarousel
+                    compare={compare}
                     key={state.refineVersion}
                     onSaveRecommendation={state.saveRecommendationBuild}
                     onSelect={state.adoptRecommendation}
@@ -145,6 +149,8 @@ export function ConfiguratorView({
                     selectedId={selectedRecommendation?.id ?? null}
                   />
                 ) : null}
+
+                <CompareView controls={compare} />
 
                 <BuildSteps
                   activeBuild={activeBuild}

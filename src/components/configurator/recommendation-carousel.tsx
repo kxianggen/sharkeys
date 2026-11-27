@@ -4,7 +4,9 @@ import Image from "next/image";
 import { useState } from "react";
 import {
   BookmarkPlus,
+  Check,
   ChevronLeft,
+  Columns3,
   ChevronRight,
   Keyboard,
 } from "lucide-react";
@@ -19,6 +21,7 @@ import {
   getKitDisplayName,
   getMetadataString,
 } from "@/components/configurator/build-helpers";
+import type { CompareControls } from "@/components/configurator/use-compare";
 import {
   RefineChips,
   type RefineControls,
@@ -34,13 +37,49 @@ import { getComponentColours } from "@/lib/components/colour";
 // One recommendation at a time: full-width card with arrow controls, so the
 // short kit name, price, and tags all fit without truncation. Cards remain
 // rule-engine-validated builds; selecting one never bypasses the engine.
+// Tick a build into (or out of) the compare table. Disabled once three are
+// picked, unless this build is one of them.
+function CompareToggle({
+  build,
+  controls,
+}: {
+  build: RecommendationBuild;
+  controls: CompareControls;
+}) {
+  const checked = controls.isCompared(build);
+
+  return (
+    <button
+      aria-pressed={checked}
+      className={`inline-flex h-8 items-center gap-1.5 rounded-lg border-[0.5px] px-3 text-xs font-semibold transition focus:outline-none focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-45 ${
+        checked
+          ? "border-accent bg-accent-subtle text-primary"
+          : "border-border bg-surface text-secondary hover:border-border-strong hover:text-primary"
+      }`}
+      disabled={!checked && controls.isFull}
+      onClick={() => controls.onToggle(build)}
+      title={!checked && controls.isFull ? "Compare up to 3 builds" : undefined}
+      type="button"
+    >
+      {checked ? (
+        <Check className="h-3.5 w-3.5" aria-hidden />
+      ) : (
+        <Columns3 className="h-3.5 w-3.5" aria-hidden />
+      )}
+      Compare
+    </button>
+  );
+}
+
 export function RecommendationCarousel({
+  compare,
   onSaveRecommendation,
   onSelect,
   recommendations,
   refine,
   selectedId,
 }: {
+  compare?: CompareControls;
   onSaveRecommendation: (recommendation: RecommendationBuild) => void;
   onSelect: (recommendation: RecommendationBuild) => void;
   recommendations: RecommendationBuild[];
@@ -195,6 +234,9 @@ export function RecommendationCarousel({
           >
             <BookmarkPlus className="h-4 w-4" aria-hidden />
           </button>
+          {compare ? (
+            <CompareToggle build={recommendation} controls={compare} />
+          ) : null}
         </div>
       </article>
 
