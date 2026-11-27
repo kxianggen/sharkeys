@@ -1,0 +1,4 @@
+{
+  "_note": "Offline eval cases that are known to fail today (keyword fallback, no API key). CI passes if the failures are a subset of this list and fails on any NEW failure. If one of these starts passing, CI says so: remove it from this list in the same PR. Recorded 2026-11-27 on v2 (54 pass / 2 fail / 2 expected-fail).",
+  "knownFailures": ["kg-008", "kg-010"]
+}

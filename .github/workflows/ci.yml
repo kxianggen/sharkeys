@@ -1,0 +1,87 @@
+# Checks on every PR into v2 or master (v2 WS0).
+# Runs typecheck, lint, unit tests, build and the offline eval. Needs no API
+# keys or secrets: the app and the eval both fall back to the local catalogue
+# and keyword intent when keys are absent.
+name: CI
+
+on:
+  pull_request:
+    branches: [v2, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write # to post the summary comment
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Each check keeps going on failure so the summary shows every result;
+      # the last step fails the job if any of them failed.
+      - id: typecheck
+        run: npm run typecheck
+        continue-on-error: true
+      - id: lint
+        run: npm run lint
+        continue-on-error: true
+      - id: test
+        run: npm run test
+        continue-on-error: true
+      - id: build
+        run: npm run build
+        continue-on-error: true
+      - id: eval
+        run: npx tsx --tsconfig tsconfig.json scripts/v2/ci-eval.ts
+        continue-on-error: true
+
+      - name: Post summary on the PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          TYPECHECK: ${{ steps.typecheck.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          TEST: ${{ steps.test.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          EVAL: ${{ steps.eval.outcome }}
+        with:
+          script: |
+            const fs = require("fs");
+            const icon = (o) => (o === "success" ? "✅" : o === "skipped" ? "⏭️" : "❌");
+            const rows = ["TYPECHECK", "LINT", "TEST", "BUILD", "EVAL"]
+              .map((k) => `| ${k.toLowerCase()} | ${icon(process.env[k])} ${process.env[k]} |`)
+              .join("\n");
+            let evalSummary = "";
+            try { evalSummary = fs.readFileSync("ci-eval-summary.md", "utf8"); } catch {}
+            const marker = "<!-- sharkeys-ci-summary -->";
+            const body = `${marker}\n## CI checks\n\n| check | result |\n|---|---|\n${rows}\n\n${evalSummary}\n_Commit ${context.sha.slice(0, 7)}_`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+      - name: Fail if any check failed
+        if: always()
+        run: |
+          for outcome in "${{ steps.typecheck.outcome }}" "${{ steps.lint.outcome }}" "${{ steps.test.outcome }}" "${{ steps.build.outcome }}" "${{ steps.eval.outcome }}"; do
+            if [ "$outcome" != "success" ]; then echo "A check failed: see the steps above."; exit 1; fi
+          done

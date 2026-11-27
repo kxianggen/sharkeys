@@ -430,6 +430,30 @@ async function main() {
     `  ${C.dim}${totalPending} pending${C.reset}\n`,
   );
 
+  // Optional machine-readable output (v2 WS0, used by scripts/v2/ci-eval.ts).
+  // Additive: when EVAL_JSON_OUT is unset, behaviour is exactly as before.
+  const jsonOut = process.env.EVAL_JSON_OUT;
+  if (jsonOut) {
+    const { writeFileSync } = await import("node:fs");
+    writeFileSync(
+      jsonOut,
+      JSON.stringify(
+        {
+          mode: SEMANTIC_MODE ? "semantic" : "offline",
+          totals: {
+            pass: totalPass,
+            fail: totalFail,
+            expectedFail: totalExpectedFail,
+            pending: totalPending,
+          },
+          results: [...intentResults, ...keybotResults, ...ragResults],
+        },
+        null,
+        2,
+      ),
+    );
+  }
+
   if (totalFail > 0) {
     process.exit(1);
   }
