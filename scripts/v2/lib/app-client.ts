@@ -16,6 +16,7 @@
 import { readFileSync } from "node:fs";
 import { extname } from "node:path";
 
+import { keyboardComponents } from "@/data";
 import type { ExtractedKeyboardIntent } from "@/lib/ai";
 import type { KeybotResponse } from "@/lib/keybot/schemas";
 import {
@@ -128,15 +129,29 @@ export function intentToPrompt(intent: ExtractedKeyboardIntent): string {
   return `A ${parts.join(", ")} keyboard`;
 }
 
+/**
+ * Mirrors what the UI shows after a search. With builds, only the build cards
+ * appear (see describeScreen). Without builds, EmptyRecommendationState shows
+ * "No validated build found", every result explanation, and the
+ * clarification prompt.
+ */
 function searchReplyText(result: RecommendationResult): string {
   if (result.recommendations.length === 0) {
-    return result.clarificationPrompt ?? result.explanations[0] ?? "No builds found.";
+    return [
+      "No validated build found",
+      ...result.explanations,
+      ...(result.clarificationPrompt ? [result.clarificationPrompt] : []),
+    ].join("\n");
   }
-  const lines = [
-    ...(result.clarificationPrompt ? [result.clarificationPrompt] : []),
-    ...result.explanations.slice(0, 3),
-  ];
-  return lines.join("\n") || `${result.recommendations.length} builds shown.`;
+  return `(${result.recommendations.length} build cards shown; no other reply text)`;
+}
+
+const catalogueNames = new Map(keyboardComponents.map((c) => [c.id, c.name]));
+
+/** Mirrors the part chips under Meg's reply: up to 4 names, not clickable. */
+function partChips(ids: readonly string[] | undefined): string {
+  const names = (ids ?? []).slice(0, 4).map((id) => catalogueNames.get(id) ?? id);
+  return names.length ? `\n[Part chips under Meg's reply: ${names.join(" · ")}]` : "";
 }
 
 export async function sendSearch(
@@ -235,7 +250,7 @@ export async function sendChat(
   }
   state.chatHistory.push({ role: "assistant", content: data.answer });
   return {
-    text: data.answer,
+    text: data.answer + partChips(data.relatedComponentIds),
     calls: [record],
     returnedIds: data.relatedComponentIds ?? [],
     buildsChanged: false,
@@ -314,9 +329,16 @@ export function describeScreen(state: AppState): string {
     .slice(0, 3)
     .map((b, i) => {
       const f = buildFacts(b);
+      // The build card shows its title, first explanation line, total and all
+      // six parts (RecommendationInspector in recommendation-demo.tsx).
+      const why = b.explanations[0] ? ` Card says: "${b.explanations[0]}"` : "";
+      const c = b.components as Record<string, { name?: string } | undefined>;
+      const parts = ["case", "pcb", "plate", "switch", "keycap", "stabilizer"]
+        .map((k) => `${k} ${c[k]?.name ?? "?"}`)
+        .join("; ");
       return `Build ${i + 1}${i === state.selectedIndex ? " (selected)" : ""}: ${f.title}, total ${
         f.totalRM === null ? "?" : `RM${Math.round(f.totalRM)}`
-      }. Case ${f.caseName}; switches ${f.switchName}; keycaps ${f.keycapName}.`;
+      }. Parts: ${parts}.${why}`;
     })
     .join("\n");
 }

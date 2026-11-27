@@ -1,0 +1,107 @@
+[
+  {
+    "key": "p01-budget-student-run1",
+    "success": false,
+    "turnsToSuccess": null,
+    "confusion": 4,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Read 'full keyboard' as full-size layout; said nothing under RM300 though the GMK67 ~RM280-299 exists; 'cheaper/reduce price' got a canned compatibility reply."
+  },
+  {
+    "key": "p02-quiet-office-run1",
+    "success": false,
+    "turnsToSuccess": null,
+    "confusion": 3,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Borderline. Silent switches were right, but all builds were RM551+ against a RM500 budget with no disclosure; turn 3 lost the on-screen builds and talked about unrelated parts."
+  },
+  {
+    "key": "p03-gamer-run1",
+    "success": false,
+    "turnsToSuccess": null,
+    "confusion": 4,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Turn 1 was honest (RM947), then turns 3 and 5 claimed hall-effect fits under RM800, which is a contradiction. The persona found the non-rapid-trigger build itself."
+  },
+  {
+    "key": "p04-sound-enthusiast-run1",
+    "success": false,
+    "turnsToSuccess": null,
+    "confusion": 4,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Search ignored the named Oil King/Boba switches and 'no milky yellow pls'; chat promised swaps but the cards never changed; turn 6 offered a plastic case with tactile switches."
+  },
+  {
+    "key": "p05-vague-beginner-run1",
+    "success": false,
+    "turnsToSuccess": null,
+    "confusion": 4,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Lost the build context ('I don't see specifics'); budget 400 got RM551+ builds with no disclosure; 'why so expensive' got a canned compatibility reply."
+  },
+  {
+    "key": "p06-gift-buyer-run1",
+    "success": true,
+    "turnsToSuccess": 2,
+    "confusion": 1,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Clear recommendation of the GMK67 under budget, with an honest assembly note."
+  },
+  {
+    "key": "p07-colour-focused-run1",
+    "success": false,
+    "turnsToSuccess": null,
+    "confusion": 4,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] 'Purple' matched the Akko Lavender Purple switch name, not keycap colour. Chat described gradient-keycap builds that never appeared on screen; the persona accepted a Pudding build."
+  },
+  {
+    "key": "p08-wireless-mac-run1",
+    "success": true,
+    "turnsToSuccess": 3,
+    "confusion": 2,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Turn 2 overclaimed Mac key support; turn 3 was honest about legends and remapping."
+  },
+  {
+    "key": "p09-small-desk-run1",
+    "success": true,
+    "turnsToSuccess": 4,
+    "confusion": 3,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Turn 1 falsely said nothing under RM450 (GMK67 at RM299 exists); turn 2 called the Lucky65 '~450' when its builds are RM525+; recovered at turns 3-4."
+  },
+  {
+    "key": "p10-code-mixer-run1",
+    "success": true,
+    "turnsToSuccess": 5,
+    "confusion": 4,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Borderline. Turn 1 falsely said 'no build under 400'; 'suara' was read as voice; the named Lucky65 aluminium request was ignored silently (it can't fit under 400 and the bot never said so). Turn 5 build meets the rule."
+  },
+  {
+    "key": "p11-out-of-catalogue-run1",
+    "success": true,
+    "turnsToSuccess": 2,
+    "confusion": 2,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Honest, with no invented parts; irrelevant part chips and repeated offers."
+  },
+  {
+    "key": "p12-mind-changer-run1",
+    "success": true,
+    "turnsToSuccess": 3,
+    "confusion": 2,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Context reset fine; turn 2 could have re-searched automatically."
+  },
+  {
+    "key": "p13-haggler-run1",
+    "success": false,
+    "turnsToSuccess": null,
+    "confusion": 4,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Never found the ~RM299 floor; repeated a false 'closest RM474/456'; part dumps instead of a build."
+  },
+  {
+    "key": "p14-photo-reference-run1",
+    "success": false,
+    "turnsToSuccess": null,
+    "confusion": 4,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Vision read the Lucky65 (65%) photo as a 75% board; turn 2 falsely said it is 'exactly the case shown'; turn 5 falsely said build 3 is sea-themed."
+  },
+  {
+    "key": "p15-expert-compat-run1",
+    "success": false,
+    "turnsToSuccess": null,
+    "confusion": 3,
+    "notes": "[Graded by HQ (Claude) from the full transcript; confirmed by Jayson on 27 Nov, including the borderline p02 and p10] Q1 right but called the Akko Lavender/Penguin switches magnetic (wrong); Q2 wrong (said screw-in stabs fit the GMK67 PCB); Q3 right. Questions typed in the search box returned irrelevant builds."
+  }
+]

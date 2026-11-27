@@ -115,10 +115,15 @@ function score(runDir: string) {
     }
   }
   const agreement = ratio(successAgree, grades.length);
+  const rubric = [...sessions.values()][0]?.rubricVersion ?? "unknown-rubric";
+  const confirmedSuccess = grades.filter((g) => g.success).length;
+  const judgeSuccess = grades.filter((g) => sessions.get(g.key)?.verdict?.success).length;
   const report = [
-    `# Judge agreement (${new Date().toISOString().slice(0, 10)})`,
+    `# Judge agreement, ${rubric} (${new Date().toISOString().slice(0, 10)})`,
     "",
-    `Run: \`${runDir}\` · graded transcripts: ${grades.length}`,
+    `Run: \`${runDir}\` · graded transcripts: ${grades.length} · grades: HQ-graded, Jayson-confirmed`,
+    "",
+    `Success counts: confirmed grades ${confirmedSuccess}/${grades.length} · judge ${judgeSuccess}/${grades.length}`,
     "",
     `| measure | agreement |`,
     `|---|---|`,
@@ -134,7 +139,8 @@ function score(runDir: string) {
     "",
     disagreements.length ? disagreements.join("\n") : "None.",
   ].join("\n");
-  writeFileSync(join(CAL_DIR, "agreement.md"), report + "\n");
+  // One file per rubric, so earlier agreement results stay as history.
+  writeFileSync(join(CAL_DIR, `agreement-${rubric}.md`), report + "\n");
   console.log(report);
 }
 

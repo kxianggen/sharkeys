@@ -1,0 +1,18 @@
+{
+  "label": "pilot",
+  "date": "2026-11-27",
+  "gitSha": "4a9146a",
+  "personas": [
+    "p01-budget-student",
+    "p04-sound-enthusiast",
+    "p07-colour-focused",
+    "p11-out-of-catalogue",
+    "p14-photo-reference"
+  ],
+  "runs": 1,
+  "maxTurns": 8,
+  "rubricVersion": "rubric-v1",
+  "simModel": "gpt-4.1-mini",
+  "appCostPerTurnAssumed": 0.003,
+  "estimatedSpendUSD": 0.106
+}

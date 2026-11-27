@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "draft — waiting for Jayson's realCustomerNotes (Checkpoint A)",
+  "status": "AI-drafted, reviewed by Jayson (27 Nov 2026). Checkpoint A (real-customer lines) was skipped, so realCustomerNotes are empty.",
   "drafted": "2026-11-27 by Claude (Opus 5.5) in the WS0 session, grounded in the 60-part catalogue in src/data/components.ts",
   "howToUse": "Each persona is played by gpt-4.1-mini in scripts/v2/simulate.ts. 'writingStyle' and 'behaviour' go into the persona prompt. 'satisfiedWhen' is what the judge checks; 'hardRequirements' are checked by code where possible. 'catalogueFit' is the honest expectation given today's catalogue: exists | partial | none.",
   "globalStyleRules": [

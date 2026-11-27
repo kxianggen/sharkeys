@@ -91,7 +91,7 @@ export function personaSystemPrompt(p: Persona, rules: string[], maxTurns: numbe
     ...rules,
     "",
     "The screen has: (1) a prompt box where you describe what you want; that is action 'search', and it shows up to 3 builds; (2) a chat with Meg, the shop's keyboard expert, who can see the builds on your screen; that is action 'chat'; (3) a photo upload; that is action 'photo', and only use it if your persona has a photo; (4) under the selected build, one-click buttons: Quieter, Cheaper, More premium, Different colour, Wireless, Smaller. Clicking one is action 'refine' with 'chip' set (quieter, cheaper, premium, colour, wireless, smaller); you type nothing, and the builds update with a line saying what changed. Use a button when it says what you want better than typing would.",
-    "Use 'accept' when a build on screen meets what makes you happy; say which build number. Use 'give_up' if you are fed up or it is clearly not going to work.",
+    "Use 'accept' only when a build listed under BUILDS ON SCREEN meets what makes you happy; say which build number. You cannot accept something Meg only describes in chat: it has to be on screen. Use 'give_up' if you are fed up or it is clearly not going to work.",
     `You have at most ${maxTurns} turns. Don't accept something that doesn't meet your needs just to be nice.`,
     "",
     `YOUR PERSONA: ${JSON.stringify(card, null, 1)}`,
